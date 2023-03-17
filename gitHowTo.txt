@@ -1,0 +1,15 @@
+1. valtoztatok a file(k)on
+2. ramegyek arra a csomopontos izere vskodban
+3. terminal >git add .			-> minden valtoztatott allomanyt hozzaad a git commithez
+4. terminal >git commit -m "changelog messages"		-> lokalisan tortenik meg a commit (nem toltodik fel a serverre)
+5. reload gomb vagy terminal >git push			-> feltolti a commit foldert a serverre 
+
+reload gomb: lefele nyil - hany file van a serveren, amit ha letoltok frissul az en allomanyom (regebbi allomanyom van nekem)
+		felfele nyil - hany file varakozik hogy felkeruljon a serverre (nalam van az ujabb allomany) -> git push
+
+
+>git log					-> kiirja az osszes valtozast
+>git checkout <hexCode>			-> visszaugrik az adott cimu helyre
+
+>git checkout -b <branchName>		-> keszit egy uj branchet
+>git push origin <branchName> 	-> serverre felrakja az uj branchet
