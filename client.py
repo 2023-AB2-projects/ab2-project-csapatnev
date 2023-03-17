@@ -22,9 +22,19 @@ def send_message_to_server(message):
         response = client_socket.recv(1024)
         if response.decode() == "error":
             # print to console part of app
-            print("kutyak")
+            gui.print_to_output_box("Error: server returned an error message")
         else:
-            print("macskak")
+            print("ok")
+
+
+#############################################
+#######        GUI USAGE:      ##############
+#############################################
+# gui = GUIWindow()     - creates a new gui window object
+# gui.print_to_output_box("Message")    - prints to the output box
+# text = gui.input_text     - text now contains the content of the input text box after
+#                               execute had been pressed
+#
 
 class GUIWindow:
     def __init__(self):
@@ -48,7 +58,15 @@ class GUIWindow:
         self.execute_button.pack()
 
     def execute(self):
-        self.output_box.insert(tk.END, self.input_box.get() + "\n")
+        print("Exec button pressed")
+        self.input_text = self.input_box.get("1.0", tk.END)
+        
+        send_message_to_server(self.input_text)
+        
+        return self.input_text
+
+    def print_to_output_box(self, message):
+        self.output_box.insert(tk.END, message)
 
     def start(self):
         self.window.mainloop()
@@ -56,3 +74,4 @@ class GUIWindow:
 if __name__ == "__main__":
     gui = GUIWindow()
     gui.start()
+    
