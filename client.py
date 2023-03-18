@@ -16,7 +16,7 @@ PORT = 6969     # nice
 def send_message_to_server(message):
     message = message.encode()
     with socket(AF_INET, SOCK_STREAM) as client_socket:
-        client_socket.connect(HOST,PORT)
+        client_socket.connect((HOST,PORT))
         client_socket.send(message)
 
         response = client_socket.recv(1024)
