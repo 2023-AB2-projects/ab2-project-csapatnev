@@ -19,58 +19,28 @@ import parsing_syntax as prs
 HOST = '127.0.0.1'
 PORT = 6969 # nice
 
-def client_message_recv():
-    with socket(AF_INET, SOCK_STREAM) as server_socket:
-        server_socket.bind(('', PORT))
-        server_socket.listen()
+DATABASE_IN_USE = ""
 
-        print("Server is waiting for a message")
+def server_side():
+    HOST = '127.0.0.1'
+    PORT = 6969
 
-        while True:
-            conn, addr = server_socket.accept()
-            print("Connection established to client")
+    server_socket = socket(AF_INET, SOCK_STREAM)
+    server_socket.bind((HOST, PORT))
+    server_socket.listen(1)
 
-            data = conn.recv(1024)
-
-            if data:
-                response = "ok"
-            else:
-                response = "error"
-            
-            response = response.encode()
-
-            conn.send(response)
-
-            conn.close()
-            return data.decode()
-        
-def server_send_message(message):
-    with socket(AF_INET, SOCK_STREAM) as client_socket:
-        client_socket.connect((HOST, PORT))
-
-        message = message.encode()
-
-        client_socket.send(message)
-
-        response = client_socket.recv(1024)
-
-        if response.decode() == "ok":
-            print("Message sent successfully")
-        else:
-            print("Error: Message not sent")
-
-
-if __name__ == "__main__":
-    DATABASE_IN_USE = ""
+    print('The server is available')
 
     while True:
-        msg = client_message_recv()
+        connection_socket, addr = server_socket.accept()
+        print('The client has connected to the server', addr)
+        data = connection_socket.recv(1024)
+        message = data.decode()
 
-        res = prs.parse(msg)
-
+        res = prs.parse(message)
         if res['code'] < 0:
             errmsg = res['message']
-            server_send_message(errmsg)
+            connection_socket.send(errmsg.encode())
         else:
             code = res['code']
             if code == 1:
@@ -78,22 +48,37 @@ if __name__ == "__main__":
                 db_name = res['database_name']
                 cmd.create_database(db_name)
                 DATABASE_IN_USE = db_name
+                response_msg = 'Database has been created!'
+                connection_socket.send(response_msg.encode())
             elif code == 2:
                 # create table
                 table_name = res['table_name']
                 columns = res['column_definitions']
                 db_name = DATABASE_IN_USE
                 cmd.create_table(db_name, table_name, columns)
+                response_msg = 'Table has been created!'
+                connection_socket.send(response_msg.encode())
             elif code == 3:
                 # create index
                 print("ahahahaha")
+                response_msg = 'Index has been created!'
+                connection_socket.send(response_msg.encode())
             elif code == 4:
                 # drop db
                 db_name = res['database_name']
                 cmd.drop_database(db_name)
                 DATABASE_IN_USE = ""
+                response_msg = 'Database has been droped!'
+                connection_socket.send(response_msg.encode())
             elif code == 5:
                 # drop table
                 db_name = DATABASE_IN_USE
                 table_name = res['table_name']
                 cmd.drop_table(db_name, table_name)
+                response_msg = 'Table has been created!'
+                connection_socket.send(response_msg.encode())
+
+
+if __name__ == "__main__":
+    server_side()
+        

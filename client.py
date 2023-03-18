@@ -26,8 +26,8 @@ def send_message_to_server(message):
         else:
             print("ok")
 
+        # You don't need to call gui.start() here
 
-    gui.start()
 
 
 def client_message_recv():
