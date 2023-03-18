@@ -76,7 +76,7 @@ def create_table(db_name, table_name, list_of_columns):
         
         # Create the structure element with the specified columns
         structure = etree.SubElement(table, 'Structure')
-        structure.text = "\n            "  # Add newline before the <Structure> tag
+        structure.text = "\n        "  # Add newline before the <Structure> tag
         structure.tail = "\n        "  # Add newline after the </Structure> tag
         for column in list_of_columns:
             attribute = etree.SubElement(structure, 'Attribute', attributeName=column[0], type=column[1])
