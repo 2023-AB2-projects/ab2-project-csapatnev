@@ -1,4 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
+<Database name="LajosAB">
+    <Tables>
+        <Table name="Telefonok">
+        <Structure>
+            <Attribute attributeName="telefonszam" type="int"/>
+            <Attribute attributeName="Csalad" type="string"/>
+            </Structure>
+        <primaryKey>
+
+        </primaryKey>
+        </Table>
+    </Tables>
+</Database>
+
 </Databases>

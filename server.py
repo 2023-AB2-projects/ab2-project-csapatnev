@@ -46,6 +46,8 @@ def client_message_recv():
 if __name__ == "__main__":
     #msg = client_message_recv()
 
+    cmd.drop_database("LajosAB")
+
     retTuple = cmd.create_database("LajosAB")
     print(retTuple[1])
 
@@ -54,7 +56,7 @@ if __name__ == "__main__":
     retTuple = cmd.create_table("LajosAB", "Telefonok", list_of_columns)
     print(retTuple[1])
 
-    # retTuple = cmd.drop_table("LajosAB", "Telefonok")
-    # print(retTuple[1])
+    #retTuple = cmd.drop_table("LajosAB", "Telefonok")
+    #print(retTuple[1])
 
     #print(msg)
