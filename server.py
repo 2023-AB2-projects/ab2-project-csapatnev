@@ -13,6 +13,7 @@
 #                            varchar(or string without specified length)
 
 from socket import *
+import commands as cmd
 
 HOST = '127.0.0.1'
 PORT = 6969 # nice
@@ -39,8 +40,17 @@ def client_message_recv():
 
             conn.send(response)
 
-            print(f"Message: {data}")
             conn.close()
+            return data
 
 if __name__ == "__main__":
-    client_message_recv()
+    #msg = client_message_recv()
+
+    retTuple = cmd.create_database("LajosAB")
+    print(retTuple[1])
+
+    retTuple = cmd.create_database("LajosAB2")
+    print(retTuple[1])
+
+    retTuple = cmd.drop_database("LajosAB")
+    print(retTuple[1])
