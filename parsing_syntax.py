@@ -5,10 +5,10 @@
 #   4 - DROP DATABASE
 #   5 - DROP TABLE
 
+import re
 
 def parse(syntax_in_sql: str):
-    data_types = ['int', 'float', 'bit', 'date', 'datetime', 'varchar', 'int,', 'float,', 'bit,', 'date,', 'datetime,', 'varchar,', 
-                  'INT', 'FLOAT', 'BIT', 'DATE', 'DATETIME', 'VARCHAR', 'INT,', 'FLOAT,', 'BIT,', 'DATE,', 'DATETIME,', 'VARCHAR,',]
+    data_types = ['int', 'float', 'bit', 'date', 'datetime', 'varchar', 'INT', 'FLOAT', 'BIT', 'DATE', 'DATETIME', 'VARCHAR']
 
     syntax_in_sql_splited = re.findall(r'\w+|[^\w\s]', syntax_in_sql.upper())
     print(syntax_in_sql_splited, sep=':')
@@ -33,7 +33,7 @@ def parse(syntax_in_sql: str):
 
         if object_type == 'DATABASE':
 
-            if len(syntax_in_sql_splited) >= 3:
+            if len(syntax_in_sql_splited) == 3:
                 database_name = syntax_in_sql_splited[2]
                 return {
                     'code': 1,
@@ -44,7 +44,7 @@ def parse(syntax_in_sql: str):
             else:
                 return {
                     'code': -1,
-                    'message': 'Invalid SQL command!'
+                    'message': 'Invalid syntax for creating database!'
                 }
             
         elif object_type == 'TABLE':
@@ -109,6 +109,24 @@ def parse(syntax_in_sql: str):
                 }
             
         elif object_type == 'INDEX':
+            if len(syntax_in_sql_splited) != 8:
+                return {
+                    'code': -1,
+                    'message': 'Invalid syntax for creating index!'
+                }
+
+            if syntax_in_sql_splited[3] != 'ON':
+                return {
+                    'code': -1,
+                    'message': 'Invalid syntax for creating index!'
+                }
+
+            if syntax_in_sql_splited[5] != '(' or syntax_in_sql_splited[7] != ')':
+                return {
+                    'code': -1,
+                    'message': 'Invalid syntax for creating index!'
+                }
+
             index_name = syntax_in_sql_splited[2]
             table_name = syntax_in_sql_splited[4]
             column_name = syntax_in_sql_splited[6]
@@ -119,6 +137,12 @@ def parse(syntax_in_sql: str):
                 'table_name': table_name,
                 'column_name': column_name
             }
+        else:
+            return {
+                'code': -1,
+                'message': 'Invalid sql Object type!'
+            }
+        
     elif command_type == 'DROP':
         if len(syntax_in_sql_splited) > 2:
             object_type = syntax_in_sql_splited[1]
@@ -151,7 +175,7 @@ def parse(syntax_in_sql: str):
         }
                     
 
-syntax_to_test = 'DROP' 
+syntax_to_test = 'CREATE Table sad (sad bit, asd float)' 
 my_dict = parse(syntax_to_test)
 print(my_dict)
 
