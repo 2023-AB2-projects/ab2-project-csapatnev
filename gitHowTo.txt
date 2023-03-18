@@ -27,4 +27,16 @@ HOGYAN TOLTOD LE A MAIN BRANCHROL A TE BRANCHEDRE AMIT KELL?
 HOGYAN TOLTOD FEL A TE BRANCHEDROL A MAIN BRANCHRE A VALTOZASOKAT?
 CSAK AKKOR HA MINDENT TESZTELTEL ES DEBUGGOLTAL!!!!!!!!!!!!
 
-idk
+> git checkout <a te branched neve>
+> git add .
+> git commit -m "message"
+> git push
+> git checkout main
+> git pull
+	> git checkout <a te branched neve>		|
+	> git merge main						|	ha git pull utan van valami changed
+
+	> git checkout <a te branched neve>		| 	ha a git pull utan "nothing to update"
+
+githubra felmesz es create pull request a branchedre
+> git merge origin main			- ha a pull request utan zolddel irja hogy "no conflicts found"
