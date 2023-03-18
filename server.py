@@ -49,8 +49,10 @@ if __name__ == "__main__":
     retTuple = cmd.create_database("LajosAB")
     print(retTuple[1])
 
-    retTuple = cmd.create_database("LajosAB2")
+    list_of_columns = [("telefonszam", "int"), ("Csalad", "string")]
+
+    retTuple = cmd.create_table("LajosAB", "Telefonok", list_of_columns)
     print(retTuple[1])
 
-    retTuple = cmd.drop_database("LajosAB")
-    print(retTuple[1])
+    # retTuple = cmd.drop_table("LajosAB", "Telefonok")
+    # print(retTuple[1])
