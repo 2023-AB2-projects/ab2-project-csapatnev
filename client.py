@@ -27,6 +27,39 @@ def send_message_to_server(message):
             print("ok")
 
 
+    gui.start()
+
+
+def client_message_recv():
+    with socket(AF_INET, SOCK_STREAM) as server_socket:
+        server_socket.bind(('', PORT))
+        server_socket.listen()
+
+        print("Server is waiting for a message")
+
+        while True:
+            conn, addr = server_socket.accept()
+            print("Connection established to client")
+
+            data = conn.recv(1024)
+
+            if data:
+                # Process the received message
+                response = "ok"
+                gui.print_to_output_box(data.decode())
+            else:
+                response = "error"
+            
+            response = response.encode()
+
+            conn.send(response)
+
+            conn.close()
+
+            return data.decode()
+
+
+
 #############################################
 #######        GUI USAGE:      ##############
 #############################################
@@ -74,4 +107,5 @@ class GUIWindow:
 if __name__ == "__main__":
     gui = GUIWindow()
     gui.start()
-    
+
+    client_message_recv()

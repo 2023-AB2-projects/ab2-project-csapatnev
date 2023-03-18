@@ -174,10 +174,5 @@ def parse(syntax_in_sql: str):
             'message': 'Invalid SQL command!'
         }
                     
-
-syntax_to_test = 'CREATE Table sad (sad bit, asd float)' 
-my_dict = parse(syntax_to_test)
-print(my_dict)
-
         
 

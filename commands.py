@@ -9,15 +9,18 @@ XML_FILE_LOCATION = './databases.xml'
 # Error_code < 0 -> error, message returned needs to be printed on client side
 
 def parse_xml_file(file_name):
+    file_name = file_name.upper()
     with open(file_name, 'rb') as file:
         content = file.read()
     return etree.fromstring(content)
 
 def database_exists(xml_root, database_name):
+    database_name = database_name.upper()
     databases = xml_root.findall(".//Database[@name='{}']".format(database_name))
     return len(databases) > 0
 
 def create_database(db_name):
+    db_name = db_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
     if database_exists(xml_root, db_name):
         return (-1, "Error: Database already exists!")
@@ -41,6 +44,7 @@ def create_database(db_name):
         return (0, f"Database {db_name} Created!")
 
 def drop_database(db_name):
+    db_name = db_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
     if not database_exists(xml_root, db_name):
         return (-1, f"Error: Database {db_name} does not exist!")
@@ -57,12 +61,16 @@ def drop_database(db_name):
         
 
 def table_exists(xml_root, db_name, table_name):
+    db_name = db_name.upper()
+    table_name = table_name.upper()
     tables = xml_root.findall(".//Database[@name='{}']/Tables/Table[@name='{}']".format(db_name, table_name))
     return len(tables) == 1
 
 
 # Create table -> db_name, table_name, list_of_columns [(column_name, data_type)]
 def create_table(db_name, table_name, list_of_columns):
+    db_name = db_name.upper()
+    table_name = table_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
     if not database_exists(xml_root, db_name):
         return (-1, f"Error: Database {db_name} does not exist!")
@@ -106,6 +114,8 @@ def create_table(db_name, table_name, list_of_columns):
 
 
 def drop_table(db_name, table_name):
+    db_name = db_name.upper()
+    table_name = table_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
     if not database_exists(xml_root, db_name):
         return (-1, f"Error: Database {db_name} does not exist!")
