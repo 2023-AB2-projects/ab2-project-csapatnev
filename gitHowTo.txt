@@ -14,6 +14,7 @@ reload gomb: lefele nyil - hany file van a serveren, amit ha letoltok frissul az
 >git checkout -b <branchName>		-> keszit egy uj branchet
 >git push origin <branchName> 	-> serverre felrakja az uj branchet
 
+>py -m pip install -r requirements.txt
 
 HOGYAN TOLTOD LE A MAIN BRANCHROL A TE BRANCHEDRE AMIT KELL?
 
@@ -26,3 +27,4 @@ HOGYAN TOLTOD LE A MAIN BRANCHROL A TE BRANCHEDRE AMIT KELL?
 HOGYAN TOLTOD FEL A TE BRANCHEDROL A MAIN BRANCHRE A VALTOZASOKAT?
 CSAK AKKOR HA MINDENT TESZTELTEL ES DEBUGGOLTAL!!!!!!!!!!!!
 
+idk
