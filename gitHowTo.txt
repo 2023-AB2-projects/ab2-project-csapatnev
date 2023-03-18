@@ -13,3 +13,13 @@ reload gomb: lefele nyil - hany file van a serveren, amit ha letoltok frissul az
 
 >git checkout -b <branchName>		-> keszit egy uj branchet
 >git push origin <branchName> 	-> serverre felrakja az uj branchet
+
+
+HOGYAN TOLTOD LE A MAIN BRANCHROL A TE BRANCHEDRE AMIT KELL?
+
+
+>git checkout main 				-> atmesz a main branchre 
+>git pull						-> kiszedsz minden valtoztatast
+>git checkout <your branch name>	-> atlepsz a te branchedre 
+>git merge main						-> felrakod a sajat branchedre ami a mainen van
+>git push
