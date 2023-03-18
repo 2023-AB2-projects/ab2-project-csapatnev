@@ -84,14 +84,15 @@ def create_table(db_name, table_name, list_of_columns):
 
         # Create the primary key element
         primary_key = etree.SubElement(table, 'primaryKey')
-        primary_key.text = "\n\n        "  # Add newline before the <primaryKey> tag
+        primary_key.text = "\n\n                        "  # Add newline before the <primaryKey> tag
         primary_key.tail = "\n        "  # Add newline after the </primaryKey> tag
         for column in list_of_columns:
             if column[0].lower() == "id":
                 pk_attribute = etree.SubElement(primary_key, 'pkAttribute')
                 pk_attribute.text = "\n                "  # Add newline before each <pkAttribute> tag
                 pk_attribute.text += column[0]
-                pk_attribute.tail = "\n                "  # Add newline after each <pkAttribute> tag
+                pk_attribute.text += "\n"
+                pk_attribute.tail = "\n            "  # Add newline after each <pkAttribute> tag
         
         # Add the new table element to the database
         tables = xml_root.find(".//Database[@name='{}']/Tables".format(db_name))

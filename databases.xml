@@ -1,34 +1,4 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
-<Database name="test_db">
-    <Tables>
-        <Table name="test_table">
-        <Structure>
-            <Attribute attributeName="id" type="int"/>
-            <Attribute attributeName="name" type="string"/>
-            </Structure>
-        <primaryKey>
-
-        <pkAttribute>
-                id</pkAttribute>
-                </primaryKey>
-        </Table>
-    </Tables>
-</Database>
-
-<Database name="LajosAB">
-    <Tables>
-        <Table name="Telefonok">
-        <Structure>
-            <Attribute attributeName="telefonszam" type="int"/>
-            <Attribute attributeName="Csalad" type="string"/>
-            </Structure>
-        <primaryKey>
-
-                        </primaryKey>
-        </Table>
-    </Tables>
-</Database>
-
 </Databases>

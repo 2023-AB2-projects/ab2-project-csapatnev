@@ -44,17 +44,17 @@ def client_message_recv():
             return data.decode()
 
 if __name__ == "__main__":
-    msg = client_message_recv()
+    #msg = client_message_recv()
 
-    # retTuple = cmd.create_database("LajosAB")
+    retTuple = cmd.create_database("LajosAB")
+    print(retTuple[1])
+
+    list_of_columns = [("telefonszam", "int"), ("Csalad", "string")]
+
+    retTuple = cmd.create_table("LajosAB", "Telefonok", list_of_columns)
+    print(retTuple[1])
+
+    # retTuple = cmd.drop_table("LajosAB", "Telefonok")
     # print(retTuple[1])
 
-    # list_of_columns = [("telefonszam", "int"), ("Csalad", "string")]
-
-    # retTuple = cmd.create_table("LajosAB", "Telefonok", list_of_columns)
-    # print(retTuple[1])
-
-    # # retTuple = cmd.drop_table("LajosAB", "Telefonok")
-    # # print(retTuple[1])
-
-    print(msg)
+    #print(msg)
