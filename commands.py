@@ -121,3 +121,4 @@ def drop_table(db_name, table_name):
             file.write(etree.tostring(xml_root, pretty_print=True, xml_declaration=True, encoding='UTF-8'))
 
         return (0, f"Table {table_name} in database {db_name} successfully dropped!")
+
