@@ -60,7 +60,10 @@ def server_side():
                 connection_socket.send(response_msg.encode())
             elif code == 3:
                 # create index
-                # kossed ossze a create_index functionnal
+                index_name = res['index_name']
+                table_name = res['table_name']
+                column_name = res['column_name']
+                cmd.create_index(db_name, table_name, column_name)
                 response_msg = 'Index has been created!'
                 connection_socket.send(response_msg.encode())
             elif code == 4:

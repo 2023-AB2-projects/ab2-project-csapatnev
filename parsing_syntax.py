@@ -131,6 +131,7 @@ def parse(syntax_in_sql: str):
             table_name = syntax_in_sql_splited[4]
             column_name = syntax_in_sql_splited[6]
             return {
+                'code': 3,
                 'type': 'create',
                 'object_name': 'index',
                 'index_name': index_name,
