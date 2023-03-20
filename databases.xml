@@ -1,8 +1,26 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
-<Database name="HELLOWORLD">
+<Database name="TESTDB">
     <Tables>
-        </Tables></Database>
+        <Table name="TESTTABLE">
+        <Structure>
+        <Attribute attributeName="c" type="o"/>
+            <Attribute attributeName="c" type="o"/>
+            <Attribute attributeName="c" type="o"/>
+            </Structure>
+        <primaryKey>
+
+        </primaryKey>
+        <uniqueKey>
+
+        </uniqueKey>
+        <indexAttributes>
+
+        <IAttribute>COL1</IAttribute>
+            </indexAttributes>
+        </Table>
+    </Tables>
+</Database>
 
 </Databases>

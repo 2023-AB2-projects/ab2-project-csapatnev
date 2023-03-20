@@ -80,5 +80,10 @@ def server_side():
 
 
 if __name__ == "__main__":
-    server_side()
+    #server_side()
+    
+    # testing create index
+    cmd.create_database("testDB")
+    cmd.create_table("testDB", "testTable", ["col1 int", "col2 int", "col3 int"])
+    cmd.create_index("testDB", "testTable", "col1")
         

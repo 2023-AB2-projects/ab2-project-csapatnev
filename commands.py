@@ -94,13 +94,17 @@ def create_table(db_name, table_name, list_of_columns):
         primary_key = etree.SubElement(table, 'primaryKey')
         primary_key.text = "\n\n        "  # Add newline before the <primaryKey> tag
         primary_key.tail = "\n        "  # Add newline after the </primaryKey> tag
-        for column in list_of_columns:
-            if column[0].lower() == "id":
-                pk_attribute = etree.SubElement(primary_key, 'pkAttribute')
-                pk_attribute.text = "\n                "  # Add newline before each <pkAttribute> tag
-                pk_attribute.text += column[0]
-                pk_attribute.tail = "\n            "  # Add newline after each <pkAttribute> tag
         
+        # Create unique key element
+        unique_key = etree.SubElement(table, 'uniqueKey')
+        unique_key.text = "\n\n        "  # Add newline before the <uniqueKey> tag
+        unique_key.tail = "\n        "  # Add newline after the </uniqueKey> tag
+        
+        # create index attributes container element
+        index_attributes = etree.SubElement(table, 'indexAttributes')
+        index_attributes.text = "\n\n        "  # Add newline before the <indexAttributes> tag
+        index_attributes.tail = "\n        "  # Add newline after the </indexAttributes> tag
+
         # Add the new table element to the database
         tables = xml_root.find(".//Database[@name='{}']/Tables".format(db_name))
         tables.append(table)
@@ -132,4 +136,35 @@ def drop_table(db_name, table_name):
             file.write(etree.tostring(xml_root, pretty_print=True, xml_declaration=True, encoding='UTF-8'))
 
         return (0, f"Table {table_name} in database {db_name} successfully dropped!")
+
+
+def create_index(db_name, table_name, column_name):
+    db_name = db_name.upper()
+    table_name = table_name.upper()
+    column_name = column_name.upper()
+
+    xml_root = parse_xml_file(XML_FILE_LOCATION)
+
+    if not database_exists(xml_root, db_name):
+        return (-1, f"Error: Database {db_name} does not exist!")
+    elif not table_exists(xml_root, db_name, table_name):
+        return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
+    else:
+        # create IAttribute element with the column_name inside: i.e. <IAttribute>column_name</IAttribute>
+        # have it be inside the indexAttributes element of the table table_name
+        IAttribute = etree.Element('IAttribute')
+        IAttribute.text = column_name
+        IAttribute.tail = "\n            "  # Add newline after each <IAttribute> tag
+
+        # Add the new IAttribute element to the indexAttributes
+        indexAttributes = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/indexAttributes"
+                                            .format(db_name, table_name))
+        indexAttributes.append(IAttribute)
+        indexAttributes.tail = "\n        "  # Add newline after the </indexAttributes> tag
+
+        # Save the modified xml file and close it
+        with open(XML_FILE_LOCATION, 'wb') as file:
+            file.write(etree.tostring(xml_root, pretty_print=True, xml_declaration=True, encoding='UTF-8'))
+
+        return (0, f"Index created on column {column_name} in table {table_name} in database {db_name}!")
 
