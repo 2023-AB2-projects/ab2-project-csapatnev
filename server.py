@@ -60,7 +60,7 @@ def server_side():
                 connection_socket.send(response_msg.encode())
             elif code == 3:
                 # create index
-                print("ahahahaha")
+                # kossed ossze a create_index functionnal
                 response_msg = 'Index has been created!'
                 connection_socket.send(response_msg.encode())
             elif code == 4:
@@ -77,13 +77,16 @@ def server_side():
                 cmd.drop_table(db_name, table_name)
                 response_msg = 'Table has been created!'
                 connection_socket.send(response_msg.encode())
+            elif code == 6:
+                # use database db_name
+                DATABASE_IN_USE = res['database_name']
 
 
 if __name__ == "__main__":
-    #server_side()
+    server_side()
     
-    # testing create index
-    cmd.create_database("testDB")
-    cmd.create_table("testDB", "testTable", ["col1 int", "col2 int", "col3 int"])
-    cmd.create_index("testDB", "testTable", "col1")
+    # # testing create index
+    # cmd.create_database("testDB")
+    # cmd.create_table("testDB", "testTable", ["col1 int", "col2 int", "col3 int"])
+    # cmd.create_index("testDB", "testTable", "col1")
         
