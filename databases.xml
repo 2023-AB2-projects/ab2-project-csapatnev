@@ -1,46 +1,4 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
-<Database name="ASD">
-    <Tables>
-        </Tables></Database>
-
-<Database name="MUKODJ">
-    <Tables>
-        <Table name="LEGYS">
-        <Structure>
-        <Attribute attributeName="ASD" type="INT"/>
-            </Structure>
-        <primaryKey>
-
-        </primaryKey>
-        <uniqueKey>
-
-        </uniqueKey>
-        <indexAttributes>
-
-        </indexAttributes>
-        </Table>
-    <Table name="ASD">
-        <Structure>
-        <Attribute attributeName="IGEN" type="VARCHAR"/>
-            </Structure>
-        <primaryKey>
-
-        </primaryKey>
-        <uniqueKey>
-
-        </uniqueKey>
-        <indexAttributes>
-
-        <IAttribute>IGEN</IAttribute>
-            <IAttribute>IGEN</IAttribute>
-            <IAttribute>IGEN</IAttribute>
-            <IAttribute>IGEN</IAttribute>
-            <IAttribute>IGEN</IAttribute>
-            </indexAttributes>
-        </Table>
-    </Tables>
-</Database>
-
 </Databases>
