@@ -15,6 +15,7 @@
 from socket import *
 import commands as cmd
 import parsing_syntax as prs
+import mongoHandler as mh
 
 HOST = '127.0.0.1'
 PORT = 6969 # nice
@@ -22,6 +23,9 @@ PORT = 6969 # nice
 DATABASE_IN_USE = ""
 
 def server_side():
+    mongodb, mongoclient = mh.connect_mongo(DATABASE_IN_USE)
+
+
     HOST = '127.0.0.1'
     PORT = 6969
 
@@ -69,7 +73,7 @@ def server_side():
             elif code == 4:
                 # drop db
                 db_name = res['database_name']
-                cmd.drop_database(db_name)
+                cmd.drop_database(db_name, mongoclient)
                 DATABASE_IN_USE = ""
                 response_msg = 'Database has been droped!'
                 connection_socket.send(response_msg.encode())
@@ -77,12 +81,30 @@ def server_side():
                 # drop table
                 db_name = DATABASE_IN_USE
                 table_name = res['table_name']
-                cmd.drop_table(db_name, table_name)
+                cmd.drop_table(db_name, table_name, mongodb)
                 response_msg = 'Table has been created!'
                 connection_socket.send(response_msg.encode())
             elif code == 6:
                 # use database db_name
                 DATABASE_IN_USE = res['database_name']
+            elif code == 7:
+                # insert into table_name (col1, col2, col3) values (val1, val2, val3)
+                table_name = res['table_name']
+                columns = res['column_names']
+                values = res['values']
+                cmd.insert_into(mongodb, table_name, columns, values)
+                response_msg = 'Data has been inserted!'
+                connection_socket.send(response_msg.encode())
+            elif code == 8:
+                # delete from table_name where studid > 1000
+                table_name = res['table_name']
+                db_name = DATABASE_IN_USE
+                filter_conditions = res['filter_conditions']
+                cmd.delete_from(db_name, table_name, filter_conditions, mongodb)
+                response_msg = 'Data has been deleted!'
+                connection_socket.send(response_msg.encode())
+                
+
 
 
 if __name__ == "__main__":
