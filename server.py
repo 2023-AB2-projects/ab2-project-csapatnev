@@ -112,7 +112,13 @@ if __name__ == "__main__":
     #server_side()
     
     # testing create index
+    
+    mongodb, mongoclient = mh.connect_mongo(DATABASE_IN_USE)
+
     cmd.create_database("testDB", 0, 0)
     cmd.create_table("testDB", "testTable", ["col1 int", "col2 int", "col3 int"])
     cmd.create_index("testDB", "testTable", "col1")
-        
+    cmd.create_table("testDB", "testTable2", ["col1 int", "col2 int", "col3 int"])
+    
+    cmd.insert_into("testDB", "testTable", ["col1", "col2", "col3"], [1, 2, 3], mongodb)
+    print(cmd.select_all("testDB", "testTable", mongodb))

@@ -5,9 +5,9 @@
     <Tables>
         <Table name="TESTTABLE">
         <Structure>
-        <Attribute attributeName="c" type="o"/>
-            <Attribute attributeName="c" type="o"/>
-            <Attribute attributeName="c" type="o"/>
+        <Attribute attributeName="col1" type="int"/>
+            <Attribute attributeName="col2" type="int"/>
+            <Attribute attributeName="col3" type="int"/>
             </Structure>
         <primaryKey>
 
@@ -19,6 +19,22 @@
 
         <IAttribute>COL1</IAttribute>
             </indexAttributes>
+        </Table>
+    <Table name="TESTTABLE2">
+        <Structure>
+        <Attribute attributeName="col1" type="int"/>
+            <Attribute attributeName="col2" type="int"/>
+            <Attribute attributeName="col3" type="int"/>
+            </Structure>
+        <primaryKey>
+
+        </primaryKey>
+        <uniqueKey>
+
+        </uniqueKey>
+        <indexAttributes>
+
+        </indexAttributes>
         </Table>
     </Tables>
 </Database>
