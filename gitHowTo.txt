@@ -8,6 +8,9 @@ reload gomb: lefele nyil - hany file van a serveren, amit ha letoltok frissul az
 		felfele nyil - hany file varakozik hogy felkeruljon a serverre (nalam van az ujabb allomany) -> git push
 
 
+HOW TO INSTALL ALL REQUIRED LIBRARIES:
+py -m pip install -r requirements.txt
+
 >git log					-> kiirja az osszes valtozast
 >git checkout <hexCode>			-> visszaugrik az adott cimu helyre
 
