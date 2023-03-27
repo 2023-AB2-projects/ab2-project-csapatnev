@@ -1,42 +1,4 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
-<Database name="TESTDB">
-    <Tables>
-        <Table name="TESTTABLE">
-        <Structure>
-        <Attribute attributeName="col1" type="int"/>
-            <Attribute attributeName="col2" type="int"/>
-            <Attribute attributeName="col3" type="int"/>
-            </Structure>
-        <primaryKey>
-
-        </primaryKey>
-        <uniqueKey>
-
-        </uniqueKey>
-        <indexAttributes>
-
-        <IAttribute>COL1</IAttribute>
-            </indexAttributes>
-        </Table>
-    <Table name="TESTTABLE2">
-        <Structure>
-        <Attribute attributeName="col1" type="int"/>
-            <Attribute attributeName="col2" type="int"/>
-            <Attribute attributeName="col3" type="int"/>
-            </Structure>
-        <primaryKey>
-
-        </primaryKey>
-        <uniqueKey>
-
-        </uniqueKey>
-        <indexAttributes>
-
-        </indexAttributes>
-        </Table>
-    </Tables>
-</Database>
-
 </Databases>
