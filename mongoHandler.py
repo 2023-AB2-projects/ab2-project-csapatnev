@@ -3,8 +3,7 @@ from pymongo import MongoClient
 from lxml import etree
 
 def connect_mongo(db_name):
-    if db_name == "":
-        db_name = "MASTER"
+    if db_name == "MASTER":
         client = MongoClient("mongodb://localhost:27017/")
         db = client[db_name]
         return db, client

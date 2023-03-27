@@ -352,6 +352,6 @@ def parse(syntax_in_sql: str):
         return parse_handle_invalid_sql_command()
                     
 
-syntax = "DELETE FROM Customers WHERE CustomerName='Alfreds Futterkiste';"
-syntax_split = parse(syntax)
-print(syntax_split)
+# syntax = "DELETE FROM Customers WHERE CustomerName='Alfreds Futterkiste';"
+# syntax_split = parse(syntax)
+# print(syntax_split)

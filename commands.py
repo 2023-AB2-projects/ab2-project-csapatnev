@@ -26,11 +26,6 @@ def create_database(db_name, mongodb, mongoclient):
     if database_exists(xml_root, db_name):
         return (-1, "Error: Database already exists!")
     else:
-        # create mongo database
-        retVal = mongoHandler.create_db(db_name, mongodb, mongoclient)
-        if retVal != 0:
-            return (-1, "Error with creating the mongo database!")
-
         database = etree.Element('Database', name=db_name)
         database.text = "\n    "  # Set the text content of the <Database> element to an empty string with proper indentation
         database.tail = "\n\n"
