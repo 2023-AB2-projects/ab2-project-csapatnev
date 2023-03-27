@@ -92,7 +92,6 @@ def parse_handle_condition(condition_str):
     condition_dict = {}
     logical_op = None
 
-    # Mapping SQL operators to MongoDB operators
     operator_mapping = {
         '>': '$gt',
         '<': '$lt',
@@ -102,7 +101,6 @@ def parse_handle_condition(condition_str):
         '!=': '$ne',
     }
 
-    # If condition is present, extract clauses and logical operator
     if condition_str:
         clauses = re.findall(
             r"(\w+)\s*(=|!=|<=|>=|<|>)\s*('[^']*'|[^\s]+)", condition_str)
@@ -111,11 +109,9 @@ def parse_handle_condition(condition_str):
         logical_ops = re.findall(
             r"\b(AND|OR)\b", condition_str, flags=re.IGNORECASE)
 
-        # Handle logical operator
         if logical_ops:
             logical_op = logical_ops[0].upper()
 
-        # Create filter_conditions dictionary
         if logical_op == 'AND':
             for column, operator, value in clauses:
                 condition_dict[column] = {operator: value}
@@ -351,6 +347,6 @@ def parse(syntax_in_sql: str):
         return parse_handle_invalid_sql_command()
 
 
-# syntax = "DELETE FROM Customers WHERE age < 21 or score > 100 or score = 100 and anyad = 'te';"
-# syntax_split = parse(syntax)
-# print(syntax_split)
+syntax = "DELETE FROM Customers WHERE age < 21 or score > 100 or score = 100 and anyad = 'te';"
+syntax_split = parse(syntax)
+print(syntax_split)
