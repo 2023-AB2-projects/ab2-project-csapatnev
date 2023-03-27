@@ -20,9 +20,10 @@ import mongoHandler as mh
 HOST = '127.0.0.1'
 PORT = 6969 # nice
 
-DATABASE_IN_USE = ""
+DATABASE_IN_USE = "MASTER"
 
 def server_side():
+    global DATABASE_IN_USE
     mongodb, mongoclient = mh.connect_mongo(DATABASE_IN_USE)
 
 
@@ -74,7 +75,7 @@ def server_side():
                 # drop db
                 db_name = res['database_name']
                 cmd.drop_database(db_name, mongoclient)
-                DATABASE_IN_USE = ""
+                DATABASE_IN_USE = "MASTER"
                 response_msg = 'Database has been droped!'
                 connection_socket.send(response_msg.encode())
             elif code == 5:
@@ -108,10 +109,10 @@ def server_side():
 
 
 if __name__ == "__main__":
-    server_side()
+    #server_side()
     
-    # # testing create index
-    # cmd.create_database("testDB")
-    # cmd.create_table("testDB", "testTable", ["col1 int", "col2 int", "col3 int"])
-    # cmd.create_index("testDB", "testTable", "col1")
+    # testing create index
+    cmd.create_database("testDB", 0, 0)
+    cmd.create_table("testDB", "testTable", ["col1 int", "col2 int", "col3 int"])
+    cmd.create_index("testDB", "testTable", "col1")
         
