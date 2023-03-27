@@ -67,3 +67,8 @@ def fetch_all_documents(mongodb, table_name):
     collection = mongodb[table_name]
     documents = collection.find()
     return list(documents)
+
+def select_all(mongodb, table_name):
+    collection = mongodb[table_name]
+    documents = collection.find()
+    return list(documents)

@@ -91,6 +91,7 @@ def create_table(db_name, table_name, list_of_columns):
         structure.text = "\n        "  # Add newline before the <Structure> tag
         structure.tail = "\n        "  # Add newline after the </Structure> tag
         for column in list_of_columns:
+            column = column.split(" ")
             attribute = etree.SubElement(structure, 'Attribute', attributeName=column[0], type=column[1])
             attribute.tail = "\n            "  # Add newline after each <Attribute> tag
 
@@ -175,16 +176,13 @@ def create_index(db_name, table_name, column_name):
 
         return (0, f"Index created on column {column_name} in table {table_name} in database {db_name}!")
 
-def validate_data_types(table_structure, columns, values):
-    # Get the list of attributes from the table structure
-    attributes = table_structure.findall('Structure/Attribute')
-
+def validate_data_types(attributes, columns, values):
     # Create a dictionary of column name to attribute type
     column_types = {attr.get('attributeName'): attr.get('type') for attr in attributes}
 
     # Iterate through the provided columns and values
     for column, value in zip(columns, values):
-        expected_type = column_types[column]
+        expected_type = column_types[column].upper()
 
         # Validate the value based on the expected data type
         if expected_type == 'VARCHAR':
@@ -214,6 +212,10 @@ def validate_data_types(table_structure, columns, values):
     # If all values pass validation, return True
     return True
 
+def find_pk_column(structure):
+    # simply return the name of the first column in the xml file
+    return structure.find('Attribute').get('attributeName')
+
 def insert_into(db_name, table_name, columns, values, mongodb):
     # check for valid database and table
     db_name = db_name.upper()
@@ -238,11 +240,12 @@ def insert_into(db_name, table_name, columns, values, mongodb):
             # get the type of the column
             column_type = structure.find(f"Attribute[@attributeName='{columns[i]}']").get('type')
             # check if the type of the value matches the type of the column using the validate_data_types function
-            if not validate_data_types(structure, [columns[i]], [values[i]]):
+            if not validate_data_types(attributes, [columns[i]], [values[i]]):
                 return (-4, f"Error: Type of value {values[i]} does not match type of column {columns[i]}!")
         
         # insert the values into the table
-        mongoHandler.insert_into(table_name, columns, values, mongodb)
+        primary_key_column = find_pk_column(structure)
+        mongoHandler.insert_into(mongodb, table_name, primary_key_column, columns, values)
 
 def delete_from(db_name, table_name, filter_conditions, mongodb):
     # check for valid database and table
@@ -256,3 +259,16 @@ def delete_from(db_name, table_name, filter_conditions, mongodb):
     else:
         # delete the values from the table
         mongoHandler.delete_from(mongodb, table_name, filter_conditions)
+
+def select_all(db_name, table_name, mongodb):
+    # check for valid database and table
+    db_name = db_name.upper()
+    table_name = table_name.upper()
+    xml_root = parse_xml_file(XML_FILE_LOCATION)
+    if not database_exists(xml_root, db_name):
+        return (-1, f"Error: Database {db_name} does not exist!")
+    elif not table_exists(xml_root, db_name, table_name):
+        return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
+    else:
+        # select all the values from the table
+        return mongoHandler.select_all(mongodb, table_name)
