@@ -154,22 +154,33 @@ def parse_handle_create_table(syntax_in_sql, data_types):
         table_name = match.group(1)
         columns_definitions_str = match.group(2)
         column_definitions = []
+        primary_keys = []
 
         for column_definition_str in columns_definitions_str.split(','):
             column_definition_match = re.match(
-                r'\s*(\w+)\s+(\w+)\s*', column_definition_str)
+                r'^\s*(\w+)\s+(\w+)\s*(.*)\s*$', column_definition_str)
+
             if column_definition_match is None:
                 return parse_handle_invalid_syntax_for_creating_table()
             else:
                 column_name = column_definition_match.group(1)
                 data_type = column_definition_match.group(2)
                 column_definitions.append((column_name, data_type))
+                match_pk = re.match(
+                    r'^\s*primary\s+key\s*$', column_definition_match.group(3), re.IGNORECASE)
+
+                if match_pk != None:
+                    primary_keys.append((column_name, data_type))
+
+        # ToDo: primary keys
+
         return {
             'code': 2,
             'type': 'create',
             'object_type': 'table',
             'table_name': table_name,
-            'column_definitions': column_definitions
+            'column_definitions': column_definitions,
+            'primary_keys': primary_keys
         }
 
 
@@ -384,3 +395,15 @@ def handle_my_sql_input(input_str: str):
         commands.append(command)
 
     return commands
+
+
+input = """
+create table asd (
+    ID int primary ,
+    valami varchar
+);
+"""
+
+asd = handle_my_sql_input(input)
+for i in asd:
+    print(i, end='\n')
