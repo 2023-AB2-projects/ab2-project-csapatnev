@@ -16,7 +16,7 @@ def connect_mongo(db_name):
 def drop_database(db_name, mongoclient):
     mongoclient.drop_database(db_name)
 
-def drop_table(table_name, mongodb):
+def drop_collection(table_name, mongodb):
     collection = mongodb[table_name]
     collection.drop()
 
@@ -36,9 +36,9 @@ def insert_into(mongodb, table_name, primary_key_column, columns, values):
     
     # Check if the operation was successful
     if result.inserted_id:
-        return True, f"Document inserted with ID: {result.inserted_id}"
+        return 0, f"Document inserted with ID: {result.inserted_id}"
     else:
-        return False, "Error inserting document"
+        return -1, "Error inserting document"
 
 
 
