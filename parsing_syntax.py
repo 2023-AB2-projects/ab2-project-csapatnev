@@ -384,4 +384,3 @@ def handle_my_sql_input(input_str: str):
         commands.append(command)
 
     return commands
-
