@@ -213,6 +213,8 @@ if __name__ == "__main__":
     syntax = """
     CREATE DATABASE University;
 
+    USE University;
+    
     CREATE TABLE disciplines (
     DiscID varchar(5) PRIMARY KEY,
     DName varchar(30),

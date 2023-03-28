@@ -91,7 +91,6 @@ def create_table(db_name, table_name, list_of_columns):
         structure.text = "\n        "  # Add newline before the <Structure> tag
         structure.tail = "\n        "  # Add newline after the </Structure> tag
         for column in list_of_columns:
-            column = column.split(" ")
             attribute = etree.SubElement(structure, 'Attribute', attributeName=column[0], type=column[1])
             attribute.tail = "\n            "  # Add newline after each <Attribute> tag
 
@@ -247,7 +246,7 @@ def insert_into(db_name, table_name, columns, values, mongodb):
         
         # insert the values into the table
         primary_key_column = find_pk_column(structure)
-        mongoHandler.insert_into(mongodb, table_name, primary_key_column, columns, values)
+        return mongoHandler.insert_into(mongodb, table_name, primary_key_column, columns, values)
 
 def delete_from(db_name, table_name, filter_conditions, mongodb):
     # check for valid database and table

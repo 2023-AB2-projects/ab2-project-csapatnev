@@ -3,6 +3,7 @@
     <!-- All databases will be found here -->
 <Database name="UNIVERSITY">
     <Tables>
-        </Tables></Database>
+        </Tables>
+</Database>
 
 </Databases>
