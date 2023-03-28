@@ -131,7 +131,7 @@ def parse_handle_create_database(syntax_in_sql):
     create_database_pattern = r'^create\s+database\s+(\w+)\s*;?$'
     match = re.match(create_database_pattern, syntax_in_sql, re.IGNORECASE)
 
-    if match in None:
+    if match is None:
         return parse_handle_invalid_syntax_for_creating_database()
     else:
         database_name = match.group(1)
@@ -384,28 +384,3 @@ def handle_my_sql_input(input_str: str):
         commands.append(command)
 
     return commands
-
-
-syntax = """
-CREATE TABLE disciplines (
-    DiscID int,
-    DName varchar,
-    CreditNr int
-);
-
-CREATE INDEX MixedIndex on disciplines (DiscID, CreditNr);
-
-/*Data for the table disciplines */
-insert into disciplines (DiscID,DName,CreditNr) values ('DB1','Databases 1', 7);
-insert into disciplines (DiscID,DName,CreditNr) values ('DS','Data Structures',6);
-insert into disciplines (DiscID,DName,CreditNr) values ('CP','C Programming',8);
-insert into disciplines (DiscID,DName,CreditNr) values ('ST','Statistics',5);
-
-USE University;
-
-/* Drop the disciplines table */
-DROP TABLE disciplines;
-"""
-asd = handle_my_sql_input(syntax)
-for test in asd:
-    print(test)
