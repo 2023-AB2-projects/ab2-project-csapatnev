@@ -1,12 +1,12 @@
 # return (code) values:
-#   0 - USE
 #   1 - CREATE DATABASE
 #   2 - CREATE TABLE
 #   3 - CREATE INDEX
 #   4 - DROP DATABASE
 #   5 - DROP TABLE
-#   6 - INSERT
-#   7 - DELETE
+#   6 - USE
+#   7 - INSERT
+#   8 - DELETE
 
 import re
 
@@ -144,19 +144,18 @@ def parse_handle_create_database(syntax_in_sql):
 
 
 def parse_handle_create_table(syntax_in_sql, data_types):
-    # print(syntax_in_sql)
-    create_table_pattern = r'^create\s+table\s+(\w+)\s*\((.*)\)\s*;?'
-    match = re.match(create_table_pattern, syntax_in_sql, flags=re.IGNORECASE)
-    print(match)
+    create_table_pattern = r'^create\s+table\s+(\w+)\s*\(\s*(.*)\s*\)\s*;?$'
+    match = re.match(create_table_pattern, syntax_in_sql,
+                     flags=re.IGNORECASE | re.DOTALL)
 
     if match is None:
         return parse_handle_invalid_syntax_for_creating_table()
     else:
         table_name = match.group(1)
-        column_definitions_str = match.group(2)
+        columns_definitions_str = match.group(2)
         column_definitions = []
 
-        for column_definition_str in column_definitions_str.split(','):
+        for column_definition_str in columns_definitions_str.split(','):
             column_definition_match = re.match(
                 r'\s*(\w+)\s+(\w+)\s*', column_definition_str)
             if column_definition_match is None:
@@ -175,17 +174,15 @@ def parse_handle_create_table(syntax_in_sql, data_types):
 
 
 def parse_handle_create_index(syntax_in_sql):
-    print(syntax_in_sql)
     create_index_pattern = r'^create\s+index\s+(\w+)\s+on\s+(\w+)\s*\((.*)\)\s*;?$'
     match = re.match(create_index_pattern, syntax_in_sql, flags=re.IGNORECASE)
-    print(match)
 
     if match is None:
         return parse_handle_invalid_syntax_for_creating_index()
     else:
         index_name = match.group(1)
         table_name = match.group(2)
-        
+
         columns = []
         columns_str = match.group(3)
         for columns_str_splited in columns_str.split(','):
@@ -241,7 +238,7 @@ def parse_handle_drop_table(syntax_in_sql):
 def parse_handle_use(syntax_in_sql):
     use_pattern = r'^use\s+(\w+)\s*;?$'
     match = re.match(use_pattern, syntax_in_sql, flags=re.IGNORECASE)
-    
+
     if match is None:
         return parse_handle_invalid_syntax_for_use()
     else:
@@ -367,48 +364,23 @@ def parse(syntax_in_sql: str):
 def handle_my_sql_input(input_str: str):
     sql_code_without_comments = re.sub('/\*.*?\*/', '', input_str)
 
-    commands_raw = re.split('(CREATE|INSERT|USE|DROP|DELETE)', sql_code_without_comments, flags=re.IGNORECASE)
+    commands_raw = re.split('(CREATE|INSERT|USE|DROP|DELETE)',
+                            sql_code_without_comments, flags=re.IGNORECASE)
 
-    # Remove empty commands and leading/trailing whitespace
-    commands_raw = [command_raw.strip() for command_raw in commands_raw if command_raw.strip()]
+    commands_raw = [command_raw.strip()
+                    for command_raw in commands_raw if command_raw.strip()]
 
     for i in range(len(commands_raw)):
         if commands_raw[i].upper() in ['CREATE', 'INSERT', 'USE', 'DROP', 'DELETE']:
             commands_raw[i] += ' ' + commands_raw[i + 1]
             commands_raw[i + 1] = ''
 
-    # Remove empty commands again
-    commands_in_sql = [command_raw.strip() for command_raw in commands_raw if command_raw.strip()]
+    commands_in_sql = [command_raw.strip()
+                       for command_raw in commands_raw if command_raw.strip()]
 
     commands = []
     for command_in_sql in commands_in_sql:
         command = parse(command_in_sql)
         commands.append(command)
-    
+
     return commands
-
-# syntax = """
-# CREATE TABLE disciplines (
-#   DiscID int,
-#   DName varchar,
-#   CreditNr int
-# );
-
-# CREATE INDEX MixedIndex on disciplines (DiscID, CreditNr);
-
-# /*Data for the table disciplines */
-# insert into disciplines (DiscID,DName,CreditNr) values ('DB1','Databases 1', 7);
-# insert into disciplines (DiscID,DName,CreditNr) values ('DS','Data Structures',6);
-# insert into disciplines (DiscID,DName,CreditNr) values ('CP','C Programming',8);
-# insert into disciplines (DiscID,DName,CreditNr) values ('ST','Statistics',5);
-
-# USE University;
-
-# /* Drop the disciplines table */
-# DROP TABLE disciplines;
-# """
-# print()
-# print()
-# asd = handle_my_sql_input(syntax)
-# for test in asd:
-#     print(test)
