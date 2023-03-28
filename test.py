@@ -1,5 +1,12 @@
 read = input("input text ")
-print(read)
 
 
+<<<<<<< HEAD
+
+
+
+
+print("csicska")
+=======
 read2 = input("input text 2")
+>>>>>>> main

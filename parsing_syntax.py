@@ -92,7 +92,6 @@ def parse_handle_condition(condition_str):
     condition_dict = {}
     logical_op = None
 
-    # Mapping SQL operators to MongoDB operators
     operator_mapping = {
         '>': '$gt',
         '<': '$lt',
@@ -102,7 +101,6 @@ def parse_handle_condition(condition_str):
         '!=': '$ne',
     }
 
-    # If condition is present, extract clauses and logical operator
     if condition_str:
         clauses = re.findall(
             r"(\w+)\s*(=|!=|<=|>=|<|>)\s*('[^']*'|[^\s]+)", condition_str)
@@ -111,11 +109,9 @@ def parse_handle_condition(condition_str):
         logical_ops = re.findall(
             r"\b(AND|OR)\b", condition_str, flags=re.IGNORECASE)
 
-        # Handle logical operator
         if logical_ops:
             logical_op = logical_ops[0].upper()
 
-        # Create filter_conditions dictionary
         if logical_op == 'AND':
             for column, operator, value in clauses:
                 condition_dict[column] = {operator: value}
@@ -148,8 +144,10 @@ def parse_handle_create_database(syntax_in_sql):
 
 
 def parse_handle_create_table(syntax_in_sql, data_types):
-    create_table_pattern = r'^create\s+table\s+(\w+)\s*\((.*)\)\s*;?$'
-    match = re.match(create_table_pattern, syntax_in_sql, re.IGNORECASE)
+    # print(syntax_in_sql)
+    create_table_pattern = r'^create\s+table\s+(\w+)\s*\((.*)\)\s*;?'
+    match = re.match(create_table_pattern, syntax_in_sql, flags=re.IGNORECASE)
+    print(match)
 
     if match is None:
         return parse_handle_invalid_syntax_for_creating_table()
@@ -177,22 +175,34 @@ def parse_handle_create_table(syntax_in_sql, data_types):
 
 
 def parse_handle_create_index(syntax_in_sql):
-    create_index_pattern = r'^create\s+index\s+(\w+)\s+on\s+(\w+)\s*\((\w+)\)\s*;?$'
-    match = re.match(create_index_pattern, syntax_in_sql, re.IGNORECASE)
+    print(syntax_in_sql)
+    create_index_pattern = r'^create\s+index\s+(\w+)\s+on\s+(\w+)\s*\((.*)\)\s*;?$'
+    match = re.match(create_index_pattern, syntax_in_sql, flags=re.IGNORECASE)
+    print(match)
 
     if match is None:
         return parse_handle_invalid_syntax_for_creating_index()
     else:
         index_name = match.group(1)
         table_name = match.group(2)
-        column_name = match.group(3)
+        
+        columns = []
+        columns_str = match.group(3)
+        for columns_str_splited in columns_str.split(','):
+            column_match = re.match(r'\s*(\w+)\s*', columns_str_splited)
+            if column_match is None:
+                return parse_handle_invalid_syntax_for_inserting()
+            else:
+                column = column_match.group(1)
+                columns.append(column)
+
         return {
             'code': 3,
             'type': 'create',
             'object_name': 'index',
             'index_name': index_name,
             'table_name': table_name,
-            'column_name': column_name
+            'columns': columns
         }
 
 
@@ -230,14 +240,17 @@ def parse_handle_drop_table(syntax_in_sql):
 
 def parse_handle_use(syntax_in_sql):
     use_pattern = r'^use\s+(\w+)\s*;?$'
-    match = re.match(use_pattern, syntax_in_sql, re.IGNORECASE)
-
-    database_name = match.group(1)
-    return {
-        'code': 0,
-        'type': 'use',
-        database_name: database_name
-    }
+    match = re.match(use_pattern, syntax_in_sql, flags=re.IGNORECASE)
+    
+    if match is None:
+        return parse_handle_invalid_syntax_for_use()
+    else:
+        database_name = match.group(1)
+        return {
+            'code': 0,
+            'type': 'use',
+            database_name: database_name
+        }
 
 
 def parse_handle_insert(syntax_in_sql):
@@ -262,7 +275,7 @@ def parse_handle_insert(syntax_in_sql):
         values = []
         values_str = match.group(3)
         for values_str_splited in values_str.split(','):
-            value_match = re.match(r'\s*(\w+)\s*', values_str_splited)
+            value_match = re.match(r'\s*([\w\' ]+)\s*', values_str_splited)
             if value_match is None:
                 return parse_handle_invalid_syntax_for_inserting()
             else:
@@ -305,7 +318,7 @@ def parse(syntax_in_sql: str):
 
     syntax_in_sql_splited = re.findall(r'\w+|[^\w\s]', syntax_in_sql.upper())
 
-    print(syntax_in_sql_splited, sep=':')
+    # print(syntax_in_sql_splited, sep=':')
 
     if len(syntax_in_sql_splited) == 0:
         return parse_handle_no_input()
@@ -351,6 +364,52 @@ def parse(syntax_in_sql: str):
         return parse_handle_invalid_sql_command()
 
 
-# syntax = "DELETE FROM Customers WHERE age < 21 or score > 100 or score = 100 and anyad = 'te';"
-# syntax_split = parse(syntax)
-# print(syntax_split)
+def handle_my_sql_input(input_str: str):
+    sql_code_without_comments = re.sub('/\*.*?\*/', '', input_str)
+
+    commands_raw = re.split('(CREATE|INSERT|USE|DROP|DELETE)', sql_code_without_comments, flags=re.IGNORECASE)
+
+    # Remove empty commands and leading/trailing whitespace
+    commands_raw = [command_raw.strip() for command_raw in commands_raw if command_raw.strip()]
+
+    for i in range(len(commands_raw)):
+        if commands_raw[i].upper() in ['CREATE', 'INSERT', 'USE', 'DROP', 'DELETE']:
+            commands_raw[i] += ' ' + commands_raw[i + 1]
+            commands_raw[i + 1] = ''
+
+    # Remove empty commands again
+    commands_in_sql = [command_raw.strip() for command_raw in commands_raw if command_raw.strip()]
+
+    commands = []
+    for command_in_sql in commands_in_sql:
+        command = parse(command_in_sql)
+        commands.append(command)
+    
+    return commands
+
+
+syntax = """
+CREATE TABLE disciplines (
+  DiscID int,
+  DName varchar,
+  CreditNr int
+);
+
+CREATE INDEX MixedIndex on disciplines (DiscID, CreditNr);
+
+/*Data for the table disciplines */
+insert into disciplines (DiscID,DName,CreditNr) values ('DB1','Databases 1', 7);
+insert into disciplines (DiscID,DName,CreditNr) values ('DS','Data Structures',6);
+insert into disciplines (DiscID,DName,CreditNr) values ('CP','C Programming',8);
+insert into disciplines (DiscID,DName,CreditNr) values ('ST','Statistics',5);
+
+USE University;
+
+/* Drop the disciplines table */
+DROP TABLE disciplines;
+"""
+print()
+print()
+asd = handle_my_sql_input(syntax)
+for test in asd:
+    print(test)
