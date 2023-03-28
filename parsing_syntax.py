@@ -306,7 +306,7 @@ def parse_handle_delete(syntax_in_sql):
 
         condition = parse_handle_condition(condition_str)
         return {
-            'code': 7,
+            'code': ,
             'type': 'delete',
             'table_name': table_name,
             'condition': condition
