@@ -131,7 +131,7 @@ def parse_handle_create_database(syntax_in_sql):
     create_database_pattern = r'^create\s+database\s+(\w+)\s*;?$'
     match = re.match(create_database_pattern, syntax_in_sql, re.IGNORECASE)
 
-    if match in None:
+    if match is None:
         return parse_handle_invalid_syntax_for_creating_database()
     else:
         database_name = match.group(1)
@@ -247,9 +247,9 @@ def parse_handle_use(syntax_in_sql):
     else:
         database_name = match.group(1)
         return {
-            'code': 0,
+            'code': 6,
             'type': 'use',
-            database_name: database_name
+            'database_name': database_name
         }
 
 
@@ -286,7 +286,7 @@ def parse_handle_insert(syntax_in_sql):
             return parse_handle_invalid_syntax_for_inserting()
 
         return {
-            'code': 6,
+            'code': 7,
             'type': 'insert',
             'table_name': table_name,
             'columns': columns,
@@ -306,7 +306,7 @@ def parse_handle_delete(syntax_in_sql):
 
         condition = parse_handle_condition(condition_str)
         return {
-            'code': 7,
+            'code': 8,
             'type': 'delete',
             'table_name': table_name,
             'condition': condition
@@ -387,29 +387,28 @@ def handle_my_sql_input(input_str: str):
     
     return commands
 
+# syntax = """
+# CREATE TABLE disciplines (
+#   DiscID int,
+#   DName varchar,
+#   CreditNr int
+# );
 
-syntax = """
-CREATE TABLE disciplines (
-  DiscID int,
-  DName varchar,
-  CreditNr int
-);
+# CREATE INDEX MixedIndex on disciplines (DiscID, CreditNr);
 
-CREATE INDEX MixedIndex on disciplines (DiscID, CreditNr);
+# /*Data for the table disciplines */
+# insert into disciplines (DiscID,DName,CreditNr) values ('DB1','Databases 1', 7);
+# insert into disciplines (DiscID,DName,CreditNr) values ('DS','Data Structures',6);
+# insert into disciplines (DiscID,DName,CreditNr) values ('CP','C Programming',8);
+# insert into disciplines (DiscID,DName,CreditNr) values ('ST','Statistics',5);
 
-/*Data for the table disciplines */
-insert into disciplines (DiscID,DName,CreditNr) values ('DB1','Databases 1', 7);
-insert into disciplines (DiscID,DName,CreditNr) values ('DS','Data Structures',6);
-insert into disciplines (DiscID,DName,CreditNr) values ('CP','C Programming',8);
-insert into disciplines (DiscID,DName,CreditNr) values ('ST','Statistics',5);
+# USE University;
 
-USE University;
-
-/* Drop the disciplines table */
-DROP TABLE disciplines;
-"""
-print()
-print()
-asd = handle_my_sql_input(syntax)
-for test in asd:
-    print(test)
+# /* Drop the disciplines table */
+# DROP TABLE disciplines;
+# """
+# print()
+# print()
+# asd = handle_my_sql_input(syntax)
+# for test in asd:
+#     print(test)
