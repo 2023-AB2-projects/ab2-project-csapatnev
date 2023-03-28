@@ -20,7 +20,7 @@ def database_exists(xml_root, database_name):
     databases = xml_root.findall(".//Database[@name='{}']".format(database_name))
     return len(databases) > 0
 
-def create_database(db_name, mongodb, mongoclient):
+def create_database(db_name):
     db_name = db_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
     if database_exists(xml_root, db_name):
@@ -146,10 +146,11 @@ def drop_table(db_name, table_name, mongodb):
         return (0, f"Table {table_name} in database {db_name} successfully dropped!")
 
 
-def create_index(db_name, table_name, column_name):
+def create_index(db_name, table_name, index_name, columns):
     db_name = db_name.upper()
     table_name = table_name.upper()
-    column_name = column_name.upper()
+    for column in columns:
+        column = column.upper()
 
     xml_root = parse_xml_file(XML_FILE_LOCATION)
 
@@ -160,15 +161,16 @@ def create_index(db_name, table_name, column_name):
     else:
         # create IAttribute element with the column_name inside: i.e. <IAttribute>column_name</IAttribute>
         # have it be inside the indexAttributes element of the table table_name
-        IAttribute = etree.Element('IAttribute')
-        IAttribute.text = column_name
-        IAttribute.tail = "\n            "  # Add newline after each <IAttribute> tag
+        for column_name in columns:
+            IAttribute = etree.Element('IAttribute')
+            IAttribute.text = column_name
+            IAttribute.tail = "\n            "  # Add newline after each <IAttribute> tag
 
-        # Add the new IAttribute element to the indexAttributes
-        indexAttributes = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/indexAttributes"
-                                            .format(db_name, table_name))
-        indexAttributes.append(IAttribute)
-        indexAttributes.tail = "\n        "  # Add newline after the </indexAttributes> tag
+            # Add the new IAttribute element to the indexAttributes
+            indexAttributes = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/indexAttributes"
+                                                .format(db_name, table_name))
+            indexAttributes.append(IAttribute)
+            indexAttributes.tail = "\n        "  # Add newline after the </indexAttributes> tag
 
         # Save the modified xml file and close it
         with open(XML_FILE_LOCATION, 'wb') as file:
@@ -221,7 +223,7 @@ def insert_into(db_name, table_name, columns, values, mongodb):
     db_name = db_name.upper()
     table_name = table_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
-    if not database_exists(xml_root, db_name):
+    if db_name != "MASTER" and not database_exists(xml_root, db_name):
         return (-1, f"Error: Database {db_name} does not exist!")
     elif not table_exists(xml_root, db_name, table_name):
         return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
