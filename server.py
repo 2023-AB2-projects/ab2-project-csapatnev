@@ -86,8 +86,8 @@ def test_syntax(syntax):
             elif code == 3:
                 # create index
                 db_name = DATABASE_IN_USE
-                index_name = res['index_name']
-                table_name = res['table_name']
+                index_name = res['index_name'].upper()
+                table_name = res['table_name'].upper()
                 columns = res['columns']
                 ret_val, err_msg = cmd.create_index(db_name, table_name, index_name, columns)
                 if ret_val >= 0:
@@ -155,13 +155,21 @@ if __name__ == "__main__":
     CREATE DATABASE University;
 
     USE University;
-    
+
     CREATE TABLE disciplines (
     DiscID varchar PRIMARY KEY,
     DName varchar,
-    CreditNr int REFERENCES TablaNevApad (TablaAttr)
+    CreditNr int REFERENCES OtherTableName(StudID)
     );
-    """
-    syntax = prs.handle_my_sql_input(syntax)
 
+    CREATE INDEX IndexName ON disciplines (DiscID, CreditNr)
+    CREATE INDEX IndexName2 ON disciplines (dISCid, dnaME)
+    """
+
+    # <IndexFiles>
+    #     <IndexFile>
+    #         <IAttributes>
+    #             <IAttribute>
+
+    syntax = prs.handle_my_sql_input(syntax)
     test_syntax(syntax)

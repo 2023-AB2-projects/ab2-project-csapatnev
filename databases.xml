@@ -5,24 +5,32 @@
     <Tables>
         <Table name="DISCIPLINES">
         <Structure>
-            <Attribute attributeName="DiscID" type="varchar"/>
-            <Attribute attributeName="DName" type="varchar"/>
-            <Attribute attributeName="CreditNr" type="int"/>
+            <Attribute attributeName="DISCID" type="VARCHAR"/>
+            <Attribute attributeName="DNAME" type="VARCHAR"/>
+            <Attribute attributeName="CREDITNR" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>DiscID</pkAttribute>
+            <pkAttribute>DISCID</pkAttribute>
         </primaryKey>
         <foreignKeys>
-            <foreignKey>CreditNr</foreignKey>
+            <foreignKey>CREDITNR</foreignKey>
 
             <references>
-                <refTable>TablaNevApad</refTable>
-                <refAttribute>TablaAttr</refAttribute>
+                <refTable>OTHERTABLENAME</refTable>
+                <refAttribute>STUDID</refAttribute>
             </references>
         </foreignKeys>
-        <indexAttributes>
+        <IndexFiles>
 
-        </indexAttributes>
+        <IndexFile indexName="idk.ind" indexType="BTree">
+            <IAttribute>DISCID</IAttribute>
+            <IAttribute>CREDITNR</IAttribute>
+        </IndexFile>
+        <IndexFile indexName="idk.ind" indexType="BTree">
+            <IAttribute>DISCID</IAttribute>
+            <IAttribute>DNAME</IAttribute>
+        </IndexFile>
+        </IndexFiles>
         </Table>
     </Tables>
 </Database>
