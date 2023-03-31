@@ -112,29 +112,29 @@ def create_table(db_name, table_name, list_of_columns, primary_keys, foreign_key
         
         # Create foreign key element
         foreign_key = etree.SubElement(table, 'foreignKeys')
-        foreign_key.text = "\n\n        "  # Add newline before the <foreignKey> tag
-        
+        foreign_key.text = "\n            "  # Add newline and indentation before the <foreignKeys> tag
+
         # insert foreign keys:
         for fk in foreign_keys:
             fk_attr = etree.SubElement(foreign_key, 'foreignKey')
-            fk_attr.text = fk[0]  # Add newline before the <foreignKey> tag
+            fk_attr.text = fk[0]
 
             references = etree.SubElement(foreign_key, 'references')
-            references.text = "\n\n        "
+            references.text = "\n                "  # Add newline and indentation before <references> tag
             
             refTable = etree.SubElement(references, 'refTable')
             refTable.text = fk[1]
-            refTable.tail = "\n"
+            refTable.tail = "\n                "  # Add newline and indentation after <refTable> tag
 
             refAttribute = etree.SubElement(references, 'refAttribute')
             refAttribute.text = fk[2]
-            refAttribute.tail = "\n"
+            refAttribute.tail = "\n            "  # Add newline and indentation after <refAttribute> tag
 
-            references.tail = "\n\n    "
-            fk_attr.tail = "\n\n    "
+            references.tail = "\n        "  # Add newline and indentation before </references> tag
+            fk_attr.tail = "\n\n            "  # Add two newlines and indentation before the next <foreignKey> tag
 
-        foreign_key.tail = "\n        "  # Add newline after the </foreignKey> tag
-        
+        foreign_key.tail="\n        "  # Add newline and indentation before </foreignKeys> tag
+
         # create index attributes container element
         index_attributes = etree.SubElement(table, 'indexAttributes')
         index_attributes.text = "\n\n        "  # Add newline before the <indexAttributes> tag

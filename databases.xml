@@ -1,4 +1,30 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
+<Database name="UNIVERSITY">
+    <Tables>
+        <Table name="DISCIPLINES">
+        <Structure>
+            <Attribute attributeName="DiscID" type="varchar"/>
+            <Attribute attributeName="DName" type="varchar"/>
+            <Attribute attributeName="CreditNr" type="int"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>DiscID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>CreditNr</foreignKey>
+
+            <references>
+                <refTable>TablaNevApad</refTable>
+                <refAttribute>TablaAttr</refAttribute>
+            </references>
+        </foreignKeys>
+        <indexAttributes>
+
+        </indexAttributes>
+        </Table>
+    </Tables>
+</Database>
+
 </Databases>

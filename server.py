@@ -74,8 +74,9 @@ def test_syntax(syntax):
                 table_name = res['table_name']
                 columns = res['column_definitions']
                 pk = res['primary_keys']
+                fk = res['references']
                 db_name = DATABASE_IN_USE
-                ret_val, err_msg = cmd.create_table(db_name, table_name, columns, pk)
+                ret_val, err_msg = cmd.create_table(db_name, table_name, columns, pk, fk)
                 if ret_val >= 0:
                     response_msg = 'Table has been created!'
                     print(response_msg)
@@ -157,8 +158,8 @@ if __name__ == "__main__":
     
     CREATE TABLE disciplines (
     DiscID varchar PRIMARY KEY,
-    DName varchar PRIMARY KEY,
-    CreditNr int
+    DName varchar,
+    CreditNr int REFERENCES TablaNevApad (TablaAttr)
     );
     """
     syntax = prs.handle_my_sql_input(syntax)

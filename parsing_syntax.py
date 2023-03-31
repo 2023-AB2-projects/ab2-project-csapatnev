@@ -185,10 +185,10 @@ def parse_handle_create_table(syntax_in_sql, data_types):
                         primary_keys.append((column_name, data_type))
 
                 if match_ref != None:
-                    table_name = match_ref.group(1)
+                    ref_table_name = match_ref.group(1)
                     ref_column_name = match_ref.group(2)
                     references.append(
-                        (column_name, table_name, ref_column_name))
+                        (column_name, ref_table_name, ref_column_name))
                     
                 if match_ref == None and match_pk == None and match_w == None:
                     return parse_handle_invalid_syntax_for_creating_table()
