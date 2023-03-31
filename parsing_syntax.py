@@ -155,10 +155,13 @@ def parse_handle_create_table(syntax_in_sql, data_types):
         columns_definitions_str = match.group(2)
         column_definitions = []
         primary_keys = []
+        references = []
 
         for column_definition_str in columns_definitions_str.split(','):
             column_definition_match = re.match(
-                r'^\s*(\w+)\s+(\w+)\s*(.*)\s*$', column_definition_str)
+                r'^\s*(\w+)\s+(\w+)\s*(?:(.*)\s*)?$', column_definition_str)
+
+            composite_pk_match = re.match(r'^\s*$', column_definition_str)
 
             if column_definition_match is None:
                 return parse_handle_invalid_syntax_for_creating_table()
@@ -166,13 +169,29 @@ def parse_handle_create_table(syntax_in_sql, data_types):
                 column_name = column_definition_match.group(1)
                 data_type = column_definition_match.group(2)
                 column_definitions.append((column_name, data_type))
+
                 match_pk = re.match(
                     r'^\s*primary\s+key\s*$', column_definition_match.group(3), re.IGNORECASE)
 
-                if match_pk != None:
-                    primary_keys.append((column_name, data_type))
+                match_ref = re.match(
+                    r'^\s*references\s+(\w+)\s*\((\w+)\)\s*$', column_definition_match.group(3), re.IGNORECASE)
 
-        # ToDo: primary keys
+                match_w = re.match(r'^\s*$', column_definition_match.group(3), re.IGNORECASE)
+
+                if match_pk != None:
+                    if len(primary_keys) > 0:
+                        return parse_handle_invalid_syntax_for_creating_table()
+                    else:
+                        primary_keys.append((column_name, data_type))
+
+                if match_ref != None:
+                    table_name = match_ref.group(1)
+                    ref_column_name = match_ref.group(2)
+                    references.append(
+                        (column_name, table_name, ref_column_name))
+                    
+                if match_ref == None and match_pk == None and match_w == None:
+                    return parse_handle_invalid_syntax_for_creating_table()
 
         return {
             'code': 2,
@@ -180,7 +199,8 @@ def parse_handle_create_table(syntax_in_sql, data_types):
             'object_type': 'table',
             'table_name': table_name,
             'column_definitions': column_definitions,
-            'primary_keys': primary_keys
+            'primary_keys': primary_keys,
+            'references': references
         }
 
 
@@ -398,9 +418,10 @@ def handle_my_sql_input(input_str: str):
 
 
 input = """
-create table asd (
-    ID int primary ,
-    valami varchar
+CREATE TABLE disciplines (
+  DiscID varchar PRIMARY KEY,
+  DName varchar PRIMARY KEY,
+  CreditNr int
 );
 """
 
