@@ -72,7 +72,7 @@ def table_exists(xml_root, db_name, table_name):
 
 
 # Create table -> db_name, table_name, list_of_columns [(column_name, data_type)]
-def create_table(db_name, table_name, list_of_columns):
+def create_table(db_name, table_name, list_of_columns, primary_keys):
     db_name = db_name.upper()
     table_name = table_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
@@ -88,15 +88,26 @@ def create_table(db_name, table_name, list_of_columns):
         
         # Create the structure element with the specified columns
         structure = etree.SubElement(table, 'Structure')
-        structure.text = "\n        "  # Add newline before the <Structure> tag
+        structure.text = "\n            "  # Add newline before the <Structure> tag
         structure.tail = "\n        "  # Add newline after the </Structure> tag
         for column in list_of_columns:
             attribute = etree.SubElement(structure, 'Attribute', attributeName=column[0], type=column[1])
-            attribute.tail = "\n            "  # Add newline after each <Attribute> tag
-
+            if column == list_of_columns[-1]:
+                attribute.tail = "\n        "  # Add newline after each <Attribute> tag
+            else:
+                attribute.tail = "\n            "  # Add newline after each <Attribute> tag
         # Create the primary key element
         primary_key = etree.SubElement(table, 'primaryKey')
-        primary_key.text = "\n\n        "  # Add newline before the <primaryKey> tag
+        primary_key.text = "\n            "  # Add newline before the <primaryKey> tag
+        # insert primary key(s): <pkAttribute>column_name</pkAttribute>
+        for pk in primary_keys:
+            attribute = etree.SubElement(primary_key, 'pkAttribute')
+            attribute.text = pk[0]
+            # if pk is the last element in the list, add a newline after the </pkAttribute> tag
+            if pk == primary_keys[-1]:
+                attribute.tail = "\n        "  # Add newline after each <pkAttribute> tag    
+            else:
+                attribute.tail = "\n            "
         primary_key.tail = "\n        "  # Add newline after the </primaryKey> tag
         
         # Create unique key element
