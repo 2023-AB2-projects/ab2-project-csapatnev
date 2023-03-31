@@ -72,7 +72,7 @@ def table_exists(xml_root, db_name, table_name):
 
 
 # Create table -> db_name, table_name, list_of_columns [(column_name, data_type)]
-def create_table(db_name, table_name, list_of_columns, primary_keys):
+def create_table(db_name, table_name, list_of_columns, primary_keys, foreign_keys):
     db_name = db_name.upper()
     table_name = table_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
@@ -110,10 +110,30 @@ def create_table(db_name, table_name, list_of_columns, primary_keys):
                 attribute.tail = "\n            "
         primary_key.tail = "\n        "  # Add newline after the </primaryKey> tag
         
-        # Create unique key element
-        unique_key = etree.SubElement(table, 'uniqueKey')
-        unique_key.text = "\n\n        "  # Add newline before the <uniqueKey> tag
-        unique_key.tail = "\n        "  # Add newline after the </uniqueKey> tag
+        # Create foreign key element
+        foreign_key = etree.SubElement(table, 'foreignKeys')
+        foreign_key.text = "\n\n        "  # Add newline before the <foreignKey> tag
+        
+        # insert foreign keys:
+        for fk in foreign_keys:
+            fk_attr = etree.SubElement(foreign_key, 'foreignKey')
+            fk_attr.text = fk[0]  # Add newline before the <foreignKey> tag
+
+            references = etree.SubElement(foreign_key, 'references')
+            references.text = "\n\n        "
+            
+            refTable = etree.SubElement(references, 'refTable')
+            refTable.text = fk[1]
+            refTable.tail = "\n"
+
+            refAttribute = etree.SubElement(references, 'refAttribute')
+            refAttribute.text = fk[2]
+            refAttribute.tail = "\n"
+
+            references.tail = "\n\n    "
+            fk_attr.tail = "\n\n    "
+
+        foreign_key.tail = "\n        "  # Add newline after the </foreignKey> tag
         
         # create index attributes container element
         index_attributes = etree.SubElement(table, 'indexAttributes')
