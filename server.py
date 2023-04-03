@@ -43,19 +43,19 @@ def server_side():
         message = data.decode()
 
         full_request = prs.handle_my_sql_input(message)
-        test_syntax(full_request)
+        test_syntax(full_request, connection_socket)
                     
 
-def test_syntax(syntax):
-    global DATABASE_IN_USE
+def test_syntax(syntax, connection_socket):
 
+    global DATABASE_IN_USE
     mongodb, mongoclient = mh.connect_mongo(DATABASE_IN_USE)
 
     for res in syntax:    # iterate through each request
         if res['code'] < 0:
             errmsg = res['message']
             print(errmsg)
-            #connection_socket.send(errmsg.encode())
+            connection_socket.send(errmsg.encode())
         else:
             code = res['code']
             if code == 1:
@@ -66,9 +66,10 @@ def test_syntax(syntax):
                     DATABASE_IN_USE = db_name
                     response_msg = 'Database has been created!'
                     print(response_msg)
+                    connection_socket.send(response_msg.encode())
                 else:
                     print(err_msg)
-                #connection_socket.send(response_msg.encode())
+                    connection_socket.send(err_msg.encode())
             elif code == 2:
                 # create table
                 table_name = res['table_name']
@@ -80,9 +81,10 @@ def test_syntax(syntax):
                 if ret_val >= 0:
                     response_msg = 'Table has been created!'
                     print(response_msg)
-                    #connection_socket.send(response_msg.encode())
+                    connection_socket.send(response_msg.encode())
                 else:
                     print(err_msg)
+                    connection_socket.send(err_msg.encode())
             elif code == 3:
                 # create index
                 db_name = DATABASE_IN_USE
@@ -93,9 +95,10 @@ def test_syntax(syntax):
                 if ret_val >= 0:
                     response_msg = 'Index has been created!'
                     print(response_msg)
-                    #connection_socket.send(response_msg.encode())
+                    connection_socket.send(response_msg.encode())
                 else:
                     print(err_msg)
+                    connection_socket.send(err_msg.encode())
             elif code == 4:
                 # drop db
                 db_name = res['database_name']
@@ -104,9 +107,10 @@ def test_syntax(syntax):
                     DATABASE_IN_USE = "MASTER"
                     response_msg = 'Database has been droped!'
                     print(response_msg)
-                    #connection_socket.send(response_msg.encode())
+                    connection_socket.send(response_msg.encode())
                 else:
                     print(err_msg)
+                    connection_socket.send(err_msg.encode())
             elif code == 5:
                 # drop table
                 db_name = DATABASE_IN_USE
@@ -115,9 +119,10 @@ def test_syntax(syntax):
                 if ret_val >= 0:
                     response_msg = 'Table has been created!'
                     print(response_msg)
-                    #connection_socket.send(response_msg.encode())
+                    connection_socket.send(response_msg.encode())
                 else:
                     print(err_msg)
+                    connection_socket.send(err_msg.encode())
             elif code == 6:
                 # use database db_name
                 DATABASE_IN_USE = res['database_name']
@@ -132,9 +137,10 @@ def test_syntax(syntax):
                 if ret_val >= 0:
                     response_msg = 'Data has been inserted!'
                     print(response_msg)
-                    #connection_socket.send(response_msg.encode())
+                    connection_socket.send(response_msg.encode())
                 else:
                     print(err_msg)
+                    connection_socket.send(err_msg.encode())
             elif code == 8:
                 # delete from table_name where studid > 1000
                 table_name = res['table_name']
@@ -144,32 +150,33 @@ def test_syntax(syntax):
                 if ret_val >= 0:
                     response_msg = 'Data has been deleted!'
                     print(response_msg)
-                    #connection_socket.send(response_msg.encode())
+                    connection_socket.send(response_msg.encode())
                 else:
                     print(err_msg)
+                    connection_socket.send(err_msg.encode())
         
 
 if __name__ == "__main__":
-    #server_side()
-    syntax = """
-    CREATE DATABASE University;
+    server_side()
+    # syntax = """
+    # CREATE DATABASE University;
 
-    USE University;
+    # USE University;
 
-    CREATE TABLE disciplines (
-    DiscID varchar PRIMARY KEY,
-    DName varchar,
-    CreditNr int REFERENCES OtherTableName(StudID)
-    );
+    # CREATE TABLE disciplines (
+    # DiscID varchar PRIMARY KEY,
+    # DName varchar,
+    # CreditNr int REFERENCES OtherTableName(StudID)
+    # );
 
-    CREATE INDEX IndexName ON disciplines (DiscID, CreditNr)
-    CREATE INDEX IndexName2 ON disciplines (dISCid, dnaME)
-    """
+    # CREATE INDEX IndexName ON disciplines (DiscID, CreditNr)
+    # CREATE INDEX IndexName2 ON disciplines (dISCid, dnaME)
+    # """
 
-    # <IndexFiles>
-    #     <IndexFile>
-    #         <IAttributes>
-    #             <IAttribute>
+    # # <IndexFiles>
+    # #     <IndexFile>
+    # #         <IAttributes>
+    # #             <IAttribute>
 
-    syntax = prs.handle_my_sql_input(syntax)
-    test_syntax(syntax)
+    # syntax = prs.handle_my_sql_input(syntax)
+    # test_syntax(syntax)

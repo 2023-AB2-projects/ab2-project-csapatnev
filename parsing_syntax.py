@@ -536,10 +536,10 @@ def handle_my_sql_input(input_str: str):
     return commands
 
 
-input = """
-DELETE FROM asd WHERE not helloszia = 1 or not asd = 1 and ja = 12
-"""
+# input = """
+# DELETE FROM asd WHERE not helloszia = 1 or not asd = 1 and ja = 12
+# """
 
-asd = handle_my_sql_input(input)
-for i in asd:
-    print(i, end='\n')
+# asd = handle_my_sql_input(input)
+# for i in asd:
+#     print(i, end='\n')
