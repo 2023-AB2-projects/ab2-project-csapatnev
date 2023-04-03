@@ -14,13 +14,13 @@ def send_message_to_server(message):
     with socket(AF_INET, SOCK_STREAM) as client_socket:
         client_socket.connect((HOST,PORT))
         client_socket.send(message)
-
-        response = client_socket.recv(1024)
-        if response.decode() == "error":
-            # print to console part of app
-            print("Error: server returned an error message")
-        else:
-            print(response)
+        while True:
+            response = client_socket.recv(1024)
+            if response.decode() == "breakout":
+                print("Server finished with it's tasks, client can rest now!")
+                break
+            else:
+                print(response.decode())
 
 
 def client_message_recv():

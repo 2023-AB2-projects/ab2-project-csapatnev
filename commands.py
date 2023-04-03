@@ -102,7 +102,7 @@ def create_table(db_name, table_name, list_of_columns, primary_keys, foreign_key
         # insert primary key(s): <pkAttribute>column_name</pkAttribute>
         for pk in primary_keys:
             attribute = etree.SubElement(primary_key, 'pkAttribute')
-            attribute.text = pk[0].upper()
+            attribute.text = pk.upper()
             # if pk is the last element in the list, add a newline after the </pkAttribute> tag
             if pk == primary_keys[-1]:
                 attribute.tail = "\n        "  # Add newline after each <pkAttribute> tag    
@@ -251,13 +251,21 @@ def validate_data_types(attributes, columns, values):
     return True
 
 def find_pk_column(structure):
-    # simply return the name of the first column in the xml file
-    return structure.find('Attribute').get('attributeName')
+    pk_element = structure.getparent().find(".//primaryKey/pkAttribute")
+    if pk_element is not None:
+        return pk_element.text
+    
+    first_attribute = structure.find(".//Attribute")
+    if first_attribute is not None:
+        return first_attribute.get("attributeName")
 
 def insert_into(db_name, table_name, columns, values, mongodb):
     # check for valid database and table
     db_name = db_name.upper()
     table_name = table_name.upper()
+    columns = [col.upper() for col in columns]
+    values = [val.upper() for val in values]
+    
     xml_root = parse_xml_file(XML_FILE_LOCATION)
     if db_name != "MASTER" and not database_exists(xml_root, db_name):
         return (-1, f"Error: Database {db_name} does not exist!")
@@ -273,13 +281,11 @@ def insert_into(db_name, table_name, columns, values, mongodb):
         # check if the number of columns and values match
         if len(columns) != len(values):
             return (-3, f"Error: Number of columns and values do not match!")
-        # check if the types of the values match the types of the columns
-        for i in range(len(columns)):
-            # get the type of the column
-            column_type = structure.find(f"Attribute[@attributeName='{columns[i]}']").get('type')
-            # check if the type of the value matches the type of the column using the validate_data_types function
-            if not validate_data_types(attributes, [columns[i]], [values[i]]):
-                return (-4, f"Error: Type of value {values[i]} does not match type of column {columns[i]}!")
+        # # check if the types of the values match the types of the columns
+        # for i in range(len(columns)):
+        #     # check if the type of the value matches the type of the column using the validate_data_types function
+        #     if not validate_data_types(attributes, columns[i], values[i]):
+        #         return (-4, f"Error: Type of value {values[i]} does not match type of column {columns[i]}!")
         
         # insert the values into the table
         primary_key_column = find_pk_column(structure)

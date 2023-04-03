@@ -1,11 +1,22 @@
+drop database University;
+
 create database University;
 
 USE University;
 
+CREATE TABLE credits (
+  CreditNr int PRIMARY KEY,
+  CName varchar(30)
+);
+
 CREATE TABLE disciplines (
   DiscID varchar(5) PRIMARY KEY,
   DName varchar(30),
-  CreditNr int
+  CreditNr int REFERENCES credits(CreditNr)
 );
 
 Create index asd on disciplines (CreditNr);
+
+INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
+INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
+INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
