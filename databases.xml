@@ -1,6 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
+    
+
 <Database name="UNIVERSITY">
     <Tables>
         <Table name="DISCIPLINES">
@@ -10,25 +12,14 @@
             <Attribute attributeName="CREDITNR" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>DISCID</pkAttribute>
+            <pkAttribute>D</pkAttribute>
         </primaryKey>
         <foreignKeys>
-            <foreignKey>CREDITNR</foreignKey>
-
-            <references>
-                <refTable>OTHERTABLENAME</refTable>
-                <refAttribute>STUDID</refAttribute>
-            </references>
-        </foreignKeys>
+            </foreignKeys>
         <IndexFiles>
 
         <IndexFile indexName="idk.ind" indexType="BTree">
-            <IAttribute>DISCID</IAttribute>
             <IAttribute>CREDITNR</IAttribute>
-        </IndexFile>
-        <IndexFile indexName="idk.ind" indexType="BTree">
-            <IAttribute>DISCID</IAttribute>
-            <IAttribute>DNAME</IAttribute>
         </IndexFile>
         </IndexFiles>
         </Table>

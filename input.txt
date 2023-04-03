@@ -1,0 +1,11 @@
+create database University;
+
+USE University;
+
+CREATE TABLE disciplines (
+  DiscID varchar(5) PRIMARY KEY,
+  DName varchar(30),
+  CreditNr int
+);
+
+Create index asd on disciplines (CreditNr);
