@@ -43,68 +43,7 @@ def server_side():
         message = data.decode()
 
         full_request = prs.handle_my_sql_input(message)
-        for res in full_request:    # iterate through each request
-            if res['code'] < 0:
-                errmsg = res['message']
-                connection_socket.send(errmsg.encode())
-            else:
-                code = res['code']
-                if code == 1:
-                    # create db
-                    db_name = res['database_name']
-                    cmd.create_database(db_name)
-                    DATABASE_IN_USE = db_name
-                    response_msg = 'Database has been created!'
-                    connection_socket.send(response_msg.encode())
-                elif code == 2:
-                    # create table
-                    table_name = res['table_name']
-                    columns = res['column_definitions']
-                    db_name = DATABASE_IN_USE
-                    cmd.create_table(db_name, table_name, columns)
-                    response_msg = 'Table has been created!'
-                    connection_socket.send(response_msg.encode())
-                elif code == 3:
-                    # create index
-                    index_name = res['index_name']
-                    table_name = res['table_name']
-                    column_name = res['column_name']
-                    cmd.create_index(db_name, table_name, column_name)
-                    response_msg = 'Index has been created!'
-                    connection_socket.send(response_msg.encode())
-                elif code == 4:
-                    # drop db
-                    db_name = res['database_name']
-                    cmd.drop_database(db_name, mongoclient)
-                    DATABASE_IN_USE = "MASTER"
-                    response_msg = 'Database has been droped!'
-                    connection_socket.send(response_msg.encode())
-                elif code == 5:
-                    # drop table
-                    db_name = DATABASE_IN_USE
-                    table_name = res['table_name']
-                    cmd.drop_table(db_name, table_name, mongodb)
-                    response_msg = 'Table has been created!'
-                    connection_socket.send(response_msg.encode())
-                elif code == 6:
-                    # use database db_name
-                    DATABASE_IN_USE = res['database_name']
-                elif code == 7:
-                    # insert into table_name (col1, col2, col3) values (val1, val2, val3)
-                    table_name = res['table_name']
-                    columns = res['column_names']
-                    values = res['values']
-                    cmd.insert_into(mongodb, table_name, columns, values)
-                    response_msg = 'Data has been inserted!'
-                    connection_socket.send(response_msg.encode())
-                elif code == 8:
-                    # delete from table_name where studid > 1000
-                    table_name = res['table_name']
-                    db_name = DATABASE_IN_USE
-                    filter_conditions = res['filter_conditions']
-                    cmd.delete_from(db_name, table_name, filter_conditions, mongodb)
-                    response_msg = 'Data has been deleted!'
-                    connection_socket.send(response_msg.encode())
+        test_syntax(full_request)
                     
 
 def test_syntax(syntax):
@@ -134,8 +73,10 @@ def test_syntax(syntax):
                 # create table
                 table_name = res['table_name']
                 columns = res['column_definitions']
+                pk = res['primary_keys']
+                fk = res['references']
                 db_name = DATABASE_IN_USE
-                ret_val, err_msg = cmd.create_table(db_name, table_name, columns)
+                ret_val, err_msg = cmd.create_table(db_name, table_name, columns, pk, fk)
                 if ret_val >= 0:
                     response_msg = 'Table has been created!'
                     print(response_msg)
@@ -145,8 +86,8 @@ def test_syntax(syntax):
             elif code == 3:
                 # create index
                 db_name = DATABASE_IN_USE
-                index_name = res['index_name']
-                table_name = res['table_name']
+                index_name = res['index_name'].upper()
+                table_name = res['table_name'].upper()
                 columns = res['columns']
                 ret_val, err_msg = cmd.create_index(db_name, table_name, index_name, columns)
                 if ret_val >= 0:
@@ -214,24 +155,21 @@ if __name__ == "__main__":
     CREATE DATABASE University;
 
     USE University;
-    
+
     CREATE TABLE disciplines (
-    DiscID varchar(5) PRIMARY KEY,
-    DName varchar(30),
-    CreditNr int
+    DiscID varchar PRIMARY KEY,
+    DName varchar,
+    CreditNr int REFERENCES OtherTableName(StudID)
     );
 
-    /*Data for the table disciplines */
-    insert into disciplines (DiscID,DName,CreditNr) values ('DB1','Databases 1', 7);
-    insert into disciplines (DiscID,DName,CreditNr) values ('DS','Data Structures',6);
-    insert into disciplines (DiscID,DName,CreditNr) values ('CP','C Programming',8);
-    insert into disciplines (DiscID,DName,CreditNr) values ('ST','Statistics',5);
-
-    USE University;
-
-    /* Drop the disciplines table */
-    DROP TABLE disciplines;
+    CREATE INDEX IndexName ON disciplines (DiscID, CreditNr)
+    CREATE INDEX IndexName2 ON disciplines (dISCid, dnaME)
     """
-    syntax = prs.handle_my_sql_input(syntax)
 
+    # <IndexFiles>
+    #     <IndexFile>
+    #         <IAttributes>
+    #             <IAttribute>
+
+    syntax = prs.handle_my_sql_input(syntax)
     test_syntax(syntax)

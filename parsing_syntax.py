@@ -211,6 +211,7 @@ def parse_handle_create_table(syntax_in_sql):
 
                 if match_ref != None:
                     ref_table_name = match_ref.group(1)
+                    ref_table_name = match_ref.group(1)
                     ref_column_name = match_ref.group(2)
                     references.append(
                         (column_name, ref_table_name, ref_column_name))

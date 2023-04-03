@@ -72,7 +72,7 @@ def table_exists(xml_root, db_name, table_name):
 
 
 # Create table -> db_name, table_name, list_of_columns [(column_name, data_type)]
-def create_table(db_name, table_name, list_of_columns):
+def create_table(db_name, table_name, list_of_columns, primary_keys, foreign_keys):
     db_name = db_name.upper()
     table_name = table_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
@@ -88,26 +88,57 @@ def create_table(db_name, table_name, list_of_columns):
         
         # Create the structure element with the specified columns
         structure = etree.SubElement(table, 'Structure')
-        structure.text = "\n        "  # Add newline before the <Structure> tag
+        structure.text = "\n            "  # Add newline before the <Structure> tag
         structure.tail = "\n        "  # Add newline after the </Structure> tag
         for column in list_of_columns:
-            attribute = etree.SubElement(structure, 'Attribute', attributeName=column[0], type=column[1])
-            attribute.tail = "\n            "  # Add newline after each <Attribute> tag
-
+            attribute = etree.SubElement(structure, 'Attribute', attributeName=column[0].upper(), type=column[1].upper())
+            if column == list_of_columns[-1]:
+                attribute.tail = "\n        "  # Add newline after each <Attribute> tag
+            else:
+                attribute.tail = "\n            "  # Add newline after each <Attribute> tag
         # Create the primary key element
         primary_key = etree.SubElement(table, 'primaryKey')
-        primary_key.text = "\n\n        "  # Add newline before the <primaryKey> tag
+        primary_key.text = "\n            "  # Add newline before the <primaryKey> tag
+        # insert primary key(s): <pkAttribute>column_name</pkAttribute>
+        for pk in primary_keys:
+            attribute = etree.SubElement(primary_key, 'pkAttribute')
+            attribute.text = pk[0].upper()
+            # if pk is the last element in the list, add a newline after the </pkAttribute> tag
+            if pk == primary_keys[-1]:
+                attribute.tail = "\n        "  # Add newline after each <pkAttribute> tag    
+            else:
+                attribute.tail = "\n            "
         primary_key.tail = "\n        "  # Add newline after the </primaryKey> tag
         
-        # Create unique key element
-        unique_key = etree.SubElement(table, 'uniqueKey')
-        unique_key.text = "\n\n        "  # Add newline before the <uniqueKey> tag
-        unique_key.tail = "\n        "  # Add newline after the </uniqueKey> tag
-        
-        # create index attributes container element
-        index_attributes = etree.SubElement(table, 'indexAttributes')
-        index_attributes.text = "\n\n        "  # Add newline before the <indexAttributes> tag
-        index_attributes.tail = "\n        "  # Add newline after the </indexAttributes> tag
+        # Create foreign key element
+        foreign_key = etree.SubElement(table, 'foreignKeys')
+        foreign_key.text = "\n            "  # Add newline and indentation before the <foreignKeys> tag
+
+        # insert foreign keys:
+        for fk in foreign_keys:
+            fk_attr = etree.SubElement(foreign_key, 'foreignKey')
+            fk_attr.text = fk[0].upper()
+
+            references = etree.SubElement(foreign_key, 'references')
+            references.text = "\n                "  # Add newline and indentation before <references> tag
+            
+            refTable = etree.SubElement(references, 'refTable')
+            refTable.text = fk[1].upper()
+            refTable.tail = "\n                "  # Add newline and indentation after <refTable> tag
+
+            refAttribute = etree.SubElement(references, 'refAttribute')
+            refAttribute.text = fk[2].upper()
+            refAttribute.tail = "\n            "  # Add newline and indentation after <refAttribute> tag
+
+            references.tail = "\n        "  # Add newline and indentation before </references> tag
+            fk_attr.tail = "\n\n            "  # Add two newlines and indentation before the next <foreignKey> tag
+
+        foreign_key.tail="\n        "  # Add newline and indentation before </foreignKeys> tag
+
+
+        IndexFiles = etree.SubElement(table, 'IndexFiles')
+        IndexFiles.text = "\n\n        "
+        IndexFiles.tail = "\n        "
 
         # Add the new table element to the database
         tables = xml_root.find(".//Database[@name='{}']/Tables".format(db_name))
@@ -148,6 +179,7 @@ def drop_table(db_name, table_name, mongodb):
 def create_index(db_name, table_name, index_name, columns):
     db_name = db_name.upper()
     table_name = table_name.upper()
+    index_name = index_name.upper()
     for column in columns:
         column = column.upper()
 
@@ -160,16 +192,21 @@ def create_index(db_name, table_name, index_name, columns):
     else:
         # create IAttribute element with the column_name inside: i.e. <IAttribute>column_name</IAttribute>
         # have it be inside the indexAttributes element of the table table_name
-        for column_name in columns:
-            IAttribute = etree.Element('IAttribute')
-            IAttribute.text = column_name
-            IAttribute.tail = "\n            "  # Add newline after each <IAttribute> tag
-
-            # Add the new IAttribute element to the indexAttributes
-            indexAttributes = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/indexAttributes"
+        indexFiles = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/IndexFiles"
                                                 .format(db_name, table_name))
-            indexAttributes.append(IAttribute)
-            indexAttributes.tail = "\n        "  # Add newline after the </indexAttributes> tag
+        
+        # create container tag
+        indexFile = etree.SubElement(indexFiles, 'IndexFile', indexName="idk.ind", indexType="BTree")
+        indexFile.text = "\n            "
+        indexFile.tail = "\n        "
+        for column_name in columns:
+            IAttribute = etree.SubElement(indexFile, 'IAttribute')
+            IAttribute.text = column_name.upper()
+            if column_name == columns[-1]:
+                IAttribute.tail = "\n        "  # Add newline after each <IAttribute> tag
+            else:
+                IAttribute.tail = "\n            "
+
 
         # Save the modified xml file and close it
         with open(XML_FILE_LOCATION, 'wb') as file:

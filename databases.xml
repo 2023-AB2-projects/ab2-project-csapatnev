@@ -3,7 +3,36 @@
     <!-- All databases will be found here -->
 <Database name="UNIVERSITY">
     <Tables>
-        </Tables>
+        <Table name="DISCIPLINES">
+        <Structure>
+            <Attribute attributeName="DISCID" type="VARCHAR"/>
+            <Attribute attributeName="DNAME" type="VARCHAR"/>
+            <Attribute attributeName="CREDITNR" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>DISCID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>CREDITNR</foreignKey>
+
+            <references>
+                <refTable>OTHERTABLENAME</refTable>
+                <refAttribute>STUDID</refAttribute>
+            </references>
+        </foreignKeys>
+        <IndexFiles>
+
+        <IndexFile indexName="idk.ind" indexType="BTree">
+            <IAttribute>DISCID</IAttribute>
+            <IAttribute>CREDITNR</IAttribute>
+        </IndexFile>
+        <IndexFile indexName="idk.ind" indexType="BTree">
+            <IAttribute>DISCID</IAttribute>
+            <IAttribute>DNAME</IAttribute>
+        </IndexFile>
+        </IndexFiles>
+        </Table>
+    </Tables>
 </Database>
 
 </Databases>
