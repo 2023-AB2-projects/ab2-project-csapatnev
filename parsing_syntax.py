@@ -131,6 +131,7 @@ def parse_condition(condition):
     elif 'not ' in condition:
         condition = condition.split('not ')
         column = condition[1].split()[0]
+        column = column.upper()
         operator = condition[1].split()[1]
         value = condition[1].split()[2]
         return {column: {"$not": {OPERATORS[operator]: value}}}
@@ -140,78 +141,6 @@ def parse_condition(condition):
         operator = condition.split(' ')[1]
         value = condition.split(' ')[2]
         return { column: { OPERATORS[operator]: value } }
-
-
-def parse_handle_condition(condition_str):
-    # Split the WHERE clause into individual conditions
-    conditions = re.findall(r"\b\w+\b\s*[<>=!]+\s*\w+", condition_str)
-    
-    # Create a list to hold the nested conditions
-    nested_conditions = []
-    
-    # Loop through each condition and generate the appropriate dictionary
-    for condition in conditions:
-        # Split the condition into the column name, operator, and value
-        parts = re.split(r"\s*([<>=!]+)\s*", condition)
-        column = parts[0]
-        operator = parts[1]
-        value = parts[2]
-        
-        # Generate the dictionary based on the operator
-        if operator == ">":
-            condition_dict = {column: {"$gt": int(value)}}
-        elif operator == "<":
-            condition_dict = {column: {"$lt": int(value)}}
-        elif operator == ">=":
-            condition_dict = {column: {"$gte": int(value)}}
-        elif operator == "<=":
-            condition_dict = {column: {"$lte": int(value)}}
-        elif operator == "=":
-            condition_dict = {column: {"$eq": int(value)}}
-        elif operator == "!=":
-            condition_dict = {column: {"$ne": int(value)}}
-        else:
-            raise ValueError(f"Invalid operator: {operator}")
-        
-        # Append the condition dictionary to the list
-        nested_conditions.append(condition_dict)
-    
-    print(nested_conditions)
-    top_level_operator = None
-    not_operator = False
-    for i in range(len(nested_conditions)-1, 0, -1):
-        # Check if the current operator is "not"
-        if condition_str.split()[i-1].lower() == "not":
-            not_operator = True
-            continue
-        
-        # Determine the top-level operator
-        if top_level_operator is None:
-            top_level_operator = "$or" if nested_conditions[i-1] != {"$not": []} else None
-        
-        # Combine the nested conditions based on the top-level operator
-        if top_level_operator == "$or":
-            if nested_conditions[i-1] == {"$not": []}:
-                nested_conditions[i-1] = {"$not": {"$or": [nested_conditions[i]]}}
-                top_level_operator = "$and"
-            elif nested_conditions[i] == {"$not": []}:
-                nested_conditions[i-1] = {"$or": [nested_conditions[i-1], {"$not": {"$or": [nested_conditions[i]]}}]}
-            else:
-                nested_conditions[i-1] = {"$or": [nested_conditions[i-1], nested_conditions[i]]}
-        elif top_level_operator == "$and":
-            if nested_conditions[i-1] == {"$not": []}:
-                nested_conditions[i-1] = {"$not": {"$and": [nested_conditions[i]]}}
-            elif nested_conditions[i] == {"$not": []}:
-                nested_conditions[i-1] = {"$and": [nested_conditions[i-1], {"$not": {"$or": [nested_conditions[i]]}}]}
-            else:
-                nested_conditions[i-1] = {"$and": [nested_conditions[i-1], nested_conditions[i]]}
-        else:
-            raise ValueError(f"Invalid operator: {top_level_operator}")
-    
-    # Wrap the conditions with "not" if necessary
-    final_conditions = nested_conditions[0]
-    
-    return final_conditions
 
 
 def parse_handle_create_database(syntax_in_sql):
@@ -501,7 +430,6 @@ def parse_handle_delete(syntax_in_sql):
         return parse_handle_invalid_syntax_for_deleting()
     else:
         table_name = match.group(1)
-        table_name = table_name.upper()
         condition_str = match.group(2)
 
         condition = parse_where_clause(condition_str)
