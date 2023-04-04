@@ -289,11 +289,6 @@ def test_syntax(syntax, connection_socket):
                 else:
                     print(err_msg)
                     connection_socket.send(err_msg.encode())
-    
-    data = cmd.select_all("UNIVERSITY", "DISCIPLINES", mongodb)
-    for d in data:
-        print(d)
-        connection_socket.send(str(d).encode())
 
     print("breaking out")
     connection_socket.send("breakout".encode()) # close the client
