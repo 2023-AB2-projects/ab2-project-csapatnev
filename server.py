@@ -295,11 +295,11 @@ def test_syntax(syntax, connection_socket):
         
 
 if __name__ == "__main__":
-    server_side()
-    # syntax = """
-    # USE University;
+    #server_side()
+    syntax = """
+    USE University;
 
-    # DELETE FROM DISCIPLINES WHERE CreditNr = 2
-    # """
-    # syntax = prs.handle_my_sql_input(syntax)
-    # test_syntax_WO_client(syntax)
+    DELETE FROM CREDITS WHERE CreditNr = 2;
+    """
+    syntax = prs.handle_my_sql_input(syntax)
+    test_syntax_WO_client(syntax)
