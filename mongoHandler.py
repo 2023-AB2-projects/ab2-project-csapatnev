@@ -29,9 +29,9 @@ def insert_into(mongoclient, db_name, table_name, primary_key_column, columns, v
     # Create new lists without the primary_key_column
     non_primary_columns = [col for col in columns if col != primary_key_column]
     non_primary_values = [val for col, val in zip(columns, values) if col != primary_key_column]
-    
+
     # Create a dictionary of column name to value
-    data = {primary_key_column: primary_key, "value": "#".join(str(value) for value in non_primary_values)}
+    data = {"_id": primary_key, "value": "#".join(str(value) for value in non_primary_values)}
     
     # Insert the data into the collection
     result = collection.insert_one(data)

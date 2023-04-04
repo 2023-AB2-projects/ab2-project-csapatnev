@@ -1,3 +1,7 @@
+USE UNIVERSITY;
+
+DROP DATABASE UNIVERSITY;
+
 create database University;
 
 USE University;
