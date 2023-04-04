@@ -250,9 +250,9 @@ def test_syntax(syntax, connection_socket):
                 # drop table
                 db_name = DATABASE_IN_USE
                 table_name = res['table_name']
-                ret_val, err_msg = cmd.drop_table(db_name, table_name, mongodb)
+                ret_val, err_msg = cmd.drop_table(db_name, table_name, mongoclient)
                 if ret_val >= 0:
-                    response_msg = 'Table has been created!'
+                    response_msg = err_msg
                     print(response_msg)
                     connection_socket.send(response_msg.encode())
                 else:

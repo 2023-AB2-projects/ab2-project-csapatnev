@@ -153,7 +153,7 @@ def create_table(db_name, table_name, list_of_columns, primary_keys, foreign_key
         return (0, f"Table {table_name} created in database {db_name}!")
 
 
-def drop_table(db_name, table_name, mongodb):
+def drop_table(db_name, table_name, mongoclient):
     db_name = db_name.upper()
     table_name = table_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
@@ -172,7 +172,7 @@ def drop_table(db_name, table_name, mongodb):
             file.write(etree.tostring(xml_root, pretty_print=True, xml_declaration=True, encoding='UTF-8'))
 
         # drop the mongo collection
-        mongoHandler.drop_collection(table_name, mongodb)
+        mongoHandler.drop_collection(db_name, table_name, mongoclient)
 
         return (0, f"Table {table_name} in database {db_name} successfully dropped!")
 

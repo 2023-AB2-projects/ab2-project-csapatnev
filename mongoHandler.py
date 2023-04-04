@@ -16,8 +16,9 @@ def connect_mongo(db_name):
 def drop_database(db_name, mongoclient):
     mongoclient.drop_database(db_name)
 
-def drop_collection(table_name, mongodb):
-    collection = mongodb[table_name]
+def drop_collection(db_name, table_name, mongoclient):
+    db = mongoclient[db_name]
+    collection = db[table_name]
     collection.drop()
 
 def insert_into(mongoclient, db_name, table_name, primary_key_column, columns, values):
