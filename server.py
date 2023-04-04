@@ -105,7 +105,7 @@ def test_syntax_WO_client(syntax):
                 columns = res['columns']
                 values = res['values']
                 # def insert_into(db_name, table_name, columns, values, mongodb):
-                ret_val, err_msg = cmd.insert_into(db_name, table_name, columns, values, mongodb)
+                ret_val, err_msg = cmd.insert_into(db_name, table_name, columns, values, mongoclient)
                 if ret_val >= 0:
                     response_msg = 'Data has been inserted!'
                     print(response_msg)
@@ -119,7 +119,7 @@ def test_syntax_WO_client(syntax):
                 db_name = DATABASE_IN_USE
                 filter_conditions = res['condition']
                 print(filter_conditions)
-                ret_val, err_msg = cmd.delete_from(db_name, table_name, filter_conditions, mongodb)
+                ret_val, err_msg = cmd.delete_from(db_name, table_name, filter_conditions, mongoclient)
                 if ret_val >= 0:
                     response_msg = 'Data has been deleted!'
                     print(response_msg)
@@ -128,7 +128,7 @@ def test_syntax_WO_client(syntax):
                     print(err_msg)
                     #connection_socket.send(err_msg.encode())
     
-    data = cmd.select_all("UNIVERSITY", "CREDITS", mongodb)
+    data = cmd.select_all("UNIVERSITY", "DISCIPLINES", mongodb)
     for d in data:
         print(d)
     #connection_socket.send("breakout".encode()) # close the client
@@ -268,7 +268,7 @@ def test_syntax(syntax, connection_socket):
                 columns = res['columns']
                 values = res['values']
                 # def insert_into(db_name, table_name, columns, values, mongodb):
-                ret_val, err_msg = cmd.insert_into(db_name, table_name, columns, values, mongodb)
+                ret_val, err_msg = cmd.insert_into(db_name, table_name, columns, values, mongoclient)
                 if ret_val >= 0:
                     response_msg = 'Data has been inserted!'
                     print(response_msg)
@@ -289,11 +289,6 @@ def test_syntax(syntax, connection_socket):
                 else:
                     print(err_msg)
                     connection_socket.send(err_msg.encode())
-    
-    data = cmd.select_all("UNIVERSITY", "CREDITS", mongodb)
-    for d in data:
-        print(d)
-        connection_socket.send(str(d).encode())
 
     print("breaking out")
     connection_socket.send("breakout".encode()) # close the client
@@ -302,29 +297,9 @@ def test_syntax(syntax, connection_socket):
 if __name__ == "__main__":
     server_side()
     # syntax = """
-    # DROP DATABASE UNIVESITY;
-
-    # CREATE DATABASE UNIVERSITY;
-
     # USE University;
 
-    # CREATE TABLE credits (
-    # CreditNr int PRIMARY KEY,
-    # CName varchar(30)
-    # );
-
-    # CREATE TABLE disciplines (
-    # DiscID varchar(5) PRIMARY KEY,
-    # DName varchar(30),
-    # CreditNr int REFERENCES credits(CreditNr)
-    # );
-
-    # Create index asd on disciplines (CreditNr);
-
-    # INSERT INTO DISCIPLINES (DiscID, DName, CreditNr) VALUES ('CS101', 'Intro to CS', 1);
-    # INSERT INTO DISCIPLINES (DiscID, DName, CreditNr) VALUES ('CS102', 'Data Structures', 2);
-    # INSERT INTO DISCIPLINES (DiscID, DName, CreditNr) VALUES ('CS103', 'Algorithms', 3);
-
+    # DELETE FROM DISCIPLINES WHERE CreditNr = 2
     # """
     # syntax = prs.handle_my_sql_input(syntax)
     # test_syntax_WO_client(syntax)
