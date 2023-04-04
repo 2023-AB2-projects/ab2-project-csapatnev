@@ -56,17 +56,24 @@ def insert_into(mongoclient, db_name, table_name, primary_key_column, columns, v
 # print(message)
 ###
 
-def delete_from(mongoclient, table_name, db_name, filter_conditions, column_index):
+def delete_from(mongoclient, table_name, db_name, filter_conditions):
     db = mongoclient[db_name]
     collection = db[table_name]
 
-    # Create a regex pattern to match the value after (column_index - 1) '#' characters
-    for key, value in filter_conditions.items():
-        regex = f"^(?:[^#]*#){{{column_index - 2}}}[^#]*{value}[^#]*"
+    # Extract the primary_key_column and its conditions from filter_conditions
+    primary_key_column = list(filter_conditions.keys())[0]
+    primary_key_conditions = filter_conditions[primary_key_column]
 
-    updated_filter_conditions = {"value": {"$regex": regex}}
+    # Create a new filter_conditions with the "_id" field
+    new_filter_conditions = {"_id": {}}
 
-    result = collection.delete_many(updated_filter_conditions)
+    for condition, value in primary_key_conditions.items():
+        # Convert the primary_key_value to the appropriate data type
+        if isinstance(value, str) and value.isdigit():
+            value = int(value)
+        new_filter_conditions["_id"][condition] = value
+
+    result = collection.delete_many(new_filter_conditions)
     if result.deleted_count > 0:
         return 0, f"Deleted {result.deleted_count} document(s) matching the filter conditions."
     else:

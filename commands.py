@@ -301,8 +301,7 @@ def delete_from(db_name, table_name, filter_conditions, mongoclient):
     elif not table_exists(xml_root, db_name, table_name):
         return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
     else:
-        col_index = get_column_index(xml_root, db_name, table_name, list(filter_conditions.keys())[0])
-        return mongoHandler.delete_from(mongoclient, table_name, db_name, filter_conditions, col_index)
+        return mongoHandler.delete_from(mongoclient, table_name, db_name, filter_conditions)
 
 
 def select_all(db_name, table_name, mongodb):

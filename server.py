@@ -168,9 +168,12 @@ def first_parse(syntax):
     error_found = 0
     error_messages = []
     for res in syntax:
+        print(res)
         if res['code'] < 0:
             error_found = 1
             error_messages.append(res['message'])
+            print("error")
+            print(res)
     return error_found, error_messages
             
 
@@ -178,6 +181,7 @@ def test_syntax(syntax, connection_socket):
     # first parse:
     error_found, error_messages = first_parse(syntax)
     if error_found:
+        print("ERROR FOUND AT FIRST PARSE!")
         for msg in error_messages:
             connection_socket.send(msg.encode())
         connection_socket.send("breakout".encode())
@@ -187,6 +191,7 @@ def test_syntax(syntax, connection_socket):
     mongodb, mongoclient = mh.connect_mongo(DATABASE_IN_USE)
 
     for res in syntax:    # iterate through each request
+        print(res)
         if res['code'] < 0:
             errmsg = res['message']
             print(errmsg)
@@ -281,7 +286,7 @@ def test_syntax(syntax, connection_socket):
                 table_name = res['table_name']
                 db_name = DATABASE_IN_USE
                 filter_conditions = res['condition']
-                ret_val, err_msg = cmd.delete_from(db_name, table_name, filter_conditions, mongodb)
+                ret_val, err_msg = cmd.delete_from(db_name, table_name, filter_conditions, mongoclient)
                 if ret_val >= 0:
                     response_msg = 'Data has been deleted!'
                     print(response_msg)
@@ -295,11 +300,11 @@ def test_syntax(syntax, connection_socket):
         
 
 if __name__ == "__main__":
-    #server_side()
-    syntax = """
-    USE University;
+    server_side()
+    # syntax = """
+    # USE UNIVERSITY;
 
-    DELETE FROM CREDITS WHERE CreditNr = 2;
-    """
-    syntax = prs.handle_my_sql_input(syntax)
-    test_syntax_WO_client(syntax)
+    # DELETE FROM CREDITS WHERE CREDITNR > 5;
+    # """
+    # syntax = prs.handle_my_sql_input(syntax)
+    # test_syntax_WO_client(syntax)
