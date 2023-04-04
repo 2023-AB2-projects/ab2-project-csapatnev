@@ -20,3 +20,7 @@ Create index asd on disciplines (CreditNr);
 INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
 INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
 INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
+
+INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
+INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHYS', 'Physics', 2);
+INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);

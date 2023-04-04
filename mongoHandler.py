@@ -20,8 +20,9 @@ def drop_collection(table_name, mongodb):
     collection = mongodb[table_name]
     collection.drop()
 
-def insert_into(mongodb, table_name, primary_key_column, columns, values):
-    collection = mongodb[table_name]
+def insert_into(mongoclient, db_name, table_name, primary_key_column, columns, values):
+    db = mongoclient[db_name]
+    collection = db[table_name]
     primary_key = values[columns.index(primary_key_column)]
     
     # Create new lists without the primary_key_column
@@ -54,13 +55,22 @@ def insert_into(mongodb, table_name, primary_key_column, columns, values):
 # print(message)
 ###
 
-def delete_from(mongodb, table_name, filter_conditions):
-    collection = mongodb[table_name]
-    result = collection.delete_many(filter_conditions)
+def delete_from(mongoclient, table_name, db_name, filter_conditions, column_index):
+    db = mongoclient[db_name]
+    collection = db[table_name]
+
+    # Create a regex pattern to match the value after (column_index - 1) '#' characters
+    for key, value in filter_conditions.items():
+        regex = f"^(?:[^#]*#){{{column_index - 2}}}[^#]*{value}[^#]*"
+
+    updated_filter_conditions = {"value": {"$regex": regex}}
+
+    result = collection.delete_many(updated_filter_conditions)
     if result.deleted_count > 0:
         return 0, f"Deleted {result.deleted_count} document(s) matching the filter conditions."
     else:
         return -1, "No document found matching the filter conditions."
+
 
 # testing function
 def fetch_all_documents(mongodb, table_name):

@@ -235,7 +235,7 @@ def find_pk_column(structure):
     if first_attribute is not None:
         return first_attribute.get("attributeName")
 
-def insert_into(db_name, table_name, columns, values, mongodb):
+def insert_into(db_name, table_name, columns, values, mongoclient):
     # check for valid database and table
     db_name = db_name.upper()
     table_name = table_name.upper()
@@ -274,15 +274,24 @@ def insert_into(db_name, table_name, columns, values, mongodb):
                     elif attribute.get('type') == 'DATETIME':
                         values[i] = datetime.strptime(values[i], '%Y-%m-%d %H:%M:%S')
                     break
-            
-        for v in values:
-            print(type(v))
-
         # insert the values into the table
         primary_key_column = find_pk_column(structure)
-        return mongoHandler.insert_into(mongodb, table_name, primary_key_column, columns, values)
+        return mongoHandler.insert_into(mongoclient, db_name, table_name, primary_key_column, columns, values)
 
-def delete_from(db_name, table_name, filter_conditions, mongodb):
+def get_column_index(xml_file, db_name, table_name, column_name):
+    # get the index of the column inside the db_name.table_name
+    # get the structure of the table
+    structure = xml_file.find(".//Database[@name='{}']/Tables/Table[@name='{}']/Structure"
+                                .format(db_name, table_name))
+    # get the list of attributes
+    attributes = structure.findall('Attribute')
+    # check if the number of columns and values match
+    for i in range(len(attributes)):
+        if attributes[i].get('attributeName') == column_name:
+            return i
+    return None
+
+def delete_from(db_name, table_name, filter_conditions, mongoclient):
     # check for valid database and table
     db_name = db_name.upper()
     table_name = table_name.upper()
@@ -292,8 +301,9 @@ def delete_from(db_name, table_name, filter_conditions, mongodb):
     elif not table_exists(xml_root, db_name, table_name):
         return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
     else:
-        # delete the values from the table
-        return mongoHandler.delete_from(mongodb, table_name, filter_conditions)
+        col_index = get_column_index(xml_root, db_name, table_name, list(filter_conditions.keys())[0])
+        return mongoHandler.delete_from(mongoclient, table_name, db_name, filter_conditions, col_index)
+
 
 def select_all(db_name, table_name, mongodb):
     # check for valid database and table
