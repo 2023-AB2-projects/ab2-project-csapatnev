@@ -442,6 +442,7 @@ def parse_handle_delete(syntax_in_sql):
         }
 
 
+# parsing of every single sql command
 def parse(syntax_in_sql: str):
     syntax_in_sql_splited = re.findall(r'\w+|[^\w\s]', syntax_in_sql.upper())
 
@@ -489,23 +490,31 @@ def parse(syntax_in_sql: str):
         return parse_handle_invalid_sql_command()
 
 
+# handle all of the input string as an sql code
 def handle_my_sql_input(input_str: str):
+    # removes all the substrings between sql comment identifiers /*(...)*/  
     sql_code_without_comments = re.sub('/\*.*?\*/', '', input_str)
 
+    # splits the string into commands
     commands_raw = re.split('(CREATE|INSERT|USE|DROP|DELETE)',
                             sql_code_without_comments, flags=re.IGNORECASE)
 
+    # removes whitespaces
     commands_raw = [command_raw.strip()
                     for command_raw in commands_raw if command_raw.strip()]
 
+    # putting the sql command keyword and the command itself into one element of the list
     for i in range(len(commands_raw)):
         if commands_raw[i].upper() in ['CREATE', 'INSERT', 'USE', 'DROP', 'DELETE']:
             commands_raw[i] += ' ' + commands_raw[i + 1]
             commands_raw[i + 1] = ''
 
+    # removing any remaining whitespaces
     commands_in_sql = [command_raw.strip()
                        for command_raw in commands_raw if command_raw.strip()]
 
+    # for every single sql command executes the parse function, and returns the full 
+    # list of commands for the server
     commands = []
     for command_in_sql in commands_in_sql:
         command = parse(command_in_sql)
@@ -514,10 +523,10 @@ def handle_my_sql_input(input_str: str):
     return commands
 
 
-input = """
-DELETE FROM DISCIPLINES WHERE CreditNr = 2;
-"""
+# input = """
+# DELETE FROM DISCIPLINES WHERE CreditNr = 2;
+# """
 
-asd = handle_my_sql_input(input)
-for i in asd:
-    print(i, end='\n')
+# asd = handle_my_sql_input(input)
+# for i in asd:
+#     print(i, end='\n')
