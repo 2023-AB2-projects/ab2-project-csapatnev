@@ -1,6 +1,7 @@
 from lxml import *
 from lxml import etree
 import mongoHandler
+import datetime
 
 XML_FILE_LOCATION = './databases.xml'
 
@@ -176,12 +177,21 @@ def drop_table(db_name, table_name, mongodb):
         return (0, f"Table {table_name} in database {db_name} successfully dropped!")
 
 
+def index_exists(xml_root, db_name, table_name, index_name):
+    # index in table in db exists
+    index = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/IndexFiles/IndexFile[@indexName='{}']"
+                            .format(db_name, table_name, index_name))
+    if index is None:
+        return False
+    else:
+        return True
+
 def create_index(db_name, table_name, index_name, columns):
     db_name = db_name.upper()
     table_name = table_name.upper()
     index_name = index_name.upper()
-    for column in columns:
-        column = column.upper()
+    index_name = index_name[:-1]
+    columns = [column.upper() for column in columns]
 
     xml_root = parse_xml_file(XML_FILE_LOCATION)
 
@@ -189,6 +199,8 @@ def create_index(db_name, table_name, index_name, columns):
         return (-1, f"Error: Database {db_name} does not exist!")
     elif not table_exists(xml_root, db_name, table_name):
         return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
+    elif index_exists(xml_root, db_name, table_name, index_name):
+        return (-3, f"Error: Index {index_name} for table {table_name} already exists!")
     else:
         # create IAttribute element with the column_name inside: i.e. <IAttribute>column_name</IAttribute>
         # have it be inside the indexAttributes element of the table table_name
@@ -196,7 +208,7 @@ def create_index(db_name, table_name, index_name, columns):
                                                 .format(db_name, table_name))
         
         # create container tag
-        indexFile = etree.SubElement(indexFiles, 'IndexFile', indexName="idk.ind", indexType="BTree")
+        indexFile = etree.SubElement(indexFiles, 'IndexFile', indexName=index_name, indexType="BTree")
         indexFile.text = "\n            "
         indexFile.tail = "\n        "
         for column_name in columns:
@@ -213,42 +225,6 @@ def create_index(db_name, table_name, index_name, columns):
             file.write(etree.tostring(xml_root, pretty_print=True, xml_declaration=True, encoding='UTF-8'))
 
         return (0, f"Index created on column {column_name} in table {table_name} in database {db_name}!")
-
-def validate_data_types(attributes, columns, values):
-    # Create a dictionary of column name to attribute type
-    column_types = {attr.get('attributeName'): attr.get('type') for attr in attributes}
-
-    # Iterate through the provided columns and values
-    for column, value in zip(columns, values):
-        expected_type = column_types[column].upper()
-
-        # Validate the value based on the expected data type
-        if expected_type == 'VARCHAR':
-            if not isinstance(value, str):
-                return False
-        elif expected_type == 'INT':
-            if not (isinstance(value, int) or value.isdigit()):
-                return False
-        elif expected_type == 'FLOAT':
-            try:
-                float(value)
-            except ValueError:
-                return False
-        elif expected_type == 'BIT':
-            if not (isinstance(value, bool) or value == '0' or value == '1'):
-                return False
-        elif expected_type == 'DATE':
-            if not (isinstance(value, str) and value.count('-') == 2):
-                return False
-        elif expected_type == 'DATETIME':
-            if not (isinstance(value, str) and value.count('-') == 2 and value.count(':') == 2):
-                return False
-        else:
-            # For any other data types, return False
-            return False
-
-    # If all values pass validation, return True
-    return True
 
 def find_pk_column(structure):
     pk_element = structure.getparent().find(".//primaryKey/pkAttribute")
@@ -281,12 +257,27 @@ def insert_into(db_name, table_name, columns, values, mongodb):
         # check if the number of columns and values match
         if len(columns) != len(values):
             return (-3, f"Error: Number of columns and values do not match!")
-        # # check if the types of the values match the types of the columns
-        # for i in range(len(columns)):
-        #     # check if the type of the value matches the type of the column using the validate_data_types function
-        #     if not validate_data_types(attributes, columns[i], values[i]):
-        #         return (-4, f"Error: Type of value {values[i]} does not match type of column {columns[i]}!")
         
+        # convert types of values to match the data types of the columns
+        for i in range(len(columns)):
+            for attribute in attributes:
+                if attribute.get('attributeName') == columns[i]:
+                    # convert the value to the correct data type
+                    if attribute.get('type') == 'INT':
+                        values[i] = int(values[i])
+                    elif attribute.get('type') == 'FLOAT':
+                        values[i] = float(values[i])
+                    elif attribute.get('type') == 'BIT':
+                        values[i] = bool(values[i])
+                    elif attribute.get('type') == 'DATE':
+                        values[i] = datetime.strptime(values[i], '%Y-%m-%d')
+                    elif attribute.get('type') == 'DATETIME':
+                        values[i] = datetime.strptime(values[i], '%Y-%m-%d %H:%M:%S')
+                    break
+            
+        for v in values:
+            print(type(v))
+
         # insert the values into the table
         primary_key_column = find_pk_column(structure)
         return mongoHandler.insert_into(mongodb, table_name, primary_key_column, columns, values)
@@ -302,7 +293,7 @@ def delete_from(db_name, table_name, filter_conditions, mongodb):
         return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
     else:
         # delete the values from the table
-        mongoHandler.delete_from(mongodb, table_name, filter_conditions)
+        return mongoHandler.delete_from(mongodb, table_name, filter_conditions)
 
 def select_all(db_name, table_name, mongodb):
     # check for valid database and table

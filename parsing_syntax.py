@@ -134,6 +134,7 @@ def parse_condition(condition):
         return { column: { "$not": { OPERATORS[operator]: value } } }
     else:
         column = condition.split(' ')[0]
+        column = column.upper()
         operator = condition.split(' ')[1]
         value = condition.split(' ')[2]
         return { column: { OPERATORS[operator]: value } }
@@ -453,6 +454,7 @@ def parse_handle_delete(syntax_in_sql):
         return parse_handle_invalid_syntax_for_deleting()
     else:
         table_name = match.group(1)
+        table_name = table_name.upper()
         condition_str = match.group(2)
 
         condition = parse_where_clause(condition_str)

@@ -58,9 +58,9 @@ def delete_from(mongodb, table_name, filter_conditions):
     collection = mongodb[table_name]
     result = collection.delete_many(filter_conditions)
     if result.deleted_count > 0:
-        return True, f"Deleted {result.deleted_count} document(s) matching the filter conditions."
+        return 0, f"Deleted {result.deleted_count} document(s) matching the filter conditions."
     else:
-        return False, "No document found matching the filter conditions."
+        return -1, "No document found matching the filter conditions."
 
 # testing function
 def fetch_all_documents(mongodb, table_name):
