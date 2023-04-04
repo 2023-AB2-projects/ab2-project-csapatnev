@@ -423,7 +423,7 @@ def parse_handle_insert(syntax_in_sql):
 
 
 def parse_handle_delete(syntax_in_sql):
-    delete_pattern = r'^delete\s+from\s+(\w+)\s+where\s+(.*)\s*;?$'
+    delete_pattern = r'^delete\s+from\s+(\w+)\s+where\s+([^;.,]*|.*)\s*(?:;)?$'
     match = re.match(delete_pattern, syntax_in_sql, re.IGNORECASE)
 
     if match is None:
@@ -431,6 +431,7 @@ def parse_handle_delete(syntax_in_sql):
     else:
         table_name = match.group(1)
         condition_str = match.group(2)
+        print(condition_str)
 
         condition = parse_where_clause(condition_str)
         return {
@@ -514,29 +515,7 @@ def handle_my_sql_input(input_str: str):
 
 
 input = """
-drop database University;
-
-create database University;
-
-USE University;
-
-CREATE TABLE credits (
-  CreditNr int PRIMARY KEY,
-  CName varchar(30)
-);
-
-CREATE TABLE disciplines (
-  DiscID varchar(5) ,
-  DName varchar(30),
-  CreditNr int REFERENCES credits(CreditNr)
-  Primary key (DiscID, DName)
-);
-
-Create index asd on disciplines (CreditNr);
-
-INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
-INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
-INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
+DELETE FROM DISCIPLINES WHERE CreditNr = 2;
 """
 
 asd = handle_my_sql_input(input)
