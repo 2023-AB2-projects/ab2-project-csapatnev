@@ -135,9 +135,9 @@ def parse_condition(condition):
         value = condition[1].split()[2]
         return {column: {"$not": {OPERATORS[operator]: value}}}
     else:
-        column = condition.split(' ')[0]
-        operator = condition.split(' ')[1]
-        value = condition.split(' ')[2]
+        column = condition.split()[0]
+        operator = condition.split()[1]
+        value = condition.split()[2]
         return {column: {OPERATORS[operator]: value}}
 
 
@@ -254,6 +254,10 @@ def parse_handle_create_table(syntax_in_sql):
 
         if len(primary_keys) != 0 and len(composite_primary_keys) != 0:
             return parse_handle_invalid_syntax_for_creating_table()
+        
+        for column_name in composite_primary_keys:
+            if column_name not in [column for (column, _) in column_definitions]:
+                return parse_handle_invalid_syntax_for_creating_table()
 
         if len(composite_primary_keys) != 0:
             return {
