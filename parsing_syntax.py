@@ -110,12 +110,14 @@ def parse_where_clause(where_clause):
                 or_conditions = []
                 for sub_condition in sub_conditions:
                     or_conditions.append(parse_condition(sub_condition))
-                filter_conditions[top_level_operator].append({ "$or" : or_conditions })
+                filter_conditions[top_level_operator].append(
+                    {"$or": or_conditions})
             else:
-                filter_conditions[top_level_operator].append(parse_condition(condition))
+                filter_conditions[top_level_operator].append(
+                    parse_condition(condition))
     else:
         filter_conditions = parse_condition(where_clause)
-    
+
     return filter_conditions
 
 
@@ -125,90 +127,18 @@ def parse_condition(condition):
         or_conditions = []
         for sub_condition in sub_conditions:
             or_conditions.append(parse_condition(sub_condition))
-        return { "$or": or_conditions }
+        return {"$or": or_conditions}
     elif 'not ' in condition:
         condition = condition.split('not ')
         column = condition[1].split()[0]
         operator = condition[1].split()[1]
         value = condition[1].split()[2]
-        return { column: { "$not": { OPERATORS[operator]: value } } }
+        return {column: {"$not": {OPERATORS[operator]: value}}}
     else:
         column = condition.split(' ')[0]
         operator = condition.split(' ')[1]
         value = condition.split(' ')[2]
-        return { column: { OPERATORS[operator]: value } }
-
-
-def parse_handle_condition(condition_str):
-    # Split the WHERE clause into individual conditions
-    conditions = re.findall(r"\b\w+\b\s*[<>=!]+\s*\w+", condition_str)
-    
-    # Create a list to hold the nested conditions
-    nested_conditions = []
-    
-    # Loop through each condition and generate the appropriate dictionary
-    for condition in conditions:
-        # Split the condition into the column name, operator, and value
-        parts = re.split(r"\s*([<>=!]+)\s*", condition)
-        column = parts[0]
-        operator = parts[1]
-        value = parts[2]
-        
-        # Generate the dictionary based on the operator
-        if operator == ">":
-            condition_dict = {column: {"$gt": int(value)}}
-        elif operator == "<":
-            condition_dict = {column: {"$lt": int(value)}}
-        elif operator == ">=":
-            condition_dict = {column: {"$gte": int(value)}}
-        elif operator == "<=":
-            condition_dict = {column: {"$lte": int(value)}}
-        elif operator == "=":
-            condition_dict = {column: {"$eq": int(value)}}
-        elif operator == "!=":
-            condition_dict = {column: {"$ne": int(value)}}
-        else:
-            raise ValueError(f"Invalid operator: {operator}")
-        
-        # Append the condition dictionary to the list
-        nested_conditions.append(condition_dict)
-    
-    print(nested_conditions)
-    top_level_operator = None
-    not_operator = False
-    for i in range(len(nested_conditions)-1, 0, -1):
-        # Check if the current operator is "not"
-        if condition_str.split()[i-1].lower() == "not":
-            not_operator = True
-            continue
-        
-        # Determine the top-level operator
-        if top_level_operator is None:
-            top_level_operator = "$or" if nested_conditions[i-1] != {"$not": []} else None
-        
-        # Combine the nested conditions based on the top-level operator
-        if top_level_operator == "$or":
-            if nested_conditions[i-1] == {"$not": []}:
-                nested_conditions[i-1] = {"$not": {"$or": [nested_conditions[i]]}}
-                top_level_operator = "$and"
-            elif nested_conditions[i] == {"$not": []}:
-                nested_conditions[i-1] = {"$or": [nested_conditions[i-1], {"$not": {"$or": [nested_conditions[i]]}}]}
-            else:
-                nested_conditions[i-1] = {"$or": [nested_conditions[i-1], nested_conditions[i]]}
-        elif top_level_operator == "$and":
-            if nested_conditions[i-1] == {"$not": []}:
-                nested_conditions[i-1] = {"$not": {"$and": [nested_conditions[i]]}}
-            elif nested_conditions[i] == {"$not": []}:
-                nested_conditions[i-1] = {"$and": [nested_conditions[i-1], {"$not": {"$or": [nested_conditions[i]]}}]}
-            else:
-                nested_conditions[i-1] = {"$and": [nested_conditions[i-1], nested_conditions[i]]}
-        else:
-            raise ValueError(f"Invalid operator: {top_level_operator}")
-    
-    # Wrap the conditions with "not" if necessary
-    final_conditions = nested_conditions[0]
-    
-    return final_conditions
+        return {column: {OPERATORS[operator]: value}}
 
 
 def parse_handle_create_database(syntax_in_sql):
@@ -227,6 +157,82 @@ def parse_handle_create_database(syntax_in_sql):
         }
 
 
+def parse_handle_create_table_composite_primary_keys(columns_definitions_str):
+    composite_primary_keys = []
+    composite_pk_pattern = r'^(.*)\s+primary\s+key\s*\(\s*(.*)\s*\)\s*$'
+    composite_pk_match = re.match(
+        composite_pk_pattern, columns_definitions_str, flags=re.IGNORECASE | re.DOTALL)
+
+    if composite_pk_match != None:
+        primary_keys_str = composite_pk_match.group(2)
+
+        for primary_key in primary_keys_str.split(','):
+            composite_primary_keys.append(primary_key.strip())
+
+        columns_definitions_str = composite_pk_match.group(
+            1).rstrip().rstrip(',')
+    return composite_primary_keys, columns_definitions_str
+
+
+def parse_handle_create_table_col_ref_pk(columns_definitions_str):
+    column_definitions = []
+    primary_keys = []
+    references = []
+
+    for column_definition_str in columns_definitions_str.split(','):
+        column_definition_pattern = r'^\s*(\w+)\s+([\w\(\)0-9]+)\s*(?:(.*)\s*)?$'
+        column_definition_match = re.match(
+            column_definition_pattern, column_definition_str.strip(), re.IGNORECASE)
+
+        if column_definition_match != None:
+            data_type_pattern = r'^\s*(int|varchar)(?:\(.*\))\s*$'
+            data_type_match = re.match(
+                data_type_pattern, column_definition_match.group(2), re.IGNORECASE)
+
+            if data_type_match is None:
+                data_type_pattern = r'^\s*(int|varchar|bit|date|datetime|float)\s*$'
+                data_type_match = re.match(
+                    data_type_pattern, column_definition_match.group(2), re.IGNORECASE)
+                if data_type_match is None:
+                    return column_definitions, primary_keys, references, -1
+
+            column_name = column_definition_match.group(1)
+            data_type = data_type_match.group(1)
+            column_definitions.append((column_name, data_type))
+
+            pk_pattern = r'^\s*primary\s+key\s*$'
+            match_pk = re.match(
+                pk_pattern, column_definition_match.group(3), re.IGNORECASE)
+
+            ref_pattern = r'^\s*references\s+(\w+)\s*\((\w+)\)\s*$'
+            match_ref = re.match(
+                ref_pattern, column_definition_match.group(3), re.IGNORECASE)
+
+            w_pattern = r'^\s*$'
+            match_w = re.match(
+                w_pattern, column_definition_match.group(3), re.IGNORECASE)
+
+            if match_pk != None:
+                if len(primary_keys) > 1:
+                    return column_definitions, primary_keys, references, -1
+                else:
+                    primary_keys.append(column_name)
+
+            if match_ref != None:
+                ref_table_name = match_ref.group(1)
+                ref_table_name = match_ref.group(1)
+                ref_column_name = match_ref.group(2)
+                references.append(
+                    (column_name, ref_table_name, ref_column_name))
+
+            if match_ref == None and match_pk == None and match_w == None:
+                return column_definitions, primary_keys, references, -1
+        else:
+            return column_definitions, primary_keys, references, -1
+
+    return column_definitions, primary_keys, references, 0
+
+
 def parse_handle_create_table(syntax_in_sql):
     create_table_pattern = r'^create\s+table\s+(\w+)\s*\(\s*(.*)\s*\)\s*;?$'
     match = re.match(create_table_pattern, syntax_in_sql,
@@ -238,83 +244,27 @@ def parse_handle_create_table(syntax_in_sql):
         table_name = match.group(1)
         columns_definitions_str = match.group(2)
 
-        column_definitions = []
-        primary_keys = []
-        composite_primary_keys = []
-        references = []
+        composite_primary_keys, columns_definitions_str = parse_handle_create_table_composite_primary_keys(
+            columns_definitions_str)
 
-        composite_pk_pattern = r'^(.*)\s+primary\s+key\s*\(\s*(.*)\s*\)\s*$'
-        composite_pk_match = re.match(
-            composite_pk_pattern, columns_definitions_str, flags=re.IGNORECASE | re.DOTALL)
+        column_definitions, primary_keys, references, status_code = parse_handle_create_table_col_ref_pk(
+            columns_definitions_str)
+        if status_code < 0:
+            return parse_handle_invalid_syntax_for_creating_table()
 
-        if composite_pk_match != None:
-            primary_keys_str = composite_pk_match.group(2)
-            for primary_key in primary_keys_str.split(','):
-                composite_primary_keys.append(primary_key.strip())
-            columns_definitions_str = composite_pk_match.group(
-                1).rstrip().rstrip(',')
+        if len(primary_keys) != 0 and len(composite_primary_keys) != 0:
+            return parse_handle_invalid_syntax_for_creating_table()
 
-        for column_definition_str in columns_definitions_str.split(','):
-            column_definition_pattern = r'^\s*(\w+)\s+([\w\(\)0-9]+)\s*(?:(.*)\s*)?$'
-            column_definition_match = re.match(
-                column_definition_pattern, column_definition_str.strip(), re.IGNORECASE)
-            
-            if column_definition_match != None:
-                data_type_pattern = r'^\s*(int|varchar)(?:\(.*\))\s*$'
-                data_type_match = re.match(
-                    data_type_pattern, column_definition_match.group(2), re.IGNORECASE)
-
-                if data_type_match is None:
-                    data_type_pattern = r'^\s*(int|varchar|bit|date|datetime|float)\s*$'
-                    data_type_match = re.match(
-                        data_type_pattern, column_definition_match.group(2), re.IGNORECASE)
-                    if data_type_match is None:
-                        return parse_handle_invalid_syntax_for_creating_table()
-
-                column_name = column_definition_match.group(1)
-                data_type = data_type_match.group(1)
-                column_definitions.append((column_name, data_type))
-
-                pk_pattern = r'^\s*primary\s+key\s*$'
-                match_pk = re.match(
-                    pk_pattern, column_definition_match.group(3), re.IGNORECASE)
-
-                ref_pattern = r'^\s*references\s+(\w+)\s*\((\w+)\)\s*$'
-                match_ref = re.match(
-                    ref_pattern, column_definition_match.group(3), re.IGNORECASE)
-
-                w_pattern = r'^\s*$'
-                match_w = re.match(
-                    w_pattern, column_definition_match.group(3), re.IGNORECASE)
-
-                if match_pk != None:
-                    if len(primary_keys) > 0:
-                        return parse_handle_invalid_syntax_for_creating_table()
-                    else:
-                        primary_keys.append(column_name)
-
-                if match_ref != None:
-                    ref_table_name = match_ref.group(1)
-                    ref_table_name = match_ref.group(1)
-                    ref_column_name = match_ref.group(2)
-                    references.append(
-                        (column_name, ref_table_name, ref_column_name))
-
-                if match_ref == None and match_pk == None and match_w == None:
-                    return parse_handle_invalid_syntax_for_creating_table()
-            else:
-                return parse_handle_invalid_syntax_for_creating_table()
-
-        for column_name in composite_primary_keys:
-            if column_name not in [column for (column, _) in column_definitions]:
-                return parse_handle_invalid_syntax_for_creating_table()
-
-        for column_name in composite_primary_keys:
-            for (column, data_type_in_col) in column_definitions:
-                if column == column_name:
-                    data_type = data_type_in_col
-                    break
-            primary_keys.append((column_name, data_type))
+        if len(composite_primary_keys) != 0:
+            return {
+                'code': 2,
+                'type': 'create',
+                'object_type': 'table',
+                'table_name': table_name,
+                'column_definitions': column_definitions,
+                'primary_keys': composite_primary_keys,
+                'references': references
+            }
 
         return {
             'code': 2,
@@ -327,6 +277,18 @@ def parse_handle_create_table(syntax_in_sql):
         }
 
 
+def parse_handle_create_index_columns(columns_str):
+    columns = []
+    for columns_str_splited in columns_str.split(','):
+        column_match = re.match(r'\s*(\w+)\s*', columns_str_splited)
+        if column_match is None:
+            return columns, -1
+        else:
+            column = column_match.group(1)
+            columns.append(column)
+    return columns, 0
+
+
 def parse_handle_create_index(syntax_in_sql):
     create_index_pattern = r'^create\s+index\s+((?:\w+\s+)?)on\s+(\w+)\s*\((.*)\)\s*;?$'
     match = re.match(create_index_pattern, syntax_in_sql, flags=re.IGNORECASE)
@@ -336,16 +298,11 @@ def parse_handle_create_index(syntax_in_sql):
     else:
         index_name = match.group(1)
         table_name = match.group(2)
-
-        columns = []
         columns_str = match.group(3)
-        for columns_str_splited in columns_str.split(','):
-            column_match = re.match(r'\s*(\w+)\s*', columns_str_splited)
-            if column_match is None:
-                return parse_handle_invalid_syntax_for_inserting()
-            else:
-                column = column_match.group(1)
-                columns.append(column)
+        columns, status_code = parse_handle_create_index_columns(columns_str)
+
+        if status_code < 0:
+            return parse_handle_invalid_syntax_for_creating_index()
 
         return {
             'code': 3,
@@ -404,6 +361,30 @@ def parse_handle_use(syntax_in_sql):
         }
 
 
+def parse_handle_insert_columns(columns_str):
+    columns = []
+    for columns_str_splited in columns_str.split(','):
+        column_match = re.match(r'\s*(\w+)\s*', columns_str_splited)
+        if column_match is None:
+            return columns, -1
+        else:
+            column = column_match.group(1)
+            columns.append(column)
+    return columns, 0
+
+
+def parse_handle_insert_values(values_str):
+    values = []
+    for values_str_splited in values_str.split(','):
+        value_match = re.match(r'\s*([\w\' \@\.\-\_]+)\s*', values_str_splited)
+        if value_match is None:
+            return values, -1
+        else:
+            value = value_match.group(1)
+            values.append(value)
+    return values, 0
+
+
 def parse_handle_insert(syntax_in_sql):
     insert_pattern = r'^insert\s+into\s+(\w+)\s*\((.*)\)\s*values\s*\((.*)\)\s*;?$'
     match = re.match(insert_pattern, syntax_in_sql, re.IGNORECASE)
@@ -413,25 +394,15 @@ def parse_handle_insert(syntax_in_sql):
     else:
         table_name = match.group(1)
 
-        columns = []
         columns_str = match.group(2)
-        for columns_str_splited in columns_str.split(','):
-            column_match = re.match(r'\s*(\w+)\s*', columns_str_splited)
-            if column_match is None:
-                return parse_handle_invalid_syntax_for_inserting()
-            else:
-                column = column_match.group(1)
-                columns.append(column)
+        columns, status_code = parse_handle_insert_columns(columns_str)
+        if status_code < 0:
+            return parse_handle_invalid_syntax_for_inserting()
 
-        values = []
         values_str = match.group(3)
-        for values_str_splited in values_str.split(','):
-            value_match = re.match(r'\s*([\w\' \@\.\-\_]+)\s*', values_str_splited)
-            if value_match is None:
-                return parse_handle_invalid_syntax_for_inserting()
-            else:
-                value = value_match.group(1)
-                values.append(value)
+        values, status_code = parse_handle_insert_values(values_str)
+        if status_code < 0:
+            return parse_handle_invalid_syntax_for_inserting()
 
         if len(values) != len(columns):
             return parse_handle_invalid_syntax_for_inserting()
@@ -536,10 +507,32 @@ def handle_my_sql_input(input_str: str):
     return commands
 
 
-# input = """
-# DELETE FROM asd WHERE not helloszia = 1 or not asd = 1 and ja = 12
-# """
+input = """
+drop database University;
 
-# asd = handle_my_sql_input(input)
-# for i in asd:
-#     print(i, end='\n')
+create database University;
+
+USE University;
+
+CREATE TABLE credits (
+  CreditNr int PRIMARY KEY,
+  CName varchar(30)
+);
+
+CREATE TABLE disciplines (
+  DiscID varchar(5) ,
+  DName varchar(30),
+  CreditNr int REFERENCES credits(CreditNr)
+  Primary key (DiscID, DName)
+);
+
+Create index asd on disciplines (CreditNr);
+
+INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
+INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
+INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
+"""
+
+asd = handle_my_sql_input(input)
+for i in asd:
+    print(i, end='\n')
