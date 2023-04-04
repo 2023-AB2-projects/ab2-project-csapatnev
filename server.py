@@ -117,7 +117,8 @@ def test_syntax_WO_client(syntax):
                 # delete from table_name where studid > 1000
                 table_name = res['table_name']
                 db_name = DATABASE_IN_USE
-                filter_conditions = res['filter_conditions']
+                filter_conditions = res['condition']
+                print(filter_conditions)
                 ret_val, err_msg = cmd.delete_from(db_name, table_name, filter_conditions, mongodb)
                 if ret_val >= 0:
                     response_msg = 'Data has been deleted!'
@@ -127,7 +128,9 @@ def test_syntax_WO_client(syntax):
                     print(err_msg)
                     #connection_socket.send(err_msg.encode())
     
-    print(cmd.select_all("UNIVERSITY", "CREDITS", mongodb))
+    data = cmd.select_all("UNIVERSITY", "CREDITS", mongodb)
+    for d in data:
+        print(d)
     #connection_socket.send("breakout".encode()) # close the client
 
 
@@ -182,8 +185,6 @@ def test_syntax(syntax, connection_socket):
 
     global DATABASE_IN_USE
     mongodb, mongoclient = mh.connect_mongo(DATABASE_IN_USE)
-
-    inserted_flag = 0
 
     for res in syntax:    # iterate through each request
         if res['code'] < 0:
@@ -279,7 +280,7 @@ def test_syntax(syntax, connection_socket):
                 # delete from table_name where studid > 1000
                 table_name = res['table_name']
                 db_name = DATABASE_IN_USE
-                filter_conditions = res['filter_conditions']
+                filter_conditions = res['condition']
                 ret_val, err_msg = cmd.delete_from(db_name, table_name, filter_conditions, mongodb)
                 if ret_val >= 0:
                     response_msg = 'Data has been deleted!'
@@ -289,34 +290,41 @@ def test_syntax(syntax, connection_socket):
                     print(err_msg)
                     connection_socket.send(err_msg.encode())
     
-    print(cmd.select_all("UNIVERSITY", "CREDITS", mongodb))
+    data = cmd.select_all("UNIVERSITY", "CREDITS", mongodb)
+    for d in data:
+        print(d)
+        connection_socket.send(str(d).encode())
+
+    print("breaking out")
     connection_socket.send("breakout".encode()) # close the client
         
 
 if __name__ == "__main__":
-    # server_side()
-    syntax = """
-        DROP DATABASE UNIVESITY;
-        CREATE DATABASE UNIVERSITY;
-        USE University;
+    server_side()
+    # syntax = """
+    # DROP DATABASE UNIVESITY;
 
-    CREATE TABLE credits (
-    CreditNr int PRIMARY KEY,
-    CName varchar(30)
-    );
+    # CREATE DATABASE UNIVERSITY;
 
-    CREATE TABLE disciplines (
-    DiscID varchar(5) PRIMARY KEY,
-    DName varchar(30),
-    CreditNr int REFERENCES credits(CreditNr)
-    );
+    # USE University;
 
-    Create index asd on disciplines (CreditNr);
+    # CREATE TABLE credits (
+    # CreditNr int PRIMARY KEY,
+    # CName varchar(30)
+    # );
 
-    INSERT INTO DISCIPLINES (DiscID, DName, CreditNr) VALUES ('CS101', 'Intro to CS', 1);
-    INSERT INTO DISCIPLINES (DiscID, DName, CreditNr) VALUES ('CS102', 'Data Structures', 2);
-    INSERT INTO DISCIPLINES (DiscID, DName, CreditNr) VALUES ('CS103', 'Algorithms', 3);
+    # CREATE TABLE disciplines (
+    # DiscID varchar(5) PRIMARY KEY,
+    # DName varchar(30),
+    # CreditNr int REFERENCES credits(CreditNr)
+    # );
 
-    """
-    syntax = prs.handle_my_sql_input(syntax)
-    test_syntax_WO_client(syntax)
+    # Create index asd on disciplines (CreditNr);
+
+    # INSERT INTO DISCIPLINES (DiscID, DName, CreditNr) VALUES ('CS101', 'Intro to CS', 1);
+    # INSERT INTO DISCIPLINES (DiscID, DName, CreditNr) VALUES ('CS102', 'Data Structures', 2);
+    # INSERT INTO DISCIPLINES (DiscID, DName, CreditNr) VALUES ('CS103', 'Algorithms', 3);
+
+    # """
+    # syntax = prs.handle_my_sql_input(syntax)
+    # test_syntax_WO_client(syntax)

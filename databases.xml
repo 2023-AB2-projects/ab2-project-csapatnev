@@ -36,13 +36,7 @@
         </foreignKeys>
         <IndexFiles>
 
-        <IndexFile indexName="idk.ind" indexType="BTree">
-            <IAttribute>CREDITNR</IAttribute>
-        </IndexFile>
-        <IndexFile indexName="idk.ind" indexType="BTree">
-            <IAttribute>CREDITNR</IAttribute>
-        </IndexFile>
-        <IndexFile indexName="idk.ind" indexType="BTree">
+        <IndexFile indexName="ASD" indexType="BTree">
             <IAttribute>CREDITNR</IAttribute>
         </IndexFile>
         <IndexFile indexName="idk.ind" indexType="BTree">
