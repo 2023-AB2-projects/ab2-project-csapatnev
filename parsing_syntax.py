@@ -96,6 +96,13 @@ def parse_handle_invalid_syntax_for_updating():
     }
 
 
+def parse_handle_invalid_syntax_for_selecting():
+    return {
+        'code': -1,
+        'message': 'Invalid syntax for selecting!'
+    }
+
+
 OPERATORS = {
     "=": "$eq",
     ">": "$gt",
@@ -484,7 +491,7 @@ def parse_handle_update_set_modifications(modification_str):
     modification_pattern = r'\s*(\w+)\s*=\s*(.*)\s*'
     modification_match = re.match(
         modification_pattern, modification_str, re.IGNORECASE)
-    
+
     if modification_match != None:
         column_name = modification_match.group(1)
         value = modification_match.group(2)
@@ -495,7 +502,8 @@ def parse_handle_update_set_modifications(modification_str):
 
 def parse_handle_update(syntax_in_sql):
     update_pattern = r'^update\s+(\w+)\s+set\s+(.*)\s+where\s+([^;.,]*|.*)\s*(?:;)?$'
-    match = re.match(update_pattern, syntax_in_sql, re.IGNORECASE)
+    match = re.match(update_pattern, syntax_in_sql,
+                     flags=re.IGNORECASE | re.DOTALL)
 
     if match is None:
         return parse_handle_invalid_syntax_for_updating()
@@ -503,7 +511,8 @@ def parse_handle_update(syntax_in_sql):
         table_name = match.group(1)
 
         modification_str = match.group(2)
-        modification, status_code = parse_handle_update_set_modifications(modification_str)
+        modification, status_code = parse_handle_update_set_modifications(
+            modification_str)
         if status_code < 0:
             return parse_handle_invalid_syntax_for_updating()
 
@@ -518,7 +527,56 @@ def parse_handle_update(syntax_in_sql):
         }
 
 
+def parse_handle_select_from_clause(from_clause_str):
+    from_clause = []
+    table_name_pattern = r'^\s*\w+\s*$'
+    for table_name in from_clause_str.split(','):
+        table_match = re.match(
+            table_name_pattern, table_name, flags=re.IGNORECASE)
+
+        if table_match != None:
+            from_clause.append(table_name)
+        else:
+            return from_clause, -1
+    return from_clause, 0
+
+
+def parse_handle_select_select_clause(select_clause_str):
+    print(asd)
+
+
+def parse_handle_select(syntax_in_sql):
+    select_pattern = r'^select\s+(.*)\s+from\s+(.*)\s+(?:where\s+(.*)\s+(?:group\s+by\s+(.*))?)?\s*(?:;)?$'
+    match = re.match(select_pattern, syntax_in_sql,
+                     flags=re.IGNORECASE | re.DOTALL)
+
+    if match is None:
+        return parse_handle_invalid_syntax_for_selecting()
+    else:
+        from_clause_str = match.group(2)
+        from_clause, status_code = parse_handle_select_from_clause(
+            from_clause_str)
+        if status_code < 0:
+            return parse_handle_invalid_syntax_for_selecting()
+
+        select_clause_str = match.group(1)
+        select_clause, status_code = parse_handle_select_select_clause(
+            select_clause_str)
+        if status_code < 0:
+            return parse_handle_invalid_syntax_for_selecting()
+
+        return {
+            'code': 10,
+            'type': 'select',
+            'select_clause': "",
+            'from_clause': "",
+            'where_clause': "",
+            'group_clause': ""
+        }
+
 # parsing of every single sql command
+
+
 def parse(syntax_in_sql: str):
     # spliting the input command string so it can determine which command keyword it contains
     syntax_in_sql_splited = re.findall(r'\w+|[^\w\s]', syntax_in_sql.upper())
@@ -565,7 +623,9 @@ def parse(syntax_in_sql: str):
     elif command_type == 'DELETE':
         return parse_handle_delete(syntax_in_sql)
     elif command_type == 'UPDATE':
-            return parse_handle_update(syntax_in_sql)
+        return parse_handle_update(syntax_in_sql)
+    elif command_type == 'SELECT':
+        return parse_handle_update(syntax_in_sql)
     else:
         return parse_handle_invalid_sql_command()
 
@@ -576,7 +636,7 @@ def handle_my_sql_input(input_str: str):
     sql_code_without_comments = re.sub('/\*.*?\*/', '', input_str)
 
     # splits the string into commands
-    commands_raw = re.split('(CREATE|INSERT|USE|DROP|DELETE|UPDATE)',
+    commands_raw = re.split('(CREATE|INSERT|USE|DROP|DELETE|UPDATE|SELECT)',
                             sql_code_without_comments, flags=re.IGNORECASE)
 
     # removes whitespaces
@@ -585,7 +645,7 @@ def handle_my_sql_input(input_str: str):
 
     # putting the sql command keyword and the command itself into one element of the list
     for i in range(len(commands_raw)):
-        if commands_raw[i].upper() in ['CREATE', 'INSERT', 'USE', 'DROP', 'DELETE', 'UPDATE']:
+        if commands_raw[i].upper() in ['CREATE', 'INSERT', 'USE', 'DROP', 'DELETE', 'UPDATE', 'SELECT']:
             commands_raw[i] += ' ' + commands_raw[i + 1]
             commands_raw[i + 1] = ''
 
