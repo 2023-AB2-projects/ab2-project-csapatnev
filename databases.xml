@@ -1,4 +1,53 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
+<Database name="UNIVERSITY">
+    <Tables>
+        <Table name="CREDITS">
+        <Structure>
+            <Attribute attributeName="CREDITNR" type="INT"/>
+            <Attribute attributeName="CNAME" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>CREDITNR</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            <uniqueKey>CNAME</uniqueKey>
+        </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="DISCIPLINES">
+        <Structure>
+            <Attribute attributeName="DISCID" type="VARCHAR"/>
+            <Attribute attributeName="DNAME" type="VARCHAR"/>
+            <Attribute attributeName="CREDITNR" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>DISCID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>CREDITNR</foreignKey>
+
+            <references>
+                <refTable>CREDITS</refTable>
+                <refAttribute>CREDITNR</refAttribute>
+            </references>
+        </foreignKeys>
+        <uniqueKeys>
+            <uniqueKey>DNAME</uniqueKey>
+        </uniqueKeys>
+        <IndexFiles>
+
+        <IndexFile indexName="ASD" indexType="BTree">
+            <IAttribute>CREDITNR</IAttribute>
+        </IndexFile>
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
 </Databases>
