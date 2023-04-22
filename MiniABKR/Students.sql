@@ -263,7 +263,7 @@ delete from marks where StudID = 49 and DiscID = 'OOP';
 delete from students where StudID = 50;
 delete from students where GroupId = 531;
 
-/  index creation
+/*  index creation */
 
 CREATE INDEX on disciplines(DiscID);
 
