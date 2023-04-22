@@ -30,6 +30,11 @@ def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_ke
     non_primary_columns = [col for col in columns if col != primary_key_column]
     non_primary_values = [val for col, val in zip(columns, values) if col != primary_key_column]
 
+    # Check if primary key data already exists
+    if collection.count_documents({"_id": primary_key}) > 0:
+        return -1, f"Error inserting document: Primary key constraint violation for {primary_key_column} with value {primary_key}"
+    
+
     # Create a dictionary of column name to value
     data = {"_id": primary_key, "value": "#".join(str(value) for value in non_primary_values)}
 

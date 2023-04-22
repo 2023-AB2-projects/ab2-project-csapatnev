@@ -60,7 +60,7 @@ def first_parse(syntax):
     return error_found, error_messages
             
 
-def test_syntax(syntax, connection_socket, mode):
+def test_syntax(syntax, connection_socket, mode=''):
     # first parse:
     error_found, error_messages = first_parse(syntax)
     if error_found:
@@ -204,50 +204,50 @@ def test_syntax(syntax, connection_socket, mode):
         
 
 if __name__ == "__main__":
-    #server_side()
+    server_side()
 
-    syntax = """
-    USE UNIVERSITY;
+    # syntax = """
+    # USE UNIVERSITY;
 
-    DROP DATABASE UNIVERSITY;
+    # DROP DATABASE UNIVERSITY;
 
-    create database University;
+    # create database University;
 
-    USE University;
+    # USE University;
 
-    CREATE TABLE credits (
-    CreditNr int PRIMARY KEY,
-    CName varchar(30) UNIQUE
-    );
+    # CREATE TABLE credits (
+    # CreditNr int PRIMARY KEY,
+    # CName varchar(30) UNIQUE
+    # );
 
-    CREATE TABLE disciplines (
-    DiscID varchar(5) PRIMARY KEY,
-    DName varchar(30) UNIQUE,
-    CreditNr int REFERENCES credits(CreditNr)
-    );
+    # CREATE TABLE disciplines (
+    # DiscID varchar(5) PRIMARY KEY,
+    # DName varchar(30) UNIQUE,
+    # CreditNr int REFERENCES credits(CreditNr)
+    # );
 
-    Create index asd on disciplines (CreditNr);
+    # Create index asd on disciplines (CreditNr);
 
-    INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
-    INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
-    INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
-    INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
-    INSERT INTO Credits (CreditNr, CName) VALUES (5, 'Geography');
-    INSERT INTO Credits (CreditNr, CName) VALUES (6, 'History');
-    INSERT INTO Credits (CreditNr, CName) VALUES (7, 'English');
-    INSERT INTO Credits (CreditNr, CName) VALUES (8, 'German');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (5, 'Geography');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (6, 'History');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (7, 'English');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (8, 'German');
 
-    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
-    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
+    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
+    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
 
-    DELETE FROM Credits WHERE CreditNr > 5;
-    """
+    # DELETE FROM Credits WHERE CreditNr > 5;
+    # """
 
-    syntax2 = """
-    USE UNIVERSITY;
-    DELETE FROM Disciplines WHERE DiscID = 'MATH';
-    """
+    # syntax2 = """
+    # USE UNIVERSITY;
+    # DELETE FROM Disciplines WHERE DiscID = 'MATH';
+    # """
 
-    syntax = prs.handle_my_sql_input(syntax2)
+    # syntax = prs.handle_my_sql_input(syntax2)
 
-    test_syntax(syntax, connection_socket='', mode='debug')
+    # test_syntax(syntax, connection_socket='', mode='debug')
