@@ -8,12 +8,12 @@ USE University;
 
 CREATE TABLE credits (
   CreditNr int PRIMARY KEY,
-  CName varchar(30)
+  CName varchar(30) UNIQUE
 );
 
 CREATE TABLE disciplines (
   DiscID varchar(5) PRIMARY KEY,
-  DName varchar(30),
+  DName varchar(30) UNIQUE,
   CreditNr int REFERENCES credits(CreditNr)
 );
 

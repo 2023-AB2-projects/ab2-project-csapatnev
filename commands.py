@@ -73,7 +73,7 @@ def table_exists(xml_root, db_name, table_name):
 
 
 # Create table -> db_name, table_name, list_of_columns [(column_name, data_type)]
-def create_table(db_name, table_name, list_of_columns, primary_keys, foreign_keys):
+def create_table(db_name, table_name, list_of_columns, primary_keys, foreign_keys, unique_keys):
     db_name = db_name.upper()
     table_name = table_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
@@ -136,6 +136,20 @@ def create_table(db_name, table_name, list_of_columns, primary_keys, foreign_key
 
         foreign_key.tail="\n        "  # Add newline and indentation before </foreignKeys> tag
 
+        # Create unique key element
+        unique_key = etree.SubElement(table, 'uniqueKeys')
+        unique_key.text = "\n            "  # Add newline and indentation before the <uniqueKeys> tag
+
+        for uk in unique_keys:
+            uk_attr = etree.SubElement(unique_key, 'uniqueKey')
+            uk_attr.text = uk.upper()
+
+            if uk == unique_keys[-1]:
+                uk_attr.tail = "\n        "
+            else:
+                uk_attr.tail = "\n            "
+
+        unique_key.tail = "\n        "  # Add newline and indentation before </uniqueKeys> tag
 
         IndexFiles = etree.SubElement(table, 'IndexFiles')
         IndexFiles.text = "\n\n        "
@@ -235,6 +249,16 @@ def find_pk_column(structure):
     if first_attribute is not None:
         return first_attribute.get("attributeName")
 
+def find_all_fk_columns(structure):
+    fk_elements = structure.getparent().findall(".//foreignKeys/foreignKey")
+    if fk_elements is not None:
+        return [fk_element.text for fk_element in fk_elements]
+    
+def find_all_unique_columns(structure):
+    unique_elements = structure.getparent().findall(".//uniqueKeys/uniqueKey")
+    if unique_elements is not None:
+        return [unique_element.text for unique_element in unique_elements]
+
 def insert_into(db_name, table_name, columns, values, mongoclient):
     # check for valid database and table
     db_name = db_name.upper()
@@ -276,7 +300,10 @@ def insert_into(db_name, table_name, columns, values, mongoclient):
                     break
         # insert the values into the table
         primary_key_column = find_pk_column(structure)
-        return mongoHandler.insert_into(mongoclient, db_name, table_name, primary_key_column, columns, values)
+        foreign_keys = find_all_fk_columns(structure)
+        unique_keys = find_all_unique_columns(structure)
+        #print(f"primary_key_column: {primary_key_column}\n foreign_keys: {foreign_keys}\n unique_keys: {unique_keys}")
+        return mongoHandler.insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_keys, unique_keys, columns, values)
 
 def get_column_index(xml_file, db_name, table_name, column_name):
     # get the index of the column inside the db_name.table_name
@@ -291,17 +318,28 @@ def get_column_index(xml_file, db_name, table_name, column_name):
             return i
     return None
 
+def find_all_columns(structure):
+    return [attribute.get('attributeName') for attribute in structure.findall('Attribute')]
+
 def delete_from(db_name, table_name, filter_conditions, mongoclient):
     # check for valid database and table
     db_name = db_name.upper()
     table_name = table_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
+    
+    structure = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/Structure"
+                                    .format(db_name, table_name))
+
+    unique_keys = find_all_unique_columns(structure)
+    foreign_keys = find_all_fk_columns(structure)
+    columns = find_all_columns(structure)
+    print(columns)
     if not database_exists(xml_root, db_name):
         return (-1, f"Error: Database {db_name} does not exist!")
     elif not table_exists(xml_root, db_name, table_name):
         return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
     else:
-        return mongoHandler.delete_from(mongoclient, table_name, db_name, filter_conditions)
+        return mongoHandler.delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys)
 
 
 def select_all(db_name, table_name, mongodb):
