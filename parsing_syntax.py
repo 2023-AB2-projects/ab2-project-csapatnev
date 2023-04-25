@@ -644,7 +644,7 @@ def handle_my_sql_input(input_str: str):
                     for command_raw in commands_raw if command_raw.strip()]
 
     # putting the sql command keyword and the command itself into one element of the list
-    for i in range(len(commands_raw)):
+    for i in range(len(commands_raw) - 1):
         if commands_raw[i].upper() in ['CREATE', 'INSERT', 'USE', 'DROP', 'DELETE', 'UPDATE', 'SELECT']:
             commands_raw[i] += ' ' + commands_raw[i + 1]
             commands_raw[i + 1] = ''

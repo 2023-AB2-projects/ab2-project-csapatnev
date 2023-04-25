@@ -25,8 +25,9 @@ INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
 INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
 INSERT INTO Credits (CreditNr, CName) VALUES (5, 'Geography');
 INSERT INTO Credits (CreditNr, CName) VALUES (6, 'History');
-INSERT INTO Credits (CreditNr, CName) VALUES (7, 'English');
-INSERT INTO Credits (CreditNr, CName) VALUES (8, 'German');
 
 INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
 INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
+INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
+INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
+INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('GEO', 'Geography', 5);

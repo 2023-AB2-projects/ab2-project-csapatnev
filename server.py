@@ -40,7 +40,7 @@ def server_side():
     while True:
         connection_socket, addr = server_socket.accept()
         print('The client has connected to the server', addr)
-        data = connection_socket.recv(1024)
+        data = connection_socket.recv(9999999)
         message = data.decode()
 
         full_request = prs.handle_my_sql_input(message)

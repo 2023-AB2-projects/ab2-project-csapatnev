@@ -15,7 +15,7 @@ def send_message_to_server(message):
         client_socket.connect((HOST,PORT))
         client_socket.send(message)
         while True:
-            response = client_socket.recv(1024)
+            response = client_socket.recv(9999999)
             if response.decode() == "breakout":
                 print("Server finished with it's tasks, client can rest now!")
                 break
