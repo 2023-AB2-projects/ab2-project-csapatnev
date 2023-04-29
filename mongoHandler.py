@@ -21,7 +21,40 @@ def drop_collection(db_name, table_name, mongoclient):
     collection = db[table_name]
     collection.drop()
 
-def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_keys, unique_keys, columns, values):
+def update_index_on_insert(mongoclient, db_name, table_name, index_name, columns, column_indices, primary_key, non_primary_values):
+    db = mongoclient[db_name]
+
+    # Get the index collection
+    index_collection_name = f"{table_name}_{'_'.join(columns)}_{index_name}_INDEX"
+    index_collection = db[index_collection_name]
+
+    # Get the value string and split it into a list of values
+    value_list = non_primary_values
+
+    # Get the indexed column values from the list of values using the provided column_indices
+    indexed_column_values = [value_list[i-1] if i != -1 else primary_key for i in column_indices]
+
+    # Try to cast values to integers if possible
+    indexed_column_values = [int(value) if str(value).isdigit() else value for value in indexed_column_values]
+
+    # Convert the tuple to a string by joining with a separator
+    indexed_column_values_str = '#'.join(str(value) for value in indexed_column_values)
+
+    # Check if the indexed column values already exist in the index collection
+    existing_document = index_collection.find_one({"_id": indexed_column_values_str})
+
+    if existing_document:
+        # Append the primary key to the existing document
+        existing_document["value"] = existing_document["value"] + "#" + primary_key
+        index_collection.replace_one({"_id": indexed_column_values_str}, existing_document)
+    else:
+        # Insert a new document with the indexed column values and primary key
+        index_data = {"_id": indexed_column_values_str, "value": primary_key}
+        index_collection.insert_one(index_data)
+
+
+
+def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_keys, unique_keys, columns, values, index_configs):
     db = mongoclient[db_name]
     collection = db[table_name]
     primary_key = values[columns.index(primary_key_column)]
@@ -68,29 +101,68 @@ def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_ke
             fk_data = {"_id": fk_value, "value": primary_key}
             fk_collection.insert_one(fk_data)
 
+    # Handle individual index files
+    if index_configs:
+         for index_config in index_configs:
+            index_name = index_config['index_name']
+            index_columns = index_config['index_columns']
+            index_column_indices = index_config['index_column_indices']
+            update_index_on_insert(mongoclient, db_name, table_name, index_name, index_columns, index_column_indices, primary_key, non_primary_values)
+
+
     # Check if the operation was successful
     if result.inserted_id:
         return 0, f"Document inserted with ID: {result.inserted_id}"
     else:
         return -1, "Error inserting document"
 
+def create_index(mongoclient, db_name, table_name, index_name, columns, column_indices):
+    db = mongoclient[db_name]
 
+    # Create the index file collection
+    index_collection_name = f"{table_name}_{'_'.join(columns)}_{index_name}_INDEX"
+    index_collection = db[index_collection_name]
 
+    # Find the collection for the table
+    table_collection = db[table_name]
 
+    if table_collection.estimated_document_count() == 0:
+        # If there's no data in the main collection, create an empty index
+        return 0, f"Created an empty compound index {index_name} on columns {', '.join(columns)} for table {table_name}."
 
-# ###
-# SQL: DELETE FROM students WHERE StudID > 10000;
-# # Example usage:
-# db_name = "my_database"
-# table_name = "students"
-# filter_conditions = {"StudID": {"$gt": 10000}}
+    try:
+        for document in table_collection.find():
+            # Get the primary key
+            primary_key = document["_id"]
 
-# mongodb, client = connect_mongo(db_name)
-# success, message = delete(mongodb, table_name, filter_conditions)
-# print(message)
-###
+            # Get the value string and split it into a list of values
+            value_list = document["value"].split("#")
 
-def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys):
+            # Get the indexed column values from the list of values using the provided column_indices
+            indexed_column_values = tuple(value_list[i-1] if i != -1 else primary_key for i in column_indices)
+
+            # Convert the tuple to a string by joining with a separator
+            indexed_column_values_str = '#'.join(indexed_column_values)
+
+            # Check if the indexed column values already exist in the index collection
+            existing_document = index_collection.find_one({"_id": indexed_column_values_str})
+
+            if existing_document:
+                # Append the primary key to the existing document
+                existing_document["value"] = existing_document["value"] + "#" + primary_key
+                index_collection.replace_one({"_id": indexed_column_values_str}, existing_document)
+            else:
+                # Insert a new document with the indexed column values and primary key
+                index_data = {"_id": indexed_column_values_str, "value": primary_key}
+                index_collection.insert_one(index_data)
+
+        return 0, f"Compound index {index_name} on columns {', '.join(columns)} for table {table_name} created successfully."
+    
+    except Exception as e:
+        # Step 6: Return an error message
+        return -1, f"Error creating compound index {index_name} on columns {', '.join(columns)} for table {table_name}. Error: {e}"
+
+def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys, index_collections):
     db = mongoclient[db_name]
     collection = db[table_name]
 
@@ -139,6 +211,19 @@ def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, un
                     index_collection.update_one({"_id": fk_value}, {"$set": {"value": ",".join(updated_value_list)}})
                 else:
                     index_collection.delete_one({"_id": fk_value})
+        
+        # Handle individual index files (created with "create index")
+        for index_collection_name in index_collections:
+            index_collection = db[index_collection_name]
+            index_doc = index_collection.find_one({"value": {"$regex": f"(^|.*#){doc['_id']}($|#.*)"}})
+
+            if index_doc:
+                # Update the index entry in the index collection
+                updated_value_list = [v for v in index_doc["value"].split("#") if v != str(doc["_id"])]
+                if updated_value_list:
+                    index_collection.update_one({"_id": index_doc["_id"]}, {"$set": {"value": "#".join(updated_value_list)}})
+                else:
+                    index_collection.delete_one({"_id": index_doc["_id"]})
 
     # Delete the documents from the main collection
     result = collection.delete_many(new_filter_conditions)
@@ -146,8 +231,6 @@ def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, un
         return 0, f"Deleted {result.deleted_count} document(s) matching the filter conditions."
     else:
         return -1, "No document found matching the filter conditions."
-
-
 
 
 # testing function
