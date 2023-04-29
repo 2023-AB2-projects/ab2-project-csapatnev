@@ -10,14 +10,17 @@
         </Structure>
         <primaryKey>
             <pkAttribute>CREDITNR</pkAttribute>
+            <pkAttribute>CNAME</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
         <uniqueKeys>
-            <uniqueKey>CNAME</uniqueKey>
-        </uniqueKeys>
+            </uniqueKeys>
         <IndexFiles>
 
+        <IndexFile indexName="" indexType="BTree" indexFileName="CREDITS_CNAME__INDEX">
+            <IAttribute>CNAME</IAttribute>
+        </IndexFile>
         </IndexFiles>
         </Table>
     <Table name="DISCIPLINES">
@@ -38,12 +41,12 @@
             </references>
         </foreignKeys>
         <uniqueKeys>
-            <uniqueKey>DNAME</uniqueKey>
-        </uniqueKeys>
+            </uniqueKeys>
         <IndexFiles>
 
-        <IndexFile indexName="ASD" indexType="BTree">
+        <IndexFile indexName="ASD" indexType="BTree" indexFileName="DISCIPLINES_CREDITNR_DNAME_ASD_INDEX">
             <IAttribute>CREDITNR</IAttribute>
+            <IAttribute>DNAME</IAttribute>
         </IndexFile>
         </IndexFiles>
         </Table>

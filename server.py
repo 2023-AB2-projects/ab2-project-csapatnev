@@ -51,7 +51,7 @@ def first_parse(syntax):
     error_found = 0
     error_messages = []
     for res in syntax:
-        print(res)
+
         if res['code'] < 0:
             error_found = 1
             error_messages.append(res['message'])
@@ -124,7 +124,7 @@ def test_syntax(syntax, connection_socket, mode=''):
                 index_name = res['index_name'].upper()
                 table_name = res['table_name'].upper()
                 columns = res['columns']
-                ret_val, err_msg = cmd.create_index(db_name, table_name, index_name, columns)
+                ret_val, err_msg = cmd.create_index(mongoclient, db_name, table_name, index_name, columns)
                 if ret_val >= 0:
                     response_msg = 'Index has been created!'
                     print(response_msg)
@@ -226,8 +226,6 @@ if __name__ == "__main__":
     # CreditNr int REFERENCES credits(CreditNr)
     # );
 
-    # Create index asd on disciplines (CreditNr);
-
     # INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
     # INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
     # INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
@@ -239,15 +237,22 @@ if __name__ == "__main__":
 
     # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
     # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
+    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
+    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
+    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('GEO', 'Geography', 5);
 
-    # DELETE FROM Credits WHERE CreditNr > 5;
-    # """
 
-    # syntax2 = """
-    # USE UNIVERSITY;
+    # Create index asd on disciplines (DName, CreditNr);
+
     # DELETE FROM Disciplines WHERE DiscID = 'MATH';
     # """
 
-    # syntax = prs.handle_my_sql_input(syntax2)
+    
+    # # syntax2 = """
+    # # USE UNIVERSITY;
+    # # DELETE FROM Disciplines WHERE DiscID = 'MATH';
+    # # """
+
+    # syntax = prs.handle_my_sql_input(syntax)
 
     # test_syntax(syntax, connection_socket='', mode='debug')

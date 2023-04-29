@@ -200,7 +200,7 @@ def index_exists(xml_root, db_name, table_name, index_name):
     else:
         return True
 
-def create_index(db_name, table_name, index_name, columns):
+def create_index(mongoclient, db_name, table_name, index_name, columns):
     db_name = db_name.upper()
     table_name = table_name.upper()
     index_name = index_name.upper()
@@ -222,7 +222,9 @@ def create_index(db_name, table_name, index_name, columns):
                                                 .format(db_name, table_name))
         
         # create container tag
-        indexFile = etree.SubElement(indexFiles, 'IndexFile', indexName=index_name, indexType="BTree")
+        i_f_name = f"{table_name}_{'_'.join(columns)}_{index_name}_INDEX"
+
+        indexFile = etree.SubElement(indexFiles, 'IndexFile', indexName=index_name, indexType="BTree", indexFileName=i_f_name)
         indexFile.text = "\n            "
         indexFile.tail = "\n        "
         for column_name in columns:
@@ -238,7 +240,26 @@ def create_index(db_name, table_name, index_name, columns):
         with open(XML_FILE_LOCATION, 'wb') as file:
             file.write(etree.tostring(xml_root, pretty_print=True, xml_declaration=True, encoding='UTF-8'))
 
-        return (0, f"Index created on column {column_name} in table {table_name} in database {db_name}!")
+        # Create indexFile inside Mongo for these tables
+        column_indices = []
+        for column in columns:
+            # find index of column from structure
+            structure = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/Structure"
+                                        .format(db_name, table_name))
+
+            # find index of column from structure
+            col_index = None
+            for i, attr in enumerate(structure.findall('Attribute')):
+                if attr.get('attributeName') == column:
+                    col_index = i
+                    break
+
+            if column == find_pk_column(structure):
+                col_index = -1
+
+            column_indices.append(col_index)
+
+        return mongoHandler.create_index(mongoclient, db_name, table_name, index_name, columns, column_indices)
 
 def find_pk_column(structure):
     pk_element = structure.getparent().find(".//primaryKey/pkAttribute")
@@ -254,6 +275,8 @@ def find_all_fk_columns(structure):
     if fk_elements is not None:
         return [fk_element.text for fk_element in fk_elements]
     
+
+
 def find_all_unique_columns(structure):
     unique_elements = structure.getparent().findall(".//uniqueKeys/uniqueKey")
     if unique_elements is not None:
@@ -302,8 +325,25 @@ def insert_into(db_name, table_name, columns, values, mongoclient):
         primary_key_column = find_pk_column(structure)
         foreign_keys = find_all_fk_columns(structure)
         unique_keys = find_all_unique_columns(structure)
+        i_f_structure = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/IndexFiles"
+                            .format(db_name, table_name))
+        # Extract the index configurations
+        index_configs = []
+
+        for index_file in i_f_structure.findall('IndexFile'):
+            index_name = index_file.get('indexName')
+            index_columns = [i_attribute.text for i_attribute in index_file.findall('IAttribute')]
+
+            index_config = {
+                'index_name': index_name,
+                'index_columns': index_columns,
+                'index_column_indices': [columns.index(col) for col in index_columns]
+            }
+
+            index_configs.append(index_config)
+
         #print(f"primary_key_column: {primary_key_column}\n foreign_keys: {foreign_keys}\n unique_keys: {unique_keys}")
-        return mongoHandler.insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_keys, unique_keys, columns, values)
+        return mongoHandler.insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_keys, unique_keys, columns, values, index_configs)
 
 def get_column_index(xml_file, db_name, table_name, column_name):
     # get the index of the column inside the db_name.table_name
@@ -321,6 +361,9 @@ def get_column_index(xml_file, db_name, table_name, column_name):
 def find_all_columns(structure):
     return [attribute.get('attributeName') for attribute in structure.findall('Attribute')]
 
+def find_all_index_file_names(structure):
+    return [index_file.get('indexFileName') for index_file in structure.findall('IndexFile')]
+
 def delete_from(db_name, table_name, filter_conditions, mongoclient):
     # check for valid database and table
     db_name = db_name.upper()
@@ -333,13 +376,15 @@ def delete_from(db_name, table_name, filter_conditions, mongoclient):
     unique_keys = find_all_unique_columns(structure)
     foreign_keys = find_all_fk_columns(structure)
     columns = find_all_columns(structure)
-    print(columns)
+    i_f_structure = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/IndexFiles"
+                            .format(db_name, table_name))
+    index_file_names = find_all_index_file_names(i_f_structure)
     if not database_exists(xml_root, db_name):
         return (-1, f"Error: Database {db_name} does not exist!")
     elif not table_exists(xml_root, db_name, table_name):
         return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
     else:
-        return mongoHandler.delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys)
+        return mongoHandler.delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys, index_file_names)
 
 
 def select_all(db_name, table_name, mongodb):

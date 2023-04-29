@@ -34,7 +34,7 @@ def client_message_recv():
         conn, addr = server_socket.accept()
         print("Connection established to client")
 
-        data = conn.recv(1024)
+        data = conn.recv(9999999)
 
         if data:
             # Process the received message
