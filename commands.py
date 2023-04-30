@@ -282,6 +282,26 @@ def find_all_unique_columns(structure):
     if unique_elements is not None:
         return [unique_element.text for unique_element in unique_elements]
 
+def find_all_fk_references(structure):
+    foreign_key_references = {}
+    
+    # Find the Table element that is the parent of the given structure
+    table = structure.getparent()
+
+    # Find foreign keys in the same table as the given structure
+    for foreign_keys in table.findall('foreignKeys'):
+        for foreign_key in foreign_keys.findall('foreignKey'):
+            fk_column = foreign_key.text
+            references = foreign_key.getnext()
+            ref_table = references.find('refTable').text
+            ref_attribute = references.find('refAttribute').text
+            foreign_key_references[fk_column] = {
+                'collection': ref_table,
+                'key': ref_attribute
+            }
+
+    return foreign_key_references
+
 def insert_into(db_name, table_name, columns, values, mongoclient):
     # check for valid database and table
     db_name = db_name.upper()
@@ -324,6 +344,7 @@ def insert_into(db_name, table_name, columns, values, mongoclient):
         # insert the values into the table
         primary_key_column = find_pk_column(structure)
         foreign_keys = find_all_fk_columns(structure)
+        foreign_key_references = find_all_fk_references(structure)
         unique_keys = find_all_unique_columns(structure)
         i_f_structure = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/IndexFiles"
                             .format(db_name, table_name))
@@ -342,8 +363,9 @@ def insert_into(db_name, table_name, columns, values, mongoclient):
 
             index_configs.append(index_config)
 
+
         #print(f"primary_key_column: {primary_key_column}\n foreign_keys: {foreign_keys}\n unique_keys: {unique_keys}")
-        return mongoHandler.insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_keys, unique_keys, columns, values, index_configs)
+        return mongoHandler.insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_keys, unique_keys, columns, values, index_configs, foreign_key_references)
 
 def get_column_index(xml_file, db_name, table_name, column_name):
     # get the index of the column inside the db_name.table_name
@@ -375,6 +397,7 @@ def delete_from(db_name, table_name, filter_conditions, mongoclient):
 
     unique_keys = find_all_unique_columns(structure)
     foreign_keys = find_all_fk_columns(structure)
+    foreign_key_references = find_all_fk_references(structure)
     columns = find_all_columns(structure)
     i_f_structure = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/IndexFiles"
                             .format(db_name, table_name))
@@ -384,7 +407,7 @@ def delete_from(db_name, table_name, filter_conditions, mongoclient):
     elif not table_exists(xml_root, db_name, table_name):
         return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
     else:
-        return mongoHandler.delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys, index_file_names)
+        return mongoHandler.delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys, foreign_key_references, index_file_names)
 
 
 def select_all(db_name, table_name, mongodb):

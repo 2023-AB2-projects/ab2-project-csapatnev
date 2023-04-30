@@ -204,48 +204,54 @@ def test_syntax(syntax, connection_socket, mode=''):
         
 
 if __name__ == "__main__":
-    server_side()
+    #server_side()
 
-    # syntax = """
-    # USE UNIVERSITY;
+    syntax = """
+    USE UNIVERSITY;
 
-    # DROP DATABASE UNIVERSITY;
+    DROP DATABASE UNIVERSITY;
 
-    # create database University;
+    create database University;
 
-    # USE University;
+    USE University;
 
-    # CREATE TABLE credits (
-    # CreditNr int PRIMARY KEY,
-    # CName varchar(30) UNIQUE
-    # );
+    CREATE TABLE credits (
+    CreditNr int PRIMARY KEY,
+    CName varchar(30) UNIQUE
+    );
 
-    # CREATE TABLE disciplines (
-    # DiscID varchar(5) PRIMARY KEY,
-    # DName varchar(30) UNIQUE,
-    # CreditNr int REFERENCES credits(CreditNr)
-    # );
+    CREATE TABLE disciplines (
+    DiscID varchar(5) PRIMARY KEY,
+    DName varchar(30) UNIQUE,
+    CreditNr int REFERENCES credits(CreditNr)
+    );
 
-    # INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (5, 'Geography');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (6, 'History');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (7, 'English');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (8, 'German');
+    INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
+    INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
+    INSERT INTO Credits (CreditNr, CName) VALUES (5, 'Geography');
+    INSERT INTO Credits (CreditNr, CName) VALUES (6, 'History');
+    INSERT INTO Credits (CreditNr, CName) VALUES (7, 'English');
+    INSERT INTO Credits (CreditNr, CName) VALUES (8, 'German');
 
-    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
-    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
-    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
-    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
-    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('GEO', 'Geography', 5);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('GEO', 'Geography', 5);
 
 
-    # Create index asd on disciplines (DName, CreditNr);
+    Create index asd on disciplines (DName, CreditNr);
 
-    # DELETE FROM Disciplines WHERE DiscID = 'MATH';
-    # """
+    /* constraint violation: */
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH2', 'Mathematics', 1);
+
+    /* correct delete from: */
+    DELETE FROM Disciplines WHERE DiscID = 'MATH';
+
+    /* constraint violation delete from: */
+    """
 
     
     # # syntax2 = """
@@ -253,6 +259,6 @@ if __name__ == "__main__":
     # # DELETE FROM Disciplines WHERE DiscID = 'MATH';
     # # """
 
-    # syntax = prs.handle_my_sql_input(syntax)
+    syntax = prs.handle_my_sql_input(syntax)
 
-    # test_syntax(syntax, connection_socket='', mode='debug')
+    test_syntax(syntax, connection_socket='', mode='debug')
