@@ -65,6 +65,7 @@ def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_ke
 
     # Check if primary key data already exists
     if collection.count_documents({"_id": primary_key}) > 0:
+        print("\n\n\n HELLO WHAT IS UP \n\n\n")
         return -1, f"Error inserting document: Primary key constraint violation for {primary_key_column} with value {primary_key}"
 
     # Validate unique keys
@@ -181,6 +182,8 @@ def create_index(mongoclient, db_name, table_name, index_name, columns, column_i
     except Exception as e:
         # Step 6: Return an error message
         return -1, f"Error creating compound index {index_name} on columns {', '.join(columns)} for table {table_name}. Error: {e}"
+    
+
 
 def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys, foreign_key_references, index_collections):
     db = mongoclient[db_name]
@@ -202,23 +205,21 @@ def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, un
     # Fetch the documents to be deleted
     docs_to_delete = list(collection.find(new_filter_conditions))
 
+
     # Validate foreign key constraints
     for doc in docs_to_delete:
-        non_primary_values = doc["value"].split("#")
-        for fk, fk_info in foreign_key_references.items():
-            fk_index = columns.index(fk) - 1
-            fk_value = non_primary_values[fk_index]
+            for fk, fk_info in foreign_key_references.items():
+                if fk_info['collection'] == table_name and fk_info['key'] == primary_key_column:
+                    referencing_collection = db[fk_info['referencing_collection']]
+                    referencing_key = fk_info['referencing_key']
+                    referencing_key_index = columns.index(referencing_key) - 1
 
-            if fk_value.isdigit():
-                fk_value = int(fk_value)
+                    # Check if there's any document with a reference to the primary key value of the document to be deleted
+                    referenced_doc = referencing_collection.find_one({"value": {"$regex": f"(^|.*#){doc['_id']}($|#.*)"}})
+                    if referenced_doc:
+                        return -1, f"Error: Foreign key constraint violation. Cannot delete {table_name}.{primary_key_column} with value {doc['_id']} because it is being referenced in {fk_info['referencing_collection']}."
 
-            referenced_collection_name = fk_info['collection']
-            referenced_key = fk_info['key']
-            referenced_collection = db[referenced_collection_name]
-
-            if referenced_collection.count_documents({referenced_key: fk_value}) > 0:
-                return -1, f"Error deleting document: Foreign key constraint violation for {fk} with value {fk_value} - Referenced value exists in {referenced_collection_name}"
-
+    
     # Iterate through the documents to be deleted and update unique and foreign key index collections
     for doc in docs_to_delete:
         non_primary_values = doc["value"].split("#")

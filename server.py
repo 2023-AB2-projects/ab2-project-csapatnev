@@ -78,7 +78,7 @@ def test_syntax(syntax, connection_socket, mode=''):
     mongodb, mongoclient = mh.connect_mongo(DATABASE_IN_USE)
 
     for res in syntax:    # iterate through each request
-        print(res)
+        #print(res)
         if res['code'] < 0:
             errmsg = res['message']
             print(errmsg)
@@ -204,53 +204,75 @@ def test_syntax(syntax, connection_socket, mode=''):
         
 
 if __name__ == "__main__":
-    #server_side()
+    server_side()
 
-    syntax = """
-    USE UNIVERSITY;
+    # syntax = """
+    # USE UNIVERSITY;
 
-    DROP DATABASE UNIVERSITY;
+    # DROP DATABASE UNIVERSITY;
 
-    create database University;
+    # create database University;
 
-    USE University;
+    # USE University;
 
-    CREATE TABLE credits (
-    CreditNr int PRIMARY KEY,
-    CName varchar(30) UNIQUE
-    );
+    # CREATE TABLE credits (
+    #     CreditNr int PRIMARY KEY,
+    #     CName varchar(30) UNIQUE
+    # );
 
-    CREATE TABLE disciplines (
-    DiscID varchar(5) PRIMARY KEY,
-    DName varchar(30) UNIQUE,
-    CreditNr int REFERENCES credits(CreditNr)
-    );
+    # CREATE TABLE disciplines (
+    #     DiscID varchar(5) PRIMARY KEY,
+    #     DName varchar(30) UNIQUE,
+    #     CreditNr int REFERENCES credits(CreditNr)
+    # );
 
-    INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
-    INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
-    INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
-    INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
-    INSERT INTO Credits (CreditNr, CName) VALUES (5, 'Geography');
-    INSERT INTO Credits (CreditNr, CName) VALUES (6, 'History');
-    INSERT INTO Credits (CreditNr, CName) VALUES (7, 'English');
-    INSERT INTO Credits (CreditNr, CName) VALUES (8, 'German');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (5, 'Geography');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (6, 'History');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (7, 'English');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (8, 'German');
 
-    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
-    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
-    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
-    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
-    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('GEO', 'Geography', 5);
+    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
+    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
+    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
+    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
+    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('GEO', 'Geography', 5);
 
 
-    Create index asd on disciplines (DName, CreditNr);
+    # Create index asd on disciplines (DName, CreditNr);
 
-    /* constraint violation: */
-    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH2', 'Mathematics', 1);
+    # /* constraint violation: */
+    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH2', 'Mathematics', 1);
 
-    /* correct delete from: */
-    DELETE FROM Disciplines WHERE DiscID = 'MATH';
+    # /* correct delete from: */
+    # /* DELETE FROM Disciplines WHERE DiscID = 'MATH'; */
 
-    /* constraint violation delete from: */
+    # /* constraint violation delete from: */
+    # /* -- Create a table for subjects */
+    
+    # CREATE TABLE subjects (
+    #     subject_id int PRIMARY KEY,
+    #     subject_name varchar(30)
+    # );
+
+    # /* Create a table for students with a foreign key referencing subjects */
+    
+    # CREATE TABLE students (
+    #     student_id int PRIMARY KEY,
+    #     student_name varchar(30),
+    #     subject_id int REFERENCES subjects(subject_id)
+    # );
+
+    # /* -- Insert a subject */
+    # INSERT INTO subjects (subject_id, subject_name) VALUES (1, 'Mathematics');
+
+    # INSERT INTO students (student_id, student_name, subject_id) VALUES (1, 'John Doe', 1);
+
+    # /* -- Attempt to delete the subject which is being referenced by the student */
+    # DELETE FROM subjects WHERE subject_id = 1;
     """
 
     
@@ -259,6 +281,6 @@ if __name__ == "__main__":
     # # DELETE FROM Disciplines WHERE DiscID = 'MATH';
     # # """
 
-    syntax = prs.handle_my_sql_input(syntax)
+    # syntax = prs.handle_my_sql_input(syntax)
 
-    test_syntax(syntax, connection_socket='', mode='debug')
+    # test_syntax(syntax, connection_socket='', mode='debug')

@@ -48,6 +48,45 @@
         </IndexFile>
         </IndexFiles>
         </Table>
+    <Table name="SUBJECTS">
+        <Structure>
+            <Attribute attributeName="SUBJECT_ID" type="INT"/>
+            <Attribute attributeName="SUBJECT_NAME" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>SUBJECT_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="STUDENTS">
+        <Structure>
+            <Attribute attributeName="STUDENT_ID" type="INT"/>
+            <Attribute attributeName="STUDENT_NAME" type="VARCHAR"/>
+            <Attribute attributeName="SUBJECT_ID" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>STUDENT_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>SUBJECT_ID</foreignKey>
+
+            <references>
+                <refTable>SUBJECTS</refTable>
+                <refAttribute>SUBJECT_ID</refAttribute>
+            </references>
+        </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
     </Tables>
 </Database>
 

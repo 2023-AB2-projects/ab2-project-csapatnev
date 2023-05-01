@@ -302,6 +302,36 @@ def find_all_fk_references(structure):
 
     return foreign_key_references
 
+
+def find_all_fk_references_extended(structure):
+    foreign_key_references = {}
+    
+    # Find the Tables element, which is the grandparent of the given structure
+    tables = structure.getparent().getparent()
+
+    # Iterate over all tables
+    for table in tables.findall("Table"):
+        # Find foreign keys in the current table
+        foreign_keys_element = table.find("foreignKeys")
+        if foreign_keys_element is not None:
+            for foreign_key_element in foreign_keys_element.findall("foreignKey"):
+                fk_column = foreign_key_element.text
+                references = foreign_key_element.getnext()
+                ref_table = references.find("refTable").text
+                ref_attribute = references.find("refAttribute").text
+
+                # Check if the foreign key references the table related to the given structure
+                if ref_table == structure.getparent().attrib["name"]:
+                    foreign_key_references[fk_column] = {
+                        "collection": ref_table,
+                        "key": ref_attribute,
+                        "referencing_collection": table.attrib["name"],
+                        "referencing_key": fk_column,
+                    }
+
+    return foreign_key_references
+
+
 def insert_into(db_name, table_name, columns, values, mongoclient):
     # check for valid database and table
     db_name = db_name.upper()
@@ -397,7 +427,7 @@ def delete_from(db_name, table_name, filter_conditions, mongoclient):
 
     unique_keys = find_all_unique_columns(structure)
     foreign_keys = find_all_fk_columns(structure)
-    foreign_key_references = find_all_fk_references(structure)
+    foreign_key_references = find_all_fk_references_extended(structure)
     columns = find_all_columns(structure)
     i_f_structure = xml_root.find(".//Database[@name='{}']/Tables/Table[@name='{}']/IndexFiles"
                             .format(db_name, table_name))
