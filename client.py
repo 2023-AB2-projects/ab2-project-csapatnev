@@ -7,12 +7,15 @@ from socket import *
 import re
 import subprocess
 import sys
+import os.path
 
 HOST = '127.0.0.1'
 PORT = 6969     # nice
 
-connected_to_server = False
+CONNECTED_TO_SERVER = False
+
 client_socket = socket(AF_INET, SOCK_STREAM)
+
 
 class console_colors:
     red = '\x1b[0;31;3m'
@@ -20,6 +23,21 @@ class console_colors:
     yellow = '\x1b[0;33;3m'
     blue = '\x1b[0;34;3m'
     end = '\x1b[0m'
+
+
+def print_header():
+    print(console_colors.green + 'Welcome to DBMSName!\n' + console_colors.end)
+    print(console_colors.green + 'Commands:' + console_colors.end)
+    print('\tconnect\t\t\t' + console_colors.blue +
+          'Connect to server' + console_colors.end)
+    print('\trun [FILENAME]\t\t' + console_colors.blue +
+          'Run your SQL code from file' + console_colors.end)
+    print('\tconsole\t\t\t' + console_colors.blue +
+          'Allows you to write SQL code in console' + console_colors.end)
+    print('\ttree\t\t\t' + console_colors.blue +
+          'View stored databases' + console_colors.end)
+    print('\texit\t\t\t' + console_colors.blue +
+          'Exit DBMSName' + console_colors.end + '\n')
 
 
 def send_message_to_server(message):
@@ -36,70 +54,74 @@ def send_message_to_server(message):
             print(response)
 
 
-# def client_message_recv():
-#     with socket(AF_INET, SOCK_STREAM) as server_socket:
-#         server_socket.bind(('', PORT))
-#         server_socket.listen()
-
-#         print("Server is waiting for a message")
-
-#         conn, addr = server_socket.accept()
-#         print("Connection established to client")
-
-#         data = conn.recv(9999999)
-
-#         if data:
-#             # Process the received message
-#             response = "ok"
-#             print(data.decode())
-#         else:
-#             response = "error"
-
-#         response = response.encode()
-
-#         conn.send(response)
-
-#         conn.close()
-
-#     return data.decode()
-
-def print_header():
-    print(console_colors.green + 'Welcome to DBMSName!\n' + console_colors.end)
-    print(console_colors.green + 'Commands:' + console_colors.end)
-    print('\tconnect\t\t\t' + console_colors.blue +
-          'Connect to server' + console_colors.end)
-    print('\trun [FILENAME]\t\t' + console_colors.blue +
-          'Run SQL code from file' + console_colors.end)
-    print('\tconsole\t\t\t' + console_colors.blue +
-          'Allows to write SQL code in console' + console_colors.end)
-    print('\ttree\t\t\t' + console_colors.blue +
-          'View stored databases' + console_colors.end)
-    print('\texit\t\t\t' + console_colors.blue +
-          'Exit DBMSName' + console_colors.end + '\n')
-
-
 def client_parse_command(command):
-    connect_pattern = r'^\s*connect\s*'
+    global CONNECTED_TO_SERVER
+
+    connect_pattern = r'^\s*connect\s*$'
     match_connect = re.match(connect_pattern, command)
     if match_connect != None:
         print('\n' + console_colors.green + 'Succesfully connected to ' +
               HOST + ':' + str(PORT) + console_colors.end + '\n')
-        subprocess.Popen([sys.executable, '/server.py'],
+        subprocess.Popen(['python', 'server.py'],
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         client_socket.connect((HOST, PORT))
 
-        connected_to_server = True
+        CONNECTED_TO_SERVER = True
         return 1
 
-    exit_pattern = r'\s*exit\s*'
+    run_pattern = r'^\s*run\s([^\s]+)\s*$'
+    match_run = re.match(run_pattern, command)
+    if match_run != None:
+        if CONNECTED_TO_SERVER != False:
+            if os.path.isfile(match_run.group(1)):
+                f_input = open(match_run.group(1), "r")
+                request = f_input.read()
+                client_socket.send(request.encode())
+                response = client_socket.recv(9999999).decode()
+                print(console_colors.yellow +
+                      '[Server]:' + console_colors.end + response)
+            else:
+                print(console_colors.red +
+                      '[Error]: Cannot open File! ' + console_colors.end + match_run.group(1))
+        else:
+            print(console_colors.red +
+                  '[Error]: You need to connect to the server first!' + console_colors.end)
+        return 2
+
+    console_pattern = r'^\s*console\s*$'
+    match_console = re.match(console_pattern, command)
+    if match_console != None:
+        if CONNECTED_TO_SERVER != False:
+            console_input = ''
+            request = ''
+            while (console_input != '<'):
+                print(console_colors.blue +
+                      '[Console]: ' + console_colors.end, end='')
+                console_input = input()
+                if console_input != '<':
+                    request += console_input
+            client_socket.send(request.encode())
+            response = client_socket.recv(9999999).decode()
+            print(console_colors.yellow +
+                  '[Server]:' + console_colors.end + response)
+        else:
+            print(console_colors.red +
+                  '[Error]: You need to connect to the server first!' + console_colors.end)
+        return 3
+
+    exit_pattern = r'^\s*exit\s*$'
     match_exit = re.match(exit_pattern, command)
     if match_exit != None:
-        if connected_to_server:
-            print('\n' + console_colors.green + 'Closing Server...' + console_colors.end)
+        if CONNECTED_TO_SERVER == True:
+            print('\n' + console_colors.green +
+                  'Closing Server...' + console_colors.end)
             client_socket.send('kill yourself'.encode())
 
-        print('\n' + console_colors.green + 'Have a great Day!' + console_colors.end + '\n')
+        print('\n' + console_colors.green +
+              'Have a great Day!' + console_colors.end + '\n')
+
+        client_socket.close()
         return 0
 
 
@@ -115,6 +137,4 @@ def start_application():
 
 if __name__ == "__main__":
     start_application()
-    # f_input = open("input.txt", "r")
-    # input = f_input.read()
     # send_message_to_server(input)

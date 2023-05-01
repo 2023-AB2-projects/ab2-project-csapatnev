@@ -43,6 +43,9 @@ def server_side():
         data = connection_socket.recv(9999999)
         message = data.decode()
 
+        if message == 'kill yourself':
+            break
+
         full_request = prs.handle_my_sql_input(message)
         test_syntax(full_request, connection_socket)
 
