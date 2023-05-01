@@ -54,7 +54,7 @@ def update_index_on_insert(mongoclient, db_name, table_name, index_name, columns
 
 
 
-def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_keys, unique_keys, columns, values, index_configs):
+def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_keys, unique_keys, columns, values, index_configs, foreign_key_references):
     db = mongoclient[db_name]
     collection = db[table_name]
     primary_key = values[columns.index(primary_key_column)]
@@ -65,16 +65,10 @@ def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_ke
 
     # Check if primary key data already exists
     if collection.count_documents({"_id": primary_key}) > 0:
+        print("\n\n\n HELLO WHAT IS UP \n\n\n")
         return -1, f"Error inserting document: Primary key constraint violation for {primary_key_column} with value {primary_key}"
-    
 
-    # Create a dictionary of column name to value
-    data = {"_id": primary_key, "value": "#".join(str(value) for value in non_primary_values)}
-
-    # Insert the data into the collection
-    result = collection.insert_one(data)
-
-    # Handle unique keys
+    # Validate unique keys
     for uk in unique_keys:
         uk_index = columns.index(uk)
         uk_value = values[uk_index]
@@ -83,38 +77,65 @@ def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_ke
         if uk_collection.count_documents({"_id": uk_value}) > 0:
             return -1, f"Error inserting document: Unique key constraint violation for {uk} with value {uk_value}"
 
-        uk_data = {"_id": uk_value, "value": primary_key}
-        uk_collection.insert_one(uk_data)
-
-    # Handle foreign keys
+    # Validate foreign keys
     for fk in foreign_keys:
         fk_index = columns.index(fk)
         fk_value = values[fk_index]
 
-        fk_collection = db[f"{table_name}_{fk}_FOREIGN_INDEX"]
-        existing_document = fk_collection.find_one({"_id": fk_value})
+        referenced_collection_name = foreign_key_references[fk]['collection']
+        referenced_key = foreign_key_references[fk]['key']
 
-        if existing_document:
-            existing_document["value"] = existing_document["value"] + "#" + primary_key
-            fk_collection.replace_one({"_id": fk_value}, existing_document)
-        else:
-            fk_data = {"_id": fk_value, "value": primary_key}
-            fk_collection.insert_one(fk_data)
+        referenced_collection = db[referenced_collection_name]
+
+        # Check for primary key reference
+        if referenced_collection.count_documents({"_id": fk_value}) > 0:
+            continue
+
+        # Check for unique key reference
+        unique_key_collection = db[f"{referenced_collection_name}_{referenced_key}_UNIQUE_INDEX"]
+        if unique_key_collection.count_documents({"_id": fk_value}) > 0:
+            continue
+
+        return -1, f"Error inserting document: Foreign key constraint violation for {fk} with value {fk_value} - Referenced value not found in {referenced_collection_name}"
+
+    # Create a dictionary of column name to value
+    data = {"_id": primary_key, "value": "#".join(str(value) for value in non_primary_values)}
+
+    # Insert the data into the collection
+    result = collection.insert_one(data)
+
+    # Update unique keys index collections
+    for uk in unique_keys:
+        uk_index = columns.index(uk)
+        uk_value = values[uk_index]
+
+        uk_data = {"_id": uk_value, "value": primary_key}
+        uk_collection = db[f"{table_name}_{uk}_UNIQUE_INDEX"]
+        uk_collection.insert_one(uk_data)
+
+    # Update foreign keys index collections
+    for fk in foreign_keys:
+        fk_index = columns.index(fk)
+        fk_value = values[fk_index]
+
+        fk_data = {"_id": fk_value, "value": primary_key}
+        fk_collection = db[f"{table_name}_{fk}_FOREIGN_INDEX"]
+        fk_collection.insert_one(fk_data)
 
     # Handle individual index files
     if index_configs:
-         for index_config in index_configs:
+        for index_config in index_configs:
             index_name = index_config['index_name']
             index_columns = index_config['index_columns']
             index_column_indices = index_config['index_column_indices']
             update_index_on_insert(mongoclient, db_name, table_name, index_name, index_columns, index_column_indices, primary_key, non_primary_values)
-
 
     # Check if the operation was successful
     if result.inserted_id:
         return 0, f"Document inserted with ID: {result.inserted_id}"
     else:
         return -1, "Error inserting document"
+
 
 def create_index(mongoclient, db_name, table_name, index_name, columns, column_indices):
     db = mongoclient[db_name]
@@ -161,8 +182,10 @@ def create_index(mongoclient, db_name, table_name, index_name, columns, column_i
     except Exception as e:
         # Step 6: Return an error message
         return -1, f"Error creating compound index {index_name} on columns {', '.join(columns)} for table {table_name}. Error: {e}"
+    
 
-def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys, index_collections):
+
+def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys, foreign_key_references, index_collections):
     db = mongoclient[db_name]
     collection = db[table_name]
 
@@ -182,6 +205,21 @@ def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, un
     # Fetch the documents to be deleted
     docs_to_delete = list(collection.find(new_filter_conditions))
 
+
+    # Validate foreign key constraints
+    for doc in docs_to_delete:
+            for fk, fk_info in foreign_key_references.items():
+                if fk_info['collection'] == table_name and fk_info['key'] == primary_key_column:
+                    referencing_collection = db[fk_info['referencing_collection']]
+                    referencing_key = fk_info['referencing_key']
+                    referencing_key_index = columns.index(referencing_key) - 1
+
+                    # Check if there's any document with a reference to the primary key value of the document to be deleted
+                    referenced_doc = referencing_collection.find_one({"value": {"$regex": f"(^|.*#){doc['_id']}($|#.*)"}})
+                    if referenced_doc:
+                        return -1, f"Error: Foreign key constraint violation. Cannot delete {table_name}.{primary_key_column} with value {doc['_id']} because it is being referenced in {fk_info['referencing_collection']}."
+
+    
     # Iterate through the documents to be deleted and update unique and foreign key index collections
     for doc in docs_to_delete:
         non_primary_values = doc["value"].split("#")

@@ -78,7 +78,7 @@ def test_syntax(syntax, connection_socket, mode=''):
     mongodb, mongoclient = mh.connect_mongo(DATABASE_IN_USE)
 
     for res in syntax:    # iterate through each request
-        print(res)
+        #print(res)
         if res['code'] < 0:
             errmsg = res['message']
             print(errmsg)
@@ -216,14 +216,14 @@ if __name__ == "__main__":
     # USE University;
 
     # CREATE TABLE credits (
-    # CreditNr int PRIMARY KEY,
-    # CName varchar(30) UNIQUE
+    #     CreditNr int PRIMARY KEY,
+    #     CName varchar(30) UNIQUE
     # );
 
     # CREATE TABLE disciplines (
-    # DiscID varchar(5) PRIMARY KEY,
-    # DName varchar(30) UNIQUE,
-    # CreditNr int REFERENCES credits(CreditNr)
+    #     DiscID varchar(5) PRIMARY KEY,
+    #     DName varchar(30) UNIQUE,
+    #     CreditNr int REFERENCES credits(CreditNr)
     # );
 
     # INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
@@ -244,8 +244,36 @@ if __name__ == "__main__":
 
     # Create index asd on disciplines (DName, CreditNr);
 
-    # DELETE FROM Disciplines WHERE DiscID = 'MATH';
-    # """
+    # /* constraint violation: */
+    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH2', 'Mathematics', 1);
+
+    # /* correct delete from: */
+    # /* DELETE FROM Disciplines WHERE DiscID = 'MATH'; */
+
+    # /* constraint violation delete from: */
+    # /* -- Create a table for subjects */
+    
+    # CREATE TABLE subjects (
+    #     subject_id int PRIMARY KEY,
+    #     subject_name varchar(30)
+    # );
+
+    # /* Create a table for students with a foreign key referencing subjects */
+    
+    # CREATE TABLE students (
+    #     student_id int PRIMARY KEY,
+    #     student_name varchar(30),
+    #     subject_id int REFERENCES subjects(subject_id)
+    # );
+
+    # /* -- Insert a subject */
+    # INSERT INTO subjects (subject_id, subject_name) VALUES (1, 'Mathematics');
+
+    # INSERT INTO students (student_id, student_name, subject_id) VALUES (1, 'John Doe', 1);
+
+    # /* -- Attempt to delete the subject which is being referenced by the student */
+    # DELETE FROM subjects WHERE subject_id = 1;
+    """
 
     
     # # syntax2 = """

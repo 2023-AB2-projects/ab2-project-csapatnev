@@ -10,17 +10,14 @@
         </Structure>
         <primaryKey>
             <pkAttribute>CREDITNR</pkAttribute>
-            <pkAttribute>CNAME</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
         <uniqueKeys>
-            </uniqueKeys>
+            <uniqueKey>CNAME</uniqueKey>
+        </uniqueKeys>
         <IndexFiles>
 
-        <IndexFile indexName="" indexType="BTree" indexFileName="CREDITS_CNAME__INDEX">
-            <IAttribute>CNAME</IAttribute>
-        </IndexFile>
         </IndexFiles>
         </Table>
     <Table name="DISCIPLINES">
@@ -41,13 +38,53 @@
             </references>
         </foreignKeys>
         <uniqueKeys>
+            <uniqueKey>DNAME</uniqueKey>
+        </uniqueKeys>
+        <IndexFiles>
+
+        <IndexFile indexName="ASD" indexType="BTree" indexFileName="DISCIPLINES_DNAME_CREDITNR_ASD_INDEX">
+            <IAttribute>DNAME</IAttribute>
+            <IAttribute>CREDITNR</IAttribute>
+        </IndexFile>
+        </IndexFiles>
+        </Table>
+    <Table name="SUBJECTS">
+        <Structure>
+            <Attribute attributeName="SUBJECT_ID" type="INT"/>
+            <Attribute attributeName="SUBJECT_NAME" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>SUBJECT_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
             </uniqueKeys>
         <IndexFiles>
 
-        <IndexFile indexName="ASD" indexType="BTree" indexFileName="DISCIPLINES_CREDITNR_DNAME_ASD_INDEX">
-            <IAttribute>CREDITNR</IAttribute>
-            <IAttribute>DNAME</IAttribute>
-        </IndexFile>
+        </IndexFiles>
+        </Table>
+    <Table name="STUDENTS">
+        <Structure>
+            <Attribute attributeName="STUDENT_ID" type="INT"/>
+            <Attribute attributeName="STUDENT_NAME" type="VARCHAR"/>
+            <Attribute attributeName="SUBJECT_ID" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>STUDENT_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>SUBJECT_ID</foreignKey>
+
+            <references>
+                <refTable>SUBJECTS</refTable>
+                <refAttribute>SUBJECT_ID</refAttribute>
+            </references>
+        </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
         </IndexFiles>
         </Table>
     </Tables>
