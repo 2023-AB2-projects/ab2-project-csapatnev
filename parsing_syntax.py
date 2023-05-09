@@ -661,12 +661,3 @@ def handle_my_sql_input(input_str: str):
         commands.append(command)
 
     return commands
-
-
-input = """
-update marks set Mark = 6 where StudID = 50 and DiscID = 'OS';
-"""
-
-asd = handle_my_sql_input(input)
-for i in asd:
-    print(i, end='\n')
