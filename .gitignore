@@ -4,3 +4,4 @@ yarn.lock
 
 *.pyc
 *.cpython-*
+ __pycache__/
