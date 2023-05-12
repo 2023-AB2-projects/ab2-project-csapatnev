@@ -276,13 +276,58 @@ if __name__ == "__main__":
 
     # /* -- Attempt to delete the subject which is being referenced by the student */
     # DELETE FROM subjects WHERE subject_id = 1;
-    """
+    # """
 
     
-    # # syntax2 = """
-    # # USE UNIVERSITY;
-    # # DELETE FROM Disciplines WHERE DiscID = 'MATH';
-    # # """
+    # syntax2 = """
+    # USE UNIVERSITY;
+
+    # DROP DATABASE UNIVERSITY;
+
+    # create database University;
+
+    # USE University;
+
+    # CREATE TABLE credits (
+    #     CreditNr int,
+    #     CName varchar(30) UNIQUE,
+    #     PRIMARY KEY (CreditNr, CName)
+    # );
+
+    # INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
+    # INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
+
+    # DELETE FROM Credits WHERE CreditNr = 1 AND CName = 'MATHEMATICS';
+
+    # """
+
+    # syntax3 = """
+    # DROP DATABASE SCHOOL;
+    # CREATE DATABASE SCHOOL;
+
+    # CREATE TABLE subjects (
+    #     subject_id int PRIMARY KEY,
+    #     subject_name varchar(30)
+    #     );
+
+    # /* Create a table for students with a foreign key referencing subjects */
+    
+    # CREATE TABLE students (
+    #     student_id int PRIMARY KEY,
+    #     student_name varchar(30),
+    #     subject_id int REFERENCES subjects(subject_id)
+    # );
+
+    # /* -- Insert a subject */
+    # INSERT INTO subjects (subject_id, subject_name) VALUES (1, 'Mathematics');
+
+    # INSERT INTO students (student_id, student_name, subject_id) VALUES (1, 'John Doe', 1);
+
+    # /* -- Attempt to delete the subject which is being referenced by the student */
+    # DELETE FROM subjects WHERE subject_id = 1;
+    # """
 
     # syntax = prs.handle_my_sql_input(syntax)
 

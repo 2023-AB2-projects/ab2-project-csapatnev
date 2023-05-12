@@ -542,7 +542,7 @@ def parse_handle_select_from_clause(from_clause_str):
 
 
 def parse_handle_select_select_clause(select_clause_str):
-    print(asd)
+    print('asd')
 
 
 def parse_handle_select(syntax_in_sql):
