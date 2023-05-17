@@ -54,19 +54,20 @@ def update_index_on_insert(mongoclient, db_name, table_name, index_name, columns
 
 
 
-def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_keys, unique_keys, columns, values, index_configs, foreign_key_references):
+def insert_into(mongoclient, db_name, table_name, primary_key_columns, foreign_keys, unique_keys, columns, values, index_configs, foreign_key_references):
     db = mongoclient[db_name]
     collection = db[table_name]
-    primary_key = values[columns.index(primary_key_column)]
 
-    # Create new lists without the primary_key_column
-    non_primary_columns = [col for col in columns if col != primary_key_column]
-    non_primary_values = [val for col, val in zip(columns, values) if col != primary_key_column]
+    primary_key_values = [values[columns.index(pk)] for pk in primary_key_columns]
+    primary_keys = primary_key_values[0] if len(primary_key_columns) == 1 else "#".join(map(str, primary_key_values))
+    
+    # Create new lists without the primary key columns
+    non_primary_columns = [col for col in columns if col not in primary_key_columns]
+    non_primary_values = [val for col, val in zip(columns, values) if col not in primary_key_columns]
 
-    # Check if primary key data already exists
-    if collection.count_documents({"_id": primary_key}) > 0:
-        print("\n\n\n HELLO WHAT IS UP \n\n\n")
-        return -1, f"Error inserting document: Primary key constraint violation for {primary_key_column} with value {primary_key}"
+     # Check if primary key data already exists
+    if collection.count_documents({"_id": primary_keys}) > 0:
+        return -1, f"Error inserting document: Primary key constraint violation for {primary_key_columns} with values {primary_keys}"
 
     # Validate unique keys
     for uk in unique_keys:
@@ -99,7 +100,7 @@ def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_ke
         return -1, f"Error inserting document: Foreign key constraint violation for {fk} with value {fk_value} - Referenced value not found in {referenced_collection_name}"
 
     # Create a dictionary of column name to value
-    data = {"_id": primary_key, "value": "#".join(str(value) for value in non_primary_values)}
+    data = {"_id": primary_keys, "value": "#".join(str(value) for value in non_primary_values)}
 
     # Insert the data into the collection
     result = collection.insert_one(data)
@@ -109,7 +110,7 @@ def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_ke
         uk_index = columns.index(uk)
         uk_value = values[uk_index]
 
-        uk_data = {"_id": uk_value, "value": primary_key}
+        uk_data = {"_id": uk_value, "value": primary_keys}
         uk_collection = db[f"{table_name}_{uk}_UNIQUE_INDEX"]
         uk_collection.insert_one(uk_data)
 
@@ -118,7 +119,7 @@ def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_ke
         fk_index = columns.index(fk)
         fk_value = values[fk_index]
 
-        fk_data = {"_id": fk_value, "value": primary_key}
+        fk_data = {"_id": fk_value, "value": primary_keys}
         fk_collection = db[f"{table_name}_{fk}_FOREIGN_INDEX"]
         fk_collection.insert_one(fk_data)
 
@@ -128,7 +129,7 @@ def insert_into(mongoclient, db_name, table_name, primary_key_column, foreign_ke
             index_name = index_config['index_name']
             index_columns = index_config['index_columns']
             index_column_indices = index_config['index_column_indices']
-            update_index_on_insert(mongoclient, db_name, table_name, index_name, index_columns, index_column_indices, primary_key, non_primary_values)
+            update_index_on_insert(mongoclient, db_name, table_name, index_name, index_columns, index_column_indices, primary_keys, non_primary_values)
 
     # Check if the operation was successful
     if result.inserted_id:
@@ -183,33 +184,70 @@ def create_index(mongoclient, db_name, table_name, index_name, columns, column_i
         # Step 6: Return an error message
         return -1, f"Error creating compound index {index_name} on columns {', '.join(columns)} for table {table_name}. Error: {e}"
     
+def process_filter_conditions(conditions, primary_key_columns):
+    new_conditions = {}
 
+    for key, value in conditions.items():
+        if key in ['$and', '$or']:
+            new_conditions[key] = [process_filter_conditions(cond, primary_key_columns) for cond in value]
+        else:
+            if key in primary_key_columns:
+                # Find the index of this key in the primary key list
+                index = primary_key_columns.index(key)
 
-def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys, foreign_key_references, index_collections):
+                # Iterate through the conditions for this key
+                for condition, val in value.items():
+                    if isinstance(val, str) and val.isdigit():
+                        val = int(val)
+                    
+                    # If "_id" in new_conditions
+                    if "_id" in new_conditions:
+                        # Add a '#' separator if it's not the first key
+                        if index != 0:
+                            new_conditions["_id"][condition] += '#'
+                        new_conditions["_id"][condition] += str(val)
+                    else:
+                        new_conditions["_id"] = {condition: str(val)}
+    
+    # For composite primary keys, handle the "$and" operator differently.
+    if '$and' in new_conditions:
+        combined_condition = {}
+        for condition in new_conditions['$and']:
+            if '_id' in condition:
+                for op, val in condition['_id'].items():
+                    if op in combined_condition:
+                        combined_condition[op] += '#' + str(val)  # Ensure val is converted to string
+                    else:
+                        combined_condition[op] = str(val)  # Ensure val is converted to string
+        new_conditions['_id'] = combined_condition
+        del new_conditions['$and']
+
+    # Check if the _id field contains a '#' and reverse the string if so
+    if '_id' in new_conditions:
+        for condition, val in new_conditions['_id'].items():
+            # If the value is a string and can be converted to an integer, do so
+            if isinstance(val, str) and val.isdigit():
+                new_conditions['_id'][condition] = int(val)
+            # If the value contains '#', it is a composite key, split and reverse it
+            elif '#' in val:
+                new_conditions['_id'][condition] = '#'.join(reversed(val.split('#')))
+
+    return new_conditions
+
+def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys, foreign_key_references, index_collections, primary_key_columns):
     db = mongoclient[db_name]
     collection = db[table_name]
 
-    # Extract the primary_key_column and its conditions from filter_conditions
-    primary_key_column = list(filter_conditions.keys())[0]
-    primary_key_conditions = filter_conditions[primary_key_column]
-
     # Create a new filter_conditions with the "_id" field
-    new_filter_conditions = {"_id": {}}
-
-    for condition, value in primary_key_conditions.items():
-        # Convert the primary_key_value to the appropriate data type
-        if isinstance(value, str) and value.isdigit():
-            value = int(value)
-        new_filter_conditions["_id"][condition] = value
+    new_filter_conditions = process_filter_conditions(filter_conditions, primary_key_columns)
 
     # Fetch the documents to be deleted
     docs_to_delete = list(collection.find(new_filter_conditions))
 
-
     # Validate foreign key constraints
     for doc in docs_to_delete:
             for fk, fk_info in foreign_key_references.items():
-                if fk_info['collection'] == table_name and fk_info['key'] == primary_key_column:
+                if fk_info['collection'] == table_name and fk_info['key'] in primary_key_columns:
                     referencing_collection = db[fk_info['referencing_collection']]
                     referencing_key = fk_info['referencing_key']
                     referencing_key_index = columns.index(referencing_key) - 1
@@ -217,7 +255,7 @@ def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, un
                     # Check if there's any document with a reference to the primary key value of the document to be deleted
                     referenced_doc = referencing_collection.find_one({"value": {"$regex": f"(^|.*#){doc['_id']}($|#.*)"}})
                     if referenced_doc:
-                        return -1, f"Error: Foreign key constraint violation. Cannot delete {table_name}.{primary_key_column} with value {doc['_id']} because it is being referenced in {fk_info['referencing_collection']}."
+                        return -1, f"Error: Foreign key constraint violation. Cannot delete {table_name}.{fk_info['key']} with value {doc['_id']} because it is being referenced in {fk_info['referencing_collection']}."
 
     
     # Iterate through the documents to be deleted and update unique and foreign key index collections
