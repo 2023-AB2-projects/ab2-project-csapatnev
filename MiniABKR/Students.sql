@@ -300,10 +300,3 @@ from marks, disciplines
 where marks.discID = disciplines.discID
 and mark > 4
 group by DName;
-
-
-/* Bonus */
-
-insert into disciplines values ('AL','Algebra', 4);   /* without list of columns  */
-
-select * from disciplines order by DiscID;
