@@ -46,7 +46,7 @@ def send_message_to_server(message):
     client_socket.send(message.encode())
 
     while True:
-        response = client_socket.recv(9999999).decode()
+        response = client_socket.recv(999999999).decode()
         if response == "breakout":
             print("Server finished with it's tasks, client can rest now!")
             break
@@ -78,7 +78,7 @@ def client_parse_command(command):
                 f_input = open(match_run.group(1), "r")
                 request = f_input.read()
                 client_socket.send(request.encode())
-                response = client_socket.recv(9999999).decode()
+                response = client_socket.recv(999999999).decode()
                 print(console_colors.yellow +
                       '[Server]:' + console_colors.end + response)
             else:
@@ -102,7 +102,7 @@ def client_parse_command(command):
                 if console_input != '<':
                     request += console_input
             client_socket.send(request.encode())
-            response = client_socket.recv(9999999).decode()
+            response = client_socket.recv(999999999).decode()
             print(console_colors.yellow +
                   '[Server]:' + console_colors.end + response)
         else:

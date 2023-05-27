@@ -40,7 +40,7 @@ def server_side():
     while True:
         connection_socket, addr = server_socket.accept()
         print('The client has connected to the server', addr)
-        data = connection_socket.recv(9999999)
+        data = connection_socket.recv(999999999)
         message = data.decode()
 
         if message == 'kill yourself':
@@ -200,6 +200,10 @@ def test_syntax(syntax, connection_socket, mode=''):
                     print(err_msg)
                     if mode != 'debug':
                         connection_socket.send(err_msg.encode())
+            elif code == 9:
+                # update
+                table_name = res['table_name']
+                db_name = DATABASE_IN_USE
 
     print("breaking out")
     if mode != 'debug':
@@ -242,9 +246,8 @@ if __name__ == "__main__":
     INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
     INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
     INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
-    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('GEO', 'Geography', 5);
-
-
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('GEO', 'AISYD', 6);
+    
     Create index asd on disciplines (DName, CreditNr);
 
     /* constraint violation: */
@@ -294,12 +297,12 @@ if __name__ == "__main__":
         PRIMARY KEY (CreditNr, CName)
     );
 
-    INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Matematics');
     INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
     INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
     INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
 
-    DELETE FROM Credits WHERE CreditNr = 1 AND CName = 'MATHEMATICS';
+    UPDATE Credits SET CName = 'Mathematics' WHERE CreditNr = 1;
 
     """
 
