@@ -271,13 +271,13 @@ select distinct groupId from students;
 
 select StudName, students.GroupId, Email
 from students, groups, specialization
-where students.GroupId = groups.GroupId and groups.SpecID = specialization.SpecID and SpecName = 'Mathematics';
+where students.GroupId = groups.GroupId and groups.SpecID = specialization.SpecID and SpecName = 'Mathematics'
 
 select mark from marks
 where StudID = 50 and DiscID = 'OS';
 
 select DName, CreditNr, Mark
-from students, marks, disciplines
+from students,a join tavbla b on a. valami ób.valami
 where students.StudID = marks.StudID
 and marks.discID = disciplines.discID
 and StudName = 'Rosa White';

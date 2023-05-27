@@ -14,7 +14,7 @@
 
 from socket import *
 import commands as cmd
-import parsing_syntax as prs
+import parser.parsing_syntax as prs
 import mongoHandler as mh
 import pdb
 
@@ -329,6 +329,6 @@ if __name__ == "__main__":
     # DELETE FROM subjects WHERE subject_id = 1;
     # """
 
-    # syntax = prs.handle_my_sql_input(syntax)
+    # syntax = prs.handle_my_sql_input(syntax2)
 
     # test_syntax(syntax, connection_socket='', mode='debug')
