@@ -232,13 +232,15 @@ def parse_where_condition(where_condition_str):
 
     rhs, status_code = parse_where_condition_rhs(condition_match.group(4))
     if status_code < 0:
-        print('flag3')
         return {}, -1
 
     return {'negation': negation, 'operator': operator, 'lhs': lhs, 'rhs': rhs}, 0
 
 
 def parse_handle_select_where_clause(where_clause_str):
+    if where_clause_str is None:
+        return [], 0
+    
     where_clause = []
 
     where_pattern = r'^\s*where\s+(.+?)$'
@@ -259,6 +261,9 @@ def parse_handle_select_where_clause(where_clause_str):
 
 
 def parse_handle_select_groupby_clause(groupby_clause_str):
+    if groupby_clause_str is None:
+        return [], 0
+    
     columns_to_groupby = []
 
     if groupby_clause_str == None:
@@ -297,7 +302,7 @@ def parse_handle_select_groupby_clause(groupby_clause_str):
 
 
 def parse_handle_select(syntax_in_sql):
-    select_pattern = r'^\s*select(\s+distinct)?\s+(.+?)\s+from\s+(.+?)((\s+join\s+\w+\s+on\s+.+?)*?)(\s+where\s+.+?)?(\s+group\s+by\s+.+?)?\s*;?\s*$'
+    select_pattern = r'^\s*select(\s+distinct)?\s+(.+?)\s+from\s+(\w+)((\s+join\s+\w+\s+on\s+.+?)*?)(\s+where\s+.+?)?(\s+group\s+by\s+.+?)?\s*;?\s*$'
     match = re.match(select_pattern, syntax_in_sql,
                      flags=re.IGNORECASE | re.DOTALL)
 
@@ -305,12 +310,12 @@ def parse_handle_select(syntax_in_sql):
         print('1')
         return parse_handle_invalid_syntax_for_selecting()
 
-    from_clause_str = match.group(3)
-    from_clause, status_code = parse_handle_select_from_clause(
-        from_clause_str)
-    if status_code < 0:
-        print('2')
-        return parse_handle_invalid_syntax_for_selecting()
+    from_clause = match.group(3)
+    # from_clause, status_code = parse_handle_select_from_clause(
+    #     from_clause_str)
+    # if status_code < 0:
+    #     print('2')
+    #     return parse_handle_invalid_syntax_for_selecting()
 
     select_clause_str = match.group(2)
     select_clause, status_code = parse_handle_select_select_clause(
@@ -342,7 +347,8 @@ def parse_handle_select(syntax_in_sql):
         print('4')
         return parse_handle_invalid_syntax_for_selecting()
 
-    print(where_clause)
+    if groupby_clause_str != None and where_clause_str is None:
+        return parse_handle_invalid_syntax_for_selecting()
 
     return {
         'code': 10,

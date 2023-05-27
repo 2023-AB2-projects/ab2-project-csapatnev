@@ -21,9 +21,12 @@ OPERATORS = {
 
 
 def parse_build_conditions(partials, logical_operator):
+    conditions = {}
+    if logical_operator != None:
+        conditions = {logical_operator: []}
+    
     condition_pattern = r'^\s*(not\s+)?(\w+)\s+(=|>|>=|<|<=|<>|like)\s+(.+?)\s*$'
-
-    conditions = {logical_operator: []}
+    
     for condition_str in partials:
         condition_match = re.match(
             condition_pattern, condition_str, flags=re.IGNORECASE | re.DOTALL)
@@ -37,7 +40,10 @@ def parse_build_conditions(partials, logical_operator):
                 condition = {
                     column: {OPERATORS[condition_match.group(3)]: condition_match.group(4)}}
 
-            conditions[logical_operator].append(condition)
+            if logical_operator != None:
+                conditions[logical_operator].append(condition)
+            else: 
+                conditions = condition
         else:
             return conditions, -1
 
@@ -51,10 +57,8 @@ def parse_filter_conditions_for_delete(condition_str):
     partials = re.split(r'\s*and\s*', condition_str, flags=re.IGNORECASE)
     if (len(partials) > 1):
         return parse_build_conditions(partials, '$and')
-
-    partials = re.split(r'\s*or\s*', condition_str, flags=re.IGNORECASE)
-    if (len(partials) > 1):
-        return parse_build_conditions(partials, '$or')
+    else: 
+        return parse_build_conditions(partials, None)
 
     return [], -1
 
