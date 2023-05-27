@@ -132,15 +132,14 @@ def handle_my_sql_input(input_str: str):
     return commands
 
 
-# syntax = '''
+syntax = '''
+select DName, CreditNr, Mark
+from students
+join marks on students.StudID = marks.StudID 
+join disciplines on marks.discID = disciplines.discID
+where not StudName >= 10 and not DName = 'Pista'
+group by DName;
+'''
 
-# select DName, CreditNr, Mark
-# from students
-#     join marks on students.StudID = marks.StudID
-#     join disciplines on marks.discID = disciplines.discID
-# where StudName >= 10 and DName = 'Pista';
-
-# '''
-
-# asd = handle_my_sql_input(syntax)
+asd = handle_my_sql_input(syntax)
 
