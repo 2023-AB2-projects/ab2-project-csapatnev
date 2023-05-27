@@ -44,7 +44,3 @@ def load_table_data(database_name, table_name, mongo_client):
         data[row['_id']] = {'pk': pk_dict, 'value': value_dict}
 
     return data
-
-
-        
-
