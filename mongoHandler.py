@@ -222,16 +222,6 @@ def process_filter_conditions(conditions, primary_key_columns):
         new_conditions['_id'] = combined_condition
         del new_conditions['$and']
 
-    # Check if the _id field contains a '#' and reverse the string if so
-    if '_id' in new_conditions:
-        for condition, val in new_conditions['_id'].items():
-            # If the value is a string and can be converted to an integer, do so
-            if isinstance(val, str) and val.isdigit():
-                new_conditions['_id'][condition] = int(val)
-            # If the value contains '#', it is a composite key, split and reverse it
-            elif '#' in val:
-                new_conditions['_id'][condition] = '#'.join(reversed(val.split('#')))
-
     return new_conditions
 
 def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys, foreign_key_references, index_collections, primary_key_columns):
