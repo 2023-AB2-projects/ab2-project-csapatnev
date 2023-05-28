@@ -477,6 +477,11 @@ def apply_condition(data, condition):
     return new_data
 
 def compare_values(operator, value1, value2):
+    if isinstance(value1, str):
+        value1 = value1.strip('\'"')
+    if isinstance(value2, str):
+        value2 = value2.strip('\'"')
+   
     if operator == "$eq":
         return value1 == value2
     elif operator == "$gt":
@@ -572,57 +577,78 @@ def load_index_data(db_name, index_name, mongo_client):
 
 def select(db_name, select_clause, select_distinct, from_clause, join_clause, where_clause, groupby_clause, mongoclient):
     db_name = db_name.upper()
-    table_name = from_clause.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
 
     if not database_exists(xml_root, db_name):
         return (-1, f"Error: Database {db_name} does not exist!")
 
-    if select_clause[0]['column_name'] == '*':
+    data = {}
+    index_column_names = []
+    
+    if join_clause: # handle multi-table queries (with JOINs)
+        for table_name in from_clause:
+            table_name = table_name.upper()
+            if not table_exists(xml_root, db_name, table_name):
+                return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
+            retVal, table_data = load_table_data(db_name, table_name, mongoclient, xml_root)
+            if retVal < 0:
+                return retVal, table_data
+            print("Loaded data: ", table_data)
+            data[table_name] = table_data
+            
+        # assuming that join_clause is ordered in a way that tables in join can be processed sequentially
+        for join in join_clause:
+            lhs_table, lhs_column = join['lsh']['table_name'].upper(), join['lsh']['column_name'].upper()
+            rhs_table, rhs_column = join['rhs']['table_name'].upper(), join['rhs']['column_name'].upper()
+
+            if lhs_table not in data or rhs_table not in data:
+                return (-3, f"Error: Tables for JOIN not loaded correctly!")
+            
+            joined_table_data = perform_join(data[lhs_table], data[rhs_table], lhs_column, rhs_column)
+            data[join['table']] = joined_table_data
+        
+    else: # handle single table queries
+        table_name = from_clause.upper()
         if not table_exists(xml_root, db_name, table_name):
             return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
-
-        retVal, data = load_table_data(db_name, table_name, mongoclient, xml_root)
-        if retVal < 0:
-            return retVal, data
-        if where_clause:
-            data = apply_where_clause(data, where_clause)
-        if select_distinct:
-            data = distinctify(data)
-        return (0, data)
-
-    else:
-        data = None
-        index_column_names = []
+        
         if where_clause:
             candidate_columns = [condition['lhs']['column_name'].upper() for condition in where_clause]
             index_columns = get_index_columns(db_name, table_name, xml_root)
             for index_col in index_columns:
                 if set(index_col) == set(candidate_columns):
                     index_column_names = index_col
-                    # Try to find the index name based on the rules
                     index_name = get_index_name(db_name, table_name, index_column_names, xml_root)
                     if index_name is None:
-                        # If there's no index that can be used, load the entire table data
-                        retVal, data = load_table_data(db_name, table_name, mongoclient, xml_root)
+                        retVal, table_data = load_table_data(db_name, table_name, mongoclient, xml_root)
                         if retVal < 0:
-                            return retVal, data
+                            return retVal, table_data
                     else:
-                        # If an index can be used, load the index and then the corresponding table data
                         retVal, index_data = load_index_data(db_name, index_name, mongoclient)
                         if retVal < 0:
                             return retVal, index_data
-                        retVal, data = load_table_data_from_index(db_name, table_name, index_data, mongoclient, xml_root)
+                        retVal, table_data = load_table_data_from_index(db_name, table_name, index_data, mongoclient, xml_root)
                         if retVal < 0:
-                            return retVal, data
+                            return retVal, table_data
                     break
 
-        if not index_column_names and data is None:
-            retVal, data = load_table_data(db_name, table_name, mongoclient, xml_root)
-            if retVal < 0:
-                return retVal, data
+            if not index_column_names:
+                retVal, table_data = load_table_data(db_name, table_name, mongoclient, xml_root)
+                if retVal < 0:
+                    return retVal, table_data
 
-        if where_clause:
-            data = apply_where_clause(data, where_clause)
-        data = filter_columns(data, select_clause)
-        return (0, data)
+            data[table_name] = table_data
+
+    if where_clause:
+        for table_name, table_data in data.items():
+            data[table_name] = apply_where_clause(table_data, where_clause)
+
+    if select_clause[0]['column_name'] != '*':
+        for table_name, table_data in data.items():
+            data[table_name] = filter_columns(table_data, select_clause)
+
+    if select_distinct:
+        for table_name, table_data in data.items():
+            data[table_name] = distinctify(table_data)
+
+    return (0, data)

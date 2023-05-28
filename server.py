@@ -358,16 +358,16 @@ if __name__ == "__main__":
 
     CREATE TABLE disciplines (
         DiscID varchar(5) PRIMARY KEY,
-        DName varchar(30) UNIQUE,
+        DName varchar(30),
         CreditNr int
     );
 
     INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
-    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
-    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Mathematics', 3);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Mathematics', 2);
     INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
 
-    SELECT * FROM Disciplines WHERE CreditNr > 1 AND CreditNr < 4;
+    SELECT * FROM Disciplines WHERE DName = 'MATHEMATICS' AND CreditNr > 1 AND CreditNr < 3;
     """
 
     syntax = prs.handle_my_sql_input(syntax4)

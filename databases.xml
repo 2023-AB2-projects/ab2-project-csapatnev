@@ -59,8 +59,7 @@
         <foreignKeys>
             </foreignKeys>
         <uniqueKeys>
-            <uniqueKey>DNAME</uniqueKey>
-        </uniqueKeys>
+            </uniqueKeys>
         <IndexFiles>
 
         </IndexFiles>
