@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 import os.path
+from enum import Enum
 
 HOST = '127.0.0.1'
 PORT = 6969     # nice
@@ -17,27 +18,38 @@ CONNECTED_TO_SERVER = False
 client_socket = socket(AF_INET, SOCK_STREAM)
 
 
-class console_colors:
-    red = '\x1b[0;31;3m'
-    green = '\x1b[0;32;3m'
-    yellow = '\x1b[0;33;3m'
-    blue = '\x1b[0;34;3m'
-    end = '\x1b[0m'
+class Color(Enum):
+    RED = 'red'
+    GREEN = 'green'
+    YELLOW = 'yellow'
+    BLUE = 'blue'
+
+
+console_colors = {
+    'red': '\x1b[0;31;3m',
+    'green': '\x1b[0;32;3m',
+    'yellow': '\x1b[0;33;3m',
+    'blue': '\x1b[0;34;3m',
+    'end': '\x1b[0m',
+}
+
+
+def str_color(string, color):
+    if color in console_colors.keys():
+        return console_colors[color] + string + console_colors['end']
+    else:
+        return string 
 
 
 def print_header():
-    print(console_colors.green + 'Welcome to DBMSName!\n' + console_colors.end)
-    print(console_colors.green + 'Commands:' + console_colors.end)
-    print('\tconnect\t\t\t' + console_colors.blue +
-          'Connect to server' + console_colors.end)
-    print('\trun [FILENAME]\t\t' + console_colors.blue +
-          'Run your SQL code from file' + console_colors.end)
-    print('\tconsole\t\t\t' + console_colors.blue +
-          'Allows you to write SQL code in console' + console_colors.end)
-    print('\ttree\t\t\t' + console_colors.blue +
-          'View stored databases' + console_colors.end)
-    print('\texit\t\t\t' + console_colors.blue +
-          'Exit DBMSName' + console_colors.end + '\n')
+    print(str_color('Welcome to DBMSName!\n', Color.GREEN.value))
+    print(str_color('Commands:', Color.GREEN.value))
+    print('\tconnect\t\t\t' + str_color('Connect to server', Color.BLUE.value))
+    print('\trun [FILENAME]\t\t' + str_color('Run your SQL code from file', Color.BLUE.value))
+    print('\tconsole\t\t\t' + str_color('Allows you to write SQL code in console', Color.BLUE.value))
+    print('\ttree\t\t\t' + str_color('View stored databases', Color.BLUE.value))
+    print('\texit\t\t\t' + str_color('Exit DBMSName', Color.BLUE.value))
+    print()
 
 
 def send_message_to_server(message):
@@ -60,8 +72,7 @@ def client_parse_command(command):
     connect_pattern = r'^\s*connect\s*$'
     match_connect = re.match(connect_pattern, command)
     if match_connect != None:
-        print('\n' + console_colors.green + 'Succesfully connected to ' +
-              HOST + ':' + str(PORT) + console_colors.end + '\n')
+        print('\n' + str_color('Succesfully connected to ' + HOST + ':' + str(PORT), Color.GREEN.value) + '\n')
         subprocess.Popen(['python', 'server.py'],
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
@@ -79,14 +90,11 @@ def client_parse_command(command):
                 request = f_input.read()
                 client_socket.send(request.encode())
                 response = client_socket.recv(999999999).decode()
-                print(console_colors.yellow +
-                      '[Server]:' + console_colors.end + response)
+                print(str_color('[Server]:', Color.YELLOW.value) + response)
             else:
-                print(console_colors.red +
-                      '[Error]: Cannot open File! ' + console_colors.end + match_run.group(1))
+                print(str_color('[Error]: Cannot open File! ', Color.RED.value) + match_run.group(1))
         else:
-            print(console_colors.red +
-                  '[Error]: You need to connect to the server first!' + console_colors.end)
+            print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
         return 2
 
     console_pattern = r'^\s*console\s*$'
@@ -96,30 +104,25 @@ def client_parse_command(command):
             console_input = ''
             request = ''
             while (console_input != '<'):
-                print(console_colors.blue +
-                      '[Console]: ' + console_colors.end, end='')
+                print(str_color('[Console]: ', Color.BLUE.value), end='')
                 console_input = input()
                 if console_input != '<':
                     request += console_input
             client_socket.send(request.encode())
             response = client_socket.recv(999999999).decode()
-            print(console_colors.yellow +
-                  '[Server]:' + console_colors.end + response)
+            print(str_color('[Server]:', Color.YELLOW.value) + response)
         else:
-            print(console_colors.red +
-                  '[Error]: You need to connect to the server first!' + console_colors.end)
+            print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
         return 3
 
     exit_pattern = r'^\s*exit\s*$'
     match_exit = re.match(exit_pattern, command)
     if match_exit != None:
         if CONNECTED_TO_SERVER == True:
-            print('\n' + console_colors.green +
-                  'Closing Server...' + console_colors.end)
+            print('\n' + str_color('Closing Server...', Color.GREEN.value))
             client_socket.send('kill yourself'.encode())
 
-        print('\n' + console_colors.green +
-              'Have a great Day!' + console_colors.end + '\n')
+        print('\n' + str_color('Have a great Day!', Color.GREEN.value) + '\n')
 
         client_socket.close()
         return 0
@@ -130,7 +133,7 @@ def start_application():
 
     status_code = -1
     while (status_code != 0):
-        print(console_colors.green + '[Input]:' + console_colors.end, end=' ')
+        print(str_color('[Input]:', Color.GREEN.value), end=' ')
         command = input()
         status_code = client_parse_command(command)
 

@@ -11,16 +11,16 @@
 
 import re
 
-from entitys.create_database import parse_handle_create_database
-from entitys.create_table import parse_handle_create_table
-from entitys.create_index import parse_handle_create_index
-from entitys.drop_database import parse_handle_drop_database
-from entitys.drop_table import parse_handle_drop_table
-from entitys.use import parse_handle_use
-from entitys.insert import parse_handle_insert
-from entitys.delete import parse_handle_delete
-from entitys.select import parse_handle_select
-from entitys.update import parse_handle_update
+from myparser.entitys.create_database import parse_handle_create_database
+from myparser.entitys.create_table import parse_handle_create_table
+from myparser.entitys.create_index import parse_handle_create_index
+from myparser.entitys.drop_database import parse_handle_drop_database
+from myparser.entitys.drop_table import parse_handle_drop_table
+from myparser.entitys.use import parse_handle_use
+from myparser.entitys.insert import parse_handle_insert
+from myparser.entitys.delete import parse_handle_delete
+from myparser.entitys.select import parse_handle_select
+from myparser.entitys.update import parse_handle_update
 
 
 def parse_handle_invalid_object_type():
