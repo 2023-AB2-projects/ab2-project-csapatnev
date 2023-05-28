@@ -41,8 +41,8 @@ def load_table_data(database_name, table_name, mongo_client, xml_root):
         # Create dictionaries for primary keys and non-primary keys
         pk_dict = {columns[i]: keys[i] for i in pk_column_indexes}
 
-        columns = [col for col in columns if col not in pk_columns]
-        value_dict = {columns[i]: values[i] for i in range(len(columns))}
+        columns_ = [col for col in columns if col not in pk_columns]
+        value_dict = {columns_[i]: values[i] for i in range(len(columns_))}
 
         # Add to the main dictionary
         data[row['_id']] = {'pk': pk_dict, 'value': value_dict}

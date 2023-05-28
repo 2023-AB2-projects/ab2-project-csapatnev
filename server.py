@@ -307,11 +307,8 @@ if __name__ == "__main__":
     
     syntax2 = """
     USE UNIVERSITY;
-
     DROP DATABASE UNIVERSITY;
-
     create database University;
-
     USE University;
 
     CREATE TABLE credits (
@@ -373,6 +370,6 @@ if __name__ == "__main__":
     SELECT * FROM Disciplines;
     """
 
-    syntax = prs.handle_my_sql_input(syntax)
+    syntax = prs.handle_my_sql_input(syntax4)
 
     test_syntax(syntax, connection_socket='', mode='debug')
