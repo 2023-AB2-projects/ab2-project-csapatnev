@@ -2,6 +2,8 @@ from lxml import *
 from lxml import etree
 import mongoHandler
 import datetime
+from datagetter import load_table_data
+import re
 
 XML_FILE_LOCATION = './databases.xml'
 
@@ -440,16 +442,110 @@ def delete_from(db_name, table_name, filter_conditions, mongoclient):
     else:
         return mongoHandler.delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys, foreign_key_references, index_file_names, primary_key_columns)
 
+def distinctify(data):
+    seen = {}
+    for key, value in data.items():
+        pk_data = tuple(value['pk'].items())
+        if pk_data not in seen:
+            seen[pk_data] = value
+    return seen
 
-def select_all(db_name, table_name, mongodb):
-    # check for valid database and table
+def apply_condition(data, condition):
+    operator = condition['operator']
+    lhs = condition['lhs']
+    rhs = condition['rhs']
+
+    new_data = {}
+
+    if rhs['type'] == 'column':
+        lhs_column_name = lhs['column_name'].upper()
+        rhs_column_name = rhs['column_name'].upper()
+        
+        for _id, row in data.items():
+            column_value_lhs = row['pk'][lhs_column_name] if lhs_column_name in row['pk'] else row['value'][lhs_column_name]
+            column_value_rhs = row['pk'][rhs_column_name] if rhs_column_name in row['pk'] else row['value'][rhs_column_name]
+            if compare_values(operator, column_value_lhs, column_value_rhs):
+                new_data[_id] = row
+    else:
+        lhs_column_name = lhs['column_name'].upper()
+        
+        for _id, row in data.items():
+            column_value = row['pk'][lhs_column_name] if lhs_column_name in row['pk'] else row['value'][lhs_column_name]
+            comparison_value = rhs['value']
+            if compare_values(operator, column_value, comparison_value):
+                new_data[_id] = row
+    return new_data
+
+def compare_values(operator, value1, value2):
+    if operator == "$eq":
+        return value1 == value2
+    elif operator == "$gt":
+        return value1 > value2
+    elif operator == "$gte":
+        return value1 >= value2
+    elif operator == "$lt":
+        return value1 < value2
+    elif operator == "$lte":
+        return value1 <= value2
+    elif operator == "$ne":
+        return value1 != value2
+    elif operator == "$regex":
+        return re.search(value2, value1)
+    else:
+        return False
+
+def apply_where_clause(data, where_clause):
+    for condition in where_clause:
+        data = apply_condition(data, condition)
+    return data
+
+def filter_columns(data, select_clause):
+    # Prepare a list of column names from the select_clause
+    column_names = {col['column_name'].upper(): (col.get('alias') or col['column_name']).upper() for col in select_clause}
+
+    for _id, row in data.items():
+        new_pk = {}
+        new_value = {}
+
+        for original_name, alias_name in column_names.items():
+            if original_name in row['pk']:
+                new_pk[alias_name] = row['pk'][original_name]
+            if original_name in row['value']:
+                new_value[alias_name] = row['value'][original_name]
+        
+        row['pk'] = new_pk
+        row['value'] = new_value
+
+    return data
+
+def select(db_name, select_clause, select_distinct, from_clause, join_clause, where_clause, groupby_clause, mongoclient):
+    # check if it's a simple SELECT * clause
     db_name = db_name.upper()
-    table_name = table_name.upper()
+    table_name = from_clause.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
+
     if not database_exists(xml_root, db_name):
         return (-1, f"Error: Database {db_name} does not exist!")
-    elif not table_exists(xml_root, db_name, table_name):
-        return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
+    if select_clause[0]['column_name'] == '*':
+        if not table_exists(xml_root, db_name, table_name):
+            return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
+
+        retVal, data = load_table_data(db_name, table_name, mongoclient, xml_root)
+        if retVal < 0:
+            return retVal, data
+        # do we want disctinct values?
+        if select_distinct:
+            data = distinctify(data)
+        return (0, data)
+
     else:
-        # select all the values from the table
-        return mongoHandler.select_all(mongodb, table_name)
+        retVal, data = load_table_data(db_name, table_name, mongoclient, xml_root)
+        if retVal < 0:
+            return retVal, data
+        # if there is a where clause, apply it
+        if where_clause:
+            data = apply_where_clause(data, where_clause)
+        # keep only the columns in the select clause
+        data = filter_columns(data, select_clause)
+        return (0, data)
+

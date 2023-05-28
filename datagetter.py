@@ -1,9 +1,8 @@
 import xml.etree.ElementTree as ET
 
-def get_column_names_from_xml(database_name, table_name):
+def get_column_names_from_xml(database_name, table_name, xml_root):
     # Parse the XML file
-    tree = ET.parse('./databases.xml')
-    root = tree.getroot()
+    root = xml_root
 
     # Iterate over all Databases in the XML
     for db in root.findall('Database'):
@@ -20,16 +19,19 @@ def get_column_names_from_xml(database_name, table_name):
                     return columns, primary_keys
     
     # If we get here, we didn't find the Database or Table
-    return -1, "Error: Database or Table not found! [xml column getter]"
+    return -1, None
 
 
-def load_table_data(database_name, table_name, mongo_client):
+def load_table_data(database_name, table_name, mongo_client, xml_root):
     db = mongo_client[database_name]
     collection = db[table_name]
 
     data = {}
 
-    columns, pk_columns = get_column_names_from_xml(database_name, table_name)
+    columns, pk_columns = get_column_names_from_xml(database_name, table_name, xml_root)
+    if columns == -1:
+        return -1, "Error: Database or Table not found! [xml column getter]"
+    
     pk_column_indexes = [columns.index(pk_col) for pk_col in pk_columns]
 
     for row in collection.find():
@@ -38,12 +40,14 @@ def load_table_data(database_name, table_name, mongo_client):
 
         # Create dictionaries for primary keys and non-primary keys
         pk_dict = {columns[i]: keys[i] for i in pk_column_indexes}
-        value_dict = {column: value for column, value in zip(columns, values) if column not in pk_columns}
+
+        columns = [col for col in columns if col not in pk_columns]
+        value_dict = {columns[i]: values[i] for i in range(len(columns))}
 
         # Add to the main dictionary
         data[row['_id']] = {'pk': pk_dict, 'value': value_dict}
 
-    return data
+    return 0, data
 
 
         

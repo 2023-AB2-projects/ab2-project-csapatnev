@@ -206,6 +206,25 @@ def test_syntax(syntax, connection_socket, mode=''):
                 # update
                 table_name = res['table_name']
                 db_name = DATABASE_IN_USE
+            elif code == 10:
+                # select
+                db_name = DATABASE_IN_USE
+                select_clause = res['select_clause']
+                select_distinct = res['select_distinct']
+                from_clause = res['from_clause']
+                join_clause = res['join_clause']
+                where_clause = res['where_clause']
+                groupby_clause = res['groupby_clause']
+                ret_val, err_msg = cmd.select(db_name, select_clause, select_distinct, from_clause, join_clause, where_clause, groupby_clause, mongoclient)
+                if ret_val >= 0:
+                    response_msg = err_msg
+                    print(response_msg)
+                    if mode != 'debug':
+                        connection_socket.send(response_msg.encode())
+                else:
+                    print(err_msg)
+                    if mode != 'debug':
+                        connection_socket.send(err_msg.encode())
 
     print("breaking out")
     if mode != 'debug':
@@ -213,127 +232,147 @@ def test_syntax(syntax, connection_socket, mode=''):
         
 
 if __name__ == "__main__":
-    server_side()
+    #server_side()
 
-    # syntax = """
-    # USE UNIVERSITY;
+    syntax = """
+    USE UNIVERSITY;
 
-    # DROP DATABASE UNIVERSITY;
+    DROP DATABASE UNIVERSITY;
 
-    # create database University;
+    create database University;
 
-    # USE University;
+    USE University;
 
-    # CREATE TABLE credits (
-    #     CreditNr int PRIMARY KEY,
-    #     CName varchar(30) UNIQUE
-    # );
+    CREATE TABLE credits (
+        CreditNr int PRIMARY KEY,
+        CName varchar(30) UNIQUE
+    );
 
-    # CREATE TABLE disciplines (
-    #     DiscID varchar(5) PRIMARY KEY,
-    #     DName varchar(30) UNIQUE,
-    #     CreditNr int REFERENCES credits(CreditNr)
-    # );
+    CREATE TABLE disciplines (
+        DiscID varchar(5) PRIMARY KEY,
+        DName varchar(30) UNIQUE,
+        CreditNr int REFERENCES credits(CreditNr)
+    );
 
-    # INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (5, 'Geography');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (6, 'History');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (7, 'English');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (8, 'German');
+    INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
+    INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
+    INSERT INTO Credits (CreditNr, CName) VALUES (5, 'Geography');
+    INSERT INTO Credits (CreditNr, CName) VALUES (6, 'History');
+    INSERT INTO Credits (CreditNr, CName) VALUES (7, 'English');
+    INSERT INTO Credits (CreditNr, CName) VALUES (8, 'German');
 
-    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
-    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
-    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
-    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
-    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('GEO', 'AISYD', 6);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('GEO', 'AISYD', 6);
     
-    # Create index asd on disciplines (DName, CreditNr);
+    Create index asd on disciplines (DName, CreditNr);
 
-    # /* constraint violation: */
-    # INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH2', 'Mathematics', 1);
+    /* constraint violation: */
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH2', 'Mathematics', 1);
 
-    # /* correct delete from: */
-    # /* DELETE FROM Disciplines WHERE DiscID = 'MATH'; */
+    /* correct delete from: */
+    /* DELETE FROM Disciplines WHERE DiscID = 'MATH'; */
 
-    # /* constraint violation delete from: */
-    # /* -- Create a table for subjects */
+    /* constraint violation delete from: */
+    /* -- Create a table for subjects */
     
-    # CREATE TABLE subjects (
-    #     subject_id int PRIMARY KEY,
-    #     subject_name varchar(30)
-    # );
+    CREATE TABLE subjects (
+        subject_id int PRIMARY KEY,
+        subject_name varchar(30)
+    );
 
-    # /* Create a table for students with a foreign key referencing subjects */
+    /* Create a table for students with a foreign key referencing subjects */
     
-    # CREATE TABLE students (
-    #     student_id int PRIMARY KEY,
-    #     student_name varchar(30),
-    #     subject_id int REFERENCES subjects(subject_id)
-    # );
+    CREATE TABLE students (
+        student_id int PRIMARY KEY,
+        student_name varchar(30),
+        subject_id int REFERENCES subjects(subject_id)
+    );
 
-    # /* -- Insert a subject */
-    # INSERT INTO subjects (subject_id, subject_name) VALUES (1, 'Mathematics');
+    /* -- Insert a subject */
+    INSERT INTO subjects (subject_id, subject_name) VALUES (1, 'Mathematics');
 
-    # INSERT INTO students (student_id, student_name, subject_id) VALUES (1, 'John Doe', 1);
+    INSERT INTO students (student_id, student_name, subject_id) VALUES (1, 'John Doe', 1);
 
-    # /* -- Attempt to delete the subject which is being referenced by the student */
-    # DELETE FROM subjects WHERE subject_id = 1;
-    # """
+    /* -- Attempt to delete the subject which is being referenced by the student */
+    DELETE FROM subjects WHERE subject_id = 1;
+
+    SELECT DName AS DiscName FROM Disciplines WHERE CreditNr > 1 AND CreditNr < 4;
+    """
 
     
-    # syntax2 = """
-    # USE UNIVERSITY;
+    syntax2 = """
+    USE UNIVERSITY;
 
-    # DROP DATABASE UNIVERSITY;
+    DROP DATABASE UNIVERSITY;
 
-    # create database University;
+    create database University;
 
-    # USE University;
+    USE University;
 
-    # CREATE TABLE credits (
-    #     CreditNr int,
-    #     CName varchar(30) UNIQUE,
-    #     PRIMARY KEY (CreditNr, CName)
-    # );
+    CREATE TABLE credits (
+        CreditNr int,
+        CName varchar(30) UNIQUE,
+        PRIMARY KEY (CreditNr, CName)
+    );
 
-    # INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Matematics');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
-    # INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
+    INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Matematics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
+    INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
 
-    # UPDATE Credits SET CName = 'Mathematics' WHERE CreditNr = 1;
+    SELECT CName AS CC, CreditNr FROM Credits WHERE CreditNr > 1;
+    """
 
-    # """
+    syntax3 = """
+    DROP DATABASE SCHOOL;
+    CREATE DATABASE SCHOOL;
 
-    # syntax3 = """
-    # DROP DATABASE SCHOOL;
-    # CREATE DATABASE SCHOOL;
+    CREATE TABLE subjects (
+        subject_id int PRIMARY KEY,
+        subject_name varchar(30)
+        );
 
-    # CREATE TABLE subjects (
-    #     subject_id int PRIMARY KEY,
-    #     subject_name varchar(30)
-    #     );
-
-    # /* Create a table for students with a foreign key referencing subjects */
+    /* Create a table for students with a foreign key referencing subjects */
     
-    # CREATE TABLE students (
-    #     student_id int PRIMARY KEY,
-    #     student_name varchar(30),
-    #     subject_id int REFERENCES subjects(subject_id)
-    # );
+    CREATE TABLE students (
+        student_id int PRIMARY KEY,
+        student_name varchar(30),
+        subject_id int REFERENCES subjects(subject_id)
+    );
 
-    # /* -- Insert a subject */
-    # INSERT INTO subjects (subject_id, subject_name) VALUES (1, 'Mathematics');
+    /* -- Insert a subject */
+    INSERT INTO subjects (subject_id, subject_name) VALUES (1, 'Mathematics');
 
-    # INSERT INTO students (student_id, student_name, subject_id) VALUES (1, 'John Doe', 1);
+    INSERT INTO students (student_id, student_name, subject_id) VALUES (1, 'John Doe', 1);
 
-    # /* -- Attempt to delete the subject which is being referenced by the student */
-    # DELETE FROM subjects WHERE subject_id = 1;
-    # """
+    /* -- Attempt to delete the subject which is being referenced by the student */
+    DELETE FROM subjects WHERE subject_id = 1;
+    """
 
-    # syntax = prs.handle_my_sql_input(syntax2)
+    syntax4 = """
+    USE UNIVERSITY;
+    DROP DATABASE UNIVERSITY;
+    CREATE DATABASE UNIVERSITY;
 
-    # test_syntax(syntax, connection_socket='', mode='debug')
+    CREATE TABLE disciplines (
+        DiscID varchar(5) PRIMARY KEY,
+        DName varchar(30) UNIQUE,
+        CreditNr int
+    );
+
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
+
+    SELECT * FROM Disciplines;
+    """
+
+    syntax = prs.handle_my_sql_input(syntax)
+
+    test_syntax(syntax, connection_socket='', mode='debug')
