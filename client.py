@@ -3,19 +3,21 @@
 #       Socket comm handling
 #       Server handshake check and error output if needed
 
-from socket import *
+import socket as sck
 import re
 import subprocess
 import sys
 import os.path
+
 from enum import Enum
+from protocol.simple_protocol import *
 
 HOST = '127.0.0.1'
 PORT = 6969     # nice
 
 CONNECTED_TO_SERVER = False
 
-client_socket = socket(AF_INET, SOCK_STREAM)
+client_socket = sck.socket(sck.AF_INET, sck.SOCK_STREAM)
 
 
 class Color(Enum):
@@ -52,18 +54,14 @@ def print_header():
     print()
 
 
-def send_message_to_server(message):
-    client_socket = socket(AF_INET, SOCK_STREAM)
-    client_socket.connect((HOST, PORT))
-    client_socket.send(message.encode())
-
+def get_message_from_socket(connection_socket: sck.socket):
+    message = bytearray()
     while True:
-        response = client_socket.recv(999999999).decode()
-        if response == "breakout":
-            print("Server finished with it's tasks, client can rest now!")
+        data = connection_socket.recv(4096)
+        message.extend(data)
+        if len(data) < 4096:
             break
-        else:
-            print(response)
+    return message.decode('utf-8')
 
 
 def client_parse_command(command):
@@ -73,8 +71,7 @@ def client_parse_command(command):
     match_connect = re.match(connect_pattern, command)
     if match_connect != None:
         print('\n' + str_color('Succesfully connected to ' + HOST + ':' + str(PORT), Color.GREEN.value) + '\n')
-        subprocess.Popen(['python', 'server.py'],
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        # subprocess.Popen(['python', 'new_server.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         client_socket.connect((HOST, PORT))
 
@@ -88,39 +85,44 @@ def client_parse_command(command):
             if os.path.isfile(match_run.group(1)):
                 f_input = open(match_run.group(1), "r")
                 request = f_input.read()
-                client_socket.send(request.encode())
-                response = client_socket.recv(999999999).decode()
-                print(str_color('[Server]:', Color.YELLOW.value) + response)
+                
+                send_one_message(client_socket, request)
+
+                while True:
+                    response = recv_one_message(client_socket).decode()
+                    if response == 'breakout': break                    
+                    print(str_color('[Server]: ', Color.YELLOW.value) + response)
             else:
                 print(str_color('[Error]: Cannot open File! ', Color.RED.value) + match_run.group(1))
         else:
             print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
         return 2
 
-    console_pattern = r'^\s*console\s*$'
-    match_console = re.match(console_pattern, command)
-    if match_console != None:
-        if CONNECTED_TO_SERVER != False:
-            console_input = ''
-            request = ''
-            while (console_input != '<'):
-                print(str_color('[Console]: ', Color.BLUE.value), end='')
-                console_input = input()
-                if console_input != '<':
-                    request += console_input
-            client_socket.send(request.encode())
-            response = client_socket.recv(999999999).decode()
-            print(str_color('[Server]:', Color.YELLOW.value) + response)
-        else:
-            print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
-        return 3
+    # console_pattern = r'^\s*console\s*$'
+    # match_console = re.match(console_pattern, command)
+    # if match_console != None:
+    #     if CONNECTED_TO_SERVER != False:
+    #         console_input = ''
+    #         request = ''
+    #         while (console_input != '<'):
+    #             print(str_color('[Console]: ', Color.BLUE.value), end='')
+    #             console_input = input()
+    #             if console_input != '<':
+    #                 request += console_input
+    #         client_socket.send(request.encode())
+    #         response = client_socket.recv(999999999).decode()
+    #         print(str_color('[Server]:', Color.YELLOW.value) + response)
+    #     else:
+    #         print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
+    #     return 3
 
     exit_pattern = r'^\s*exit\s*$'
     match_exit = re.match(exit_pattern, command)
     if match_exit != None:
         if CONNECTED_TO_SERVER == True:
             print('\n' + str_color('Closing Server...', Color.GREEN.value))
-            client_socket.send('kill yourself'.encode())
+            
+            send_one_message(client_socket, 'kill yourself')
 
         print('\n' + str_color('Have a great Day!', Color.GREEN.value) + '\n')
 
@@ -140,4 +142,3 @@ def start_application():
 
 if __name__ == "__main__":
     start_application()
-    # send_message_to_server(input)

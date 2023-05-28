@@ -307,7 +307,7 @@ def parse_handle_select(syntax_in_sql):
                      flags=re.IGNORECASE | re.DOTALL)
 
     if match is None:
-        print('1')
+        # print('1')
         return parse_handle_invalid_syntax_for_selecting()
 
     from_clause = match.group(3)
@@ -321,7 +321,7 @@ def parse_handle_select(syntax_in_sql):
     select_clause, status_code = parse_handle_select_select_clause(
         select_clause_str)
     if status_code < 0:
-        print('3')
+        # print('3')
         return parse_handle_invalid_syntax_for_selecting()
 
     select_distinct = False
@@ -331,20 +331,20 @@ def parse_handle_select(syntax_in_sql):
     join_clause_str = match.group(4)
     join_clause, status_code = parse_handle_select_join_clause(join_clause_str)
     if status_code < 0:
-        print('4')
+        # print('4')
         return parse_handle_invalid_syntax_for_selecting()
 
     where_clause_str = match.group(6)
     where_clause, status_code = parse_handle_select_where_clause(where_clause_str)
     if status_code < 0:
-        print('5')
+        # print('5')
         return parse_handle_invalid_syntax_for_selecting()
 
     groupby_clause_str = match.group(7)
     groupby_clause, status_code = parse_handle_select_groupby_clause(
         groupby_clause_str)
     if status_code < 0:
-        print('4')
+        # print('4')
         return parse_handle_invalid_syntax_for_selecting()
 
     if groupby_clause_str != None and where_clause_str is None:
