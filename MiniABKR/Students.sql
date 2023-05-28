@@ -270,24 +270,26 @@ CREATE INDEX on disciplines(DiscID);
 select distinct groupId from students;
 
 select StudName, students.GroupId, Email
-from students, groups, specialization
-where students.GroupId = groups.GroupId and groups.SpecID = specialization.SpecID and SpecName = 'Mathematics';
+from students
+Join groups on students.GroupId = groups.GroupId
+join specialization on groups.SpecID  = specialization.SpecID
+where  SpecName = 'Mathematics'
 
 select mark from marks
 where StudID = 50 and DiscID = 'OS';
 
 select DName, CreditNr, Mark
-from students, marks, disciplines
-where students.StudID = marks.StudID
-and marks.discID = disciplines.discID
-and StudName = 'Rosa White';
+from students
+join marks on students.StudID = marks.StudID
+join disciplines on marks.discID = disciplines.discID
+where StudName = 'Rosa White';
 
 select StudName, students.GroupId, Email
 from students
 where Email like '%email.com';
 
 select StudID, discID, mark from marks
-where StudID = 50 or StudID = 41;
+where StudID = 50 and StudID = 41;
 
 select StudID, avg(Mark) as avg_Mark, min(Mark) as min_Mark, max(Mark) as max_Mark
 from marks
@@ -297,6 +299,6 @@ group by StudID;
 
 select DName, avg(Mark) as avg_Mark
 from marks, disciplines
-where marks.discID = disciplines.discID
-and mark > 4
+join disciplines on marks.discID = disciplines.discID
+where mark > 4
 group by DName;

@@ -14,7 +14,7 @@
 
 from socket import *
 import commands as cmd
-import parsing_syntax as prs
+import myparser.parsing_syntax as prs
 import mongoHandler as mh
 import pdb
 
@@ -42,6 +42,8 @@ def server_side():
         print('The client has connected to the server', addr)
         data = connection_socket.recv(999999999)
         message = data.decode()
+
+        print(message)
 
         if message == 'kill yourself':
             break
@@ -204,6 +206,25 @@ def test_syntax(syntax, connection_socket, mode=''):
                 # update
                 table_name = res['table_name']
                 db_name = DATABASE_IN_USE
+            elif code == 10:
+                # select
+                db_name = DATABASE_IN_USE
+                select_clause = res['select_clause']
+                select_distinct = res['select_distinct']
+                from_clause = res['from_clause']
+                join_clause = res['join_clause']
+                where_clause = res['where_clause']
+                groupby_clause = res['groupby_clause']
+                ret_val, err_msg = cmd.select(db_name, select_clause, select_distinct, from_clause, join_clause, where_clause, groupby_clause, mongoclient)
+                if ret_val >= 0:
+                    response_msg = err_msg
+                    print(response_msg)
+                    if mode != 'debug':
+                        connection_socket.send(response_msg.encode())
+                else:
+                    print(err_msg)
+                    if mode != 'debug':
+                        connection_socket.send(err_msg.encode())
 
     print("breaking out")
     if mode != 'debug':
@@ -279,6 +300,8 @@ if __name__ == "__main__":
 
     /* -- Attempt to delete the subject which is being referenced by the student */
     DELETE FROM subjects WHERE subject_id = 1;
+
+    SELECT DName AS DiscName FROM Disciplines WHERE CreditNr > 1 AND CreditNr < 4;
     """
 
     
@@ -302,8 +325,7 @@ if __name__ == "__main__":
     INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
     INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
 
-    UPDATE Credits SET CName = 'Mathematics' WHERE CreditNr = 1;
-
+    SELECT CName AS CC, CreditNr FROM Credits WHERE CreditNr > 1;
     """
 
     syntax3 = """
@@ -330,6 +352,25 @@ if __name__ == "__main__":
 
     /* -- Attempt to delete the subject which is being referenced by the student */
     DELETE FROM subjects WHERE subject_id = 1;
+    """
+
+    syntax4 = """
+    USE UNIVERSITY;
+    DROP DATABASE UNIVERSITY;
+    CREATE DATABASE UNIVERSITY;
+
+    CREATE TABLE disciplines (
+        DiscID varchar(5) PRIMARY KEY,
+        DName varchar(30) UNIQUE,
+        CreditNr int
+    );
+
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
+
+    SELECT * FROM Disciplines;
     """
 
     syntax = prs.handle_my_sql_input(syntax)
