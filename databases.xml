@@ -45,7 +45,6 @@
         </Table>
     </Tables>
 </Database>
-
 <Database name="UNIVERSITY">
     <Tables>
         <Table name="DISCIPLINES">

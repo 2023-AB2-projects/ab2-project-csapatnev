@@ -2,7 +2,7 @@ from lxml import *
 from lxml import etree
 import mongoHandler
 import datetime
-from datagetter import load_table_data
+from datagetter import load_table_data, load_table_data_from_index
 import re
 
 XML_FILE_LOCATION = './databases.xml'
@@ -518,14 +518,66 @@ def filter_columns(data, select_clause):
 
     return data
 
+def get_index_columns(db_name, table_name, xml_root):
+    # Fetch index columns for a table from XML
+    index_columns = []
+    indexes = xml_root.findall(f"./Database[@name='{db_name}']/Tables/Table[@name='{table_name}']/IndexFiles/IndexFile")
+    for index in indexes:
+        index_cols = [iattrib.text.upper() for iattrib in index.findall('IAttribute')]
+        index_columns.append(index_cols)
+
+    # Automatically generated index files
+    # Fetch unique key columns for the table
+    uindexes = xml_root.findall(f"./Database[@name='{db_name}']/Tables/Table[@name='{table_name}']/uniqueKeys/uniqueKey")
+    for uindex in uindexes:
+        uindex_cols = uindex.text.upper()
+        index_columns.append([uindex_cols])
+
+    # Fetch foreign key columns for the table
+    findexes = xml_root.findall(f"./Database[@name='{db_name}']/Tables/Table[@name='{table_name}']/foreignKeys/foreignKey")
+    for findex in findexes:
+        findex_cols = findex.text.upper()
+        index_columns.append([findex_cols])
+
+    return index_columns
+
+def get_index_name(db_name, table_name, index_columns, xml_root):
+    # Define the general formats of the index file names
+    formats = ['{table}_{column}_UNIQUE_INDEX', '{table}_{column}_FOREIGN_INDEX']
+
+    for index_column in index_columns:
+        # Check for user-defined index files first
+        index_file_elem = xml_root.find(f"./Database[@name='{db_name}']/Tables/Table[@name='{table_name}']/IndexFiles/IndexFile[IAttribute='{index_column}']")
+        if index_file_elem is not None:
+            return index_file_elem.get('indexFileName')
+
+        # Then check for automatically generated index files
+        for fmt in formats:
+            index_name = fmt.format(table=table_name, column=index_column)
+            if xml_root.find(f"./Database[@name='{db_name}']/Tables/Table[@name='{table_name}']/IndexFiles/IndexFile[@indexFileName='{index_name}']") is not None:
+                return index_name
+
+    # If no matching index file was found, return None
+    return None
+
+def load_index_data(db_name, index_name, mongo_client):
+    db = mongo_client[db_name]
+    collection = db[index_name]
+
+    # Here, each document's '_id' is the indexed columns' values concatenated with '#',
+    # and 'value' is the primary key of the corresponding row in the table
+    data = {doc['_id']: doc['value'] for doc in collection.find()}
+
+    return 0, data
+
 def select(db_name, select_clause, select_distinct, from_clause, join_clause, where_clause, groupby_clause, mongoclient):
-    # check if it's a simple SELECT * clause
     db_name = db_name.upper()
     table_name = from_clause.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
 
     if not database_exists(xml_root, db_name):
         return (-1, f"Error: Database {db_name} does not exist!")
+
     if select_clause[0]['column_name'] == '*':
         if not table_exists(xml_root, db_name, table_name):
             return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
@@ -533,19 +585,44 @@ def select(db_name, select_clause, select_distinct, from_clause, join_clause, wh
         retVal, data = load_table_data(db_name, table_name, mongoclient, xml_root)
         if retVal < 0:
             return retVal, data
-        # do we want disctinct values?
+        if where_clause:
+            data = apply_where_clause(data, where_clause)
         if select_distinct:
             data = distinctify(data)
         return (0, data)
 
     else:
-        retVal, data = load_table_data(db_name, table_name, mongoclient, xml_root)
-        if retVal < 0:
-            return retVal, data
-        # if there is a where clause, apply it
+        data = None
+        index_column_names = []
+        if where_clause:
+            candidate_columns = [condition['lhs']['column_name'].upper() for condition in where_clause]
+            index_columns = get_index_columns(db_name, table_name, xml_root)
+            for index_col in index_columns:
+                if set(index_col) == set(candidate_columns):
+                    index_column_names = index_col
+                    # Try to find the index name based on the rules
+                    index_name = get_index_name(db_name, table_name, index_column_names, xml_root)
+                    if index_name is None:
+                        # If there's no index that can be used, load the entire table data
+                        retVal, data = load_table_data(db_name, table_name, mongoclient, xml_root)
+                        if retVal < 0:
+                            return retVal, data
+                    else:
+                        # If an index can be used, load the index and then the corresponding table data
+                        retVal, index_data = load_index_data(db_name, index_name, mongoclient)
+                        if retVal < 0:
+                            return retVal, index_data
+                        retVal, data = load_table_data_from_index(db_name, table_name, index_data, mongoclient, xml_root)
+                        if retVal < 0:
+                            return retVal, data
+                    break
+
+        if not index_column_names and data is None:
+            retVal, data = load_table_data(db_name, table_name, mongoclient, xml_root)
+            if retVal < 0:
+                return retVal, data
+
         if where_clause:
             data = apply_where_clause(data, where_clause)
-        # keep only the columns in the select clause
         data = filter_columns(data, select_clause)
         return (0, data)
-

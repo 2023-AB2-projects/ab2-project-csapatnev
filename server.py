@@ -301,7 +301,7 @@ if __name__ == "__main__":
     /* -- Attempt to delete the subject which is being referenced by the student */
     DELETE FROM subjects WHERE subject_id = 1;
 
-    SELECT DName AS DiscName FROM Disciplines WHERE CreditNr > 1 AND CreditNr < 4;
+    SELECT DName AS DiscName, CreditNr FROM Disciplines WHERE CreditNr > 1 AND CreditNr < 4;
     """
 
     
@@ -367,7 +367,7 @@ if __name__ == "__main__":
     INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
     INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
 
-    SELECT * FROM Disciplines;
+    SELECT * FROM Disciplines WHERE CreditNr > 1 AND CreditNr < 4;
     """
 
     syntax = prs.handle_my_sql_input(syntax4)
