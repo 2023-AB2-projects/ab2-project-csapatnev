@@ -126,7 +126,8 @@ def insert_into(mongoclient, db_name, table_name, primary_key_columns, foreign_k
 
         fk_data = {"_id": fk_value, "value": primary_keys}
         fk_collection = db[f"{table_name}_{fk}_FOREIGN_INDEX"]
-        fk_collection.insert_one(fk_data)
+        if fk_collection.count_documents({"_id": fk_value}) == 0:
+            fk_collection.insert_one(fk_data)
 
     # Handle individual index files
     if index_configs:

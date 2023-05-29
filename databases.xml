@@ -150,4 +150,66 @@
     </Tables>
 </Database>
 
+<Database name="TMP">
+    <Tables>
+        <Table name="SUBJECTS">
+        <Structure>
+            <Attribute attributeName="SUBJECTID" type="INT"/>
+            <Attribute attributeName="SUBJECTNAME" type="VARCHAR"/>
+            <Attribute attributeName="COURSES" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>SUBJECTID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="FELHASZNALOK">
+        <Structure>
+            <Attribute attributeName="FID" type="INT"/>
+            <Attribute attributeName="FNAME" type="VARCHAR"/>
+            <Attribute attributeName="FTYPE" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>FID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="RESOURCES">
+        <Structure>
+            <Attribute attributeName="RID" type="INT"/>
+            <Attribute attributeName="RNAME" type="VARCHAR"/>
+            <Attribute attributeName="SUBJECTID" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>RID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>SUBJECTID</foreignKey>
+
+            <references>
+                <refTable>SUBJECTS</refTable>
+                <refAttribute>SUBJECTID</refAttribute>
+            </references>
+        </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
 </Databases>
