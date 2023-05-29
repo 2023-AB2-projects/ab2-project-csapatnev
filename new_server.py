@@ -18,6 +18,8 @@ import myparser.parsing_syntax as prs
 import mongoHandler as mh
 import pdb
 
+import xml.etree.ElementTree as ET
+
 from protocol.simple_protocol import *
 
 HOST = '127.0.0.1'
@@ -37,7 +39,7 @@ def create_database_request(mode, res, mongoclient, connection_socket: sck.socke
     if ret_val >= 0:
         global DATABASE_IN_USE
         DATABASE_IN_USE = db_name
-        response_msg = 'Database has been created!'
+        response_msg = err_msg
 
         if mode == 'debug': print(response_msg)
         else: RESPONSE_MESSAGES.append(response_msg)
@@ -48,6 +50,7 @@ def create_database_request(mode, res, mongoclient, connection_socket: sck.socke
             send_one_message(connection_socket, 'breakout')
 
     return ret_val
+
 
 # CREATE TABLE table_name (col_definitions); 
 def create_table_request(mode, res, mongoclient, connection_socket: sck.socket):
@@ -61,7 +64,7 @@ def create_table_request(mode, res, mongoclient, connection_socket: sck.socket):
 
     ret_val, err_msg = cmd.create_table(db_name, table_name, columns, pk, fk, uk)
     if ret_val >= 0:
-        response_msg = 'Table has been created!'
+        response_msg = err_msg 
 
         if mode == 'debug': print(response_msg)
         else: RESPONSE_MESSAGES.append(response_msg)
@@ -85,7 +88,7 @@ def create_index_request(mode, res, mongoclient, connection_socket: sck.socket):
     
     ret_val, err_msg = cmd.create_index(mongoclient, db_name, table_name, index_name, columns)
     if ret_val >= 0:
-        response_msg = 'Index has been created!'
+        response_msg = err_msg
         
         if mode == 'debug': print(response_msg)
         else: RESPONSE_MESSAGES.append(response_msg)
@@ -106,7 +109,7 @@ def drop_database_request(mode, res, mongoclient, connection_socket: sck.socket)
     if ret_val >= 0:
         global DATABASE_IN_USE
         DATABASE_IN_USE = "MASTER"
-        response_msg = 'Database has been droped!'
+        response_msg = err_msg
         
         if mode == 'debug': print(response_msg)
         else: RESPONSE_MESSAGES.append(response_msg)
@@ -139,6 +142,7 @@ def drop_table_request(mode, res, mongoclient, connection_socket: sck.socket):
         
     return ret_val
 
+
 # USE DATABASE db_name;
 def use_request(mode, res, mongoclient, connection_socket: sck.socket):
     global DATABASE_IN_USE
@@ -156,7 +160,7 @@ def insert_request(mode, res, mongoclient, connection_socket: sck.socket):
     
     ret_val, err_msg = cmd.insert_into(db_name, table_name, columns, values, mongoclient)
     if ret_val >= 0:
-        response_msg = 'Data has been inserted!'
+        response_msg = err_msg
         
         if mode == 'debug': print(response_msg)
         else: RESPONSE_MESSAGES.append(response_msg)
@@ -178,7 +182,7 @@ def delete_request(mode, res, mongoclient, connection_socket: sck.socket):
     
     ret_val, err_msg = cmd.delete_from(db_name, table_name, filter_conditions, mongoclient)
     if ret_val >= 0:
-        response_msg = 'Data has been deleted!'
+        response_msg = err_msg
 
         if mode == 'debug': print(response_msg)
         else: RESPONSE_MESSAGES.append(response_msg)
@@ -216,8 +220,9 @@ def select_request(mode, res, mongoclient, connection_socket: sck.socket):
         
         if mode == 'debug': print(response_msg)
         else:
-            TABLES_TO_SELECT.append(err_msg) 
             RESPONSE_MESSAGES.append(response_msg)
+            RESPONSE_MESSAGES.append('select') 
+            RESPONSE_MESSAGES.append(str(err_msg)) 
     else:
         if mode == 'debug': print(err_msg)
         else:
@@ -225,6 +230,7 @@ def select_request(mode, res, mongoclient, connection_socket: sck.socket):
             send_one_message(connection_socket, 'breakout')
 
     return ret_val
+
 
 # parse through the whole input file, and search for errors            
 def first_parse(syntax: str, mode = ''):
@@ -272,6 +278,7 @@ def test_syntax(syntax: str, connection_socket: sck.socket, mode=''):
         return -1
 
     global DATABASE_IN_USE
+    global TABLES_TO_SELECT
     mongodb, mongoclient = mh.connect_mongo(DATABASE_IN_USE)
 
     status_code = 0
@@ -284,13 +291,57 @@ def test_syntax(syntax: str, connection_socket: sck.socket, mode=''):
             if mode != 'debug':
                 send_one_message(connection_socket, response_msg)
 
-        if len(TABLES_TO_SELECT):
-            for table_to_select in TABLES_TO_SELECT:
-                print(table_to_select) # tmp -> send to client
-
         if mode != 'debug':
             send_one_message(connection_socket, 'breakout')
         
+
+def create_tree_from_xml():
+    response = {}
+    tree = ET.parse('databases.xml')
+    root = tree.getroot()
+
+    for database in root.findall('Database'):
+        response[database.attrib['name']] = []
+        table_response = {}
+        for table in database.findall('.//Table'):
+            table_response[table.attrib['name']] = []
+            for attribute in table.findall('.//Attribute'):
+                table_response[table.attrib['name']].append(attribute.attrib['attributeName'])
+            response[database.attrib['name']].append(table_response)
+            table_response = {}
+
+    return response
+
+
+# CLIENT's 'run' COMMAND:
+def handle_run_request(connection_socket):
+    global RESPONSE_MESSAGES
+    RESPONSE_MESSAGES = []
+            
+    message = recv_one_message(connection_socket).decode()
+
+    full_request = prs.handle_my_sql_input(message)
+    test_syntax(full_request, connection_socket)
+
+
+# CLIENT's 'console' COMMAND:
+def handle_console_request(connection_socket):
+    global RESPONSE_MESSAGES
+    RESPONSE_MESSAGES = []
+            
+    message = recv_one_message(connection_socket).decode()
+
+    full_request = prs.handle_my_sql_input(message)
+    test_syntax(full_request, connection_socket)
+
+
+# CLIENT's 'tree' COMMAND:
+def handle_tree_request(connection_socket):
+    response = create_tree_from_xml()
+
+    send_one_message(connection_socket, str(response))
+    send_one_message(connection_socket, 'breakout')
+
 
 def server_side():
     global DATABASE_IN_USE
@@ -315,26 +366,15 @@ def server_side():
             break
 
         if request == 'run':
-            RESPONSE_MESSAGES = []
-            
-            message = recv_one_message(connection_socket).decode()
-
-            full_request = prs.handle_my_sql_input(message)
-            test_syntax(full_request, connection_socket)
+            handle_run_request(connection_socket)
             continue
 
         if request == 'console':
-            RESPONSE_MESSAGES = []
-            
-            message = recv_one_message(connection_socket).decode()
-
-            print(message)
-
-            full_request = prs.handle_my_sql_input(message)
-            test_syntax(full_request, connection_socket)
+            handle_console_request(connection_socket)
             continue
         
         if request == 'tree':
+            handle_tree_request(connection_socket)
             continue
 
 

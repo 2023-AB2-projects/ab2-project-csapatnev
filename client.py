@@ -8,9 +8,13 @@ import re
 import subprocess
 import sys
 import os.path
+import rich
 
 from enum import Enum
 from protocol.simple_protocol import *
+from rich.tree import Tree
+from rich.console import Console
+from rich.table import Table
 
 HOST = '127.0.0.1'
 PORT = 6969     # nice
@@ -25,6 +29,7 @@ class Color(Enum):
     GREEN = 'green'
     YELLOW = 'yellow'
     BLUE = 'blue'
+    LIGHT = 'light'
 
 
 console_colors = {
@@ -32,6 +37,7 @@ console_colors = {
     'green': '\x1b[0;32;3m',
     'yellow': '\x1b[0;33;3m',
     'blue': '\x1b[0;34;3m',
+    'light': '\x1b[0;37;3m',
     'end': '\x1b[0m',
 }
 
@@ -43,25 +49,15 @@ def str_color(string, color):
         return string 
 
 
-def print_header():
-    print(str_color('Welcome to DBMSName!\n', Color.GREEN.value))
+def print_commands():
     print(str_color('Commands:', Color.GREEN.value))
     print('\tconnect\t\t\t' + str_color('Connect to server', Color.BLUE.value))
     print('\trun [FILENAME]\t\t' + str_color('Run your SQL code from file', Color.BLUE.value))
     print('\tconsole\t\t\t' + str_color('Allows you to write SQL code in console', Color.BLUE.value))
     print('\ttree\t\t\t' + str_color('View stored databases', Color.BLUE.value))
+    print('\tcommands\t\t' + str_color('Show commands', Color.BLUE.value))
     print('\texit\t\t\t' + str_color('Exit DBMSName', Color.BLUE.value))
     print()
-
-
-def get_message_from_socket(connection_socket: sck.socket):
-    message = bytearray()
-    while True:
-        data = connection_socket.recv(4096)
-        message.extend(data)
-        if len(data) < 4096:
-            break
-    return message.decode('utf-8')
 
 
 def client_parse_command(command):
@@ -81,66 +77,164 @@ def client_parse_command(command):
     run_pattern = r'^\s*run\s([^\s]+)\s*$'
     match_run = re.match(run_pattern, command)
     if match_run != None:
-        if CONNECTED_TO_SERVER != False:
-            if os.path.isfile(match_run.group(1)):
-                f_input = open(match_run.group(1), "r")
-                request = f_input.read()
-                
-                send_one_message(client_socket, 'run')
-                send_one_message(client_socket, request)
-
-                while True:
-                    response = recv_one_message(client_socket).decode()
-                    if response == 'breakout': break                    
-                    print(str_color('[Server]: ', Color.YELLOW.value) + response)
-            else:
-                print(str_color('[Error]: Cannot open File! ', Color.RED.value) + match_run.group(1))
-        else:
+        if not CONNECTED_TO_SERVER:
             print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
-        return 2
+            return 2
+        
+        if not os.path.isfile(match_run.group(1)):
+            print(str_color('[Error]: Cannot open File! ', Color.RED.value) + match_run.group(1))
+            return 2
+        
+        f_input = open(match_run.group(1), "r")
+        request = f_input.read()
+        
+        send_one_message(client_socket, 'run')
+        send_one_message(client_socket, request)
 
+        while True:
+            response = recv_one_message(client_socket).decode()
+            
+            if response == 'breakout': break                    
+            
+            if response == 'select':
+                response = recv_one_message(client_socket).decode()
+                table_to_print = eval(response)
+
+                configure_item = table_to_print[0]
+
+                table = Table(show_lines=True, header_style='yellow')
+                table.add_column('No.', style='yellow')
+            
+                for columns in configure_item.keys():
+                    table.add_column(columns, no_wrap=True)
+
+                row_counter = 0
+                for row_item in table_to_print:
+                    row_counter += 1
+
+                    row = [str(row_counter) + '.'] + [str(value) for _, value in list(row_item.items())]
+                    table.add_row(*row)
+
+                console = Console()
+                console.print(table)
+            else:
+                print('\n' + str_color('[Server]: ', Color.YELLOW.value) + response)
+
+        print()
+
+        return 2
+            
     console_pattern = r'^\s*console\s*$'
     match_console = re.match(console_pattern, command)
     if match_console != None:
-        if CONNECTED_TO_SERVER != False:
-            console_input = ''
-            request = ''
-            
-            while (console_input != '<'):
-                print(str_color('[Console]: ', Color.BLUE.value), end='')
-                
-                console_input = input()
-                
-                if console_input != '<':
-                    request += ' ' + console_input
-            
-            send_one_message(client_socket, 'console')
-            send_one_message(client_socket, request)
-
-            while True:
-                    response = recv_one_message(client_socket).decode()
-                    if response == 'breakout': break                    
-                    print(str_color('[Server]: ', Color.YELLOW.value) + response)
-        else:
+        if not CONNECTED_TO_SERVER:
             print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
-        return 3
+            return 3
+        
+        console_input = ''
+        request = ''
+        
+        while (console_input != '<'):
+            print(str_color('[Console]: ', Color.BLUE.value), end='')
+            
+            console_input = input()
+            
+            if console_input != '<':
+                request += ' ' + console_input
+        
+        send_one_message(client_socket, 'console')
+        send_one_message(client_socket, request)
+
+        while True:
+            response = recv_one_message(client_socket).decode()
+            
+            if response == 'breakout': break                    
+            
+            if response == 'select':
+                response = recv_one_message(client_socket).decode()
+                table_to_print = eval(response)
+
+                configure_item = table_to_print[0]
+
+                table = Table(show_lines=True, header_style='yellow')
+                table.add_column('No.', style='yellow')
+            
+                for columns in configure_item.keys():
+                    table.add_column(columns, no_wrap=True)
+
+                row_counter = 0
+                for row_item in table_to_print:
+                    row_counter += 1
+
+                    row = [str(row_counter) + '.'] + [str(value) for _, value in list(row_item.items())]
+                    table.add_row(*row)
+
+                console = Console()
+                console.print(table)
+            else:
+                print('\n' + str_color('[Server]: ', Color.YELLOW.value) + response)
+
+        print()
+        return 3  
+
+    tree_pattern = r'^\s*tree\s*$'
+    match_tree = re.match(tree_pattern, command)
+    if match_tree != None:
+        if not CONNECTED_TO_SERVER:
+            print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
+            return 4
+        
+        send_one_message(client_socket, 'tree')
+
+        while True:
+            response = recv_one_message(client_socket).decode()
+            if response == 'breakout': break                    
+            
+            tree = Tree(str_color('<Tree>', Color.GREEN.value))
+            
+            tree_to_print = eval(response)
+            
+            for database in tree_to_print.keys():
+                database_tree = Tree(str_color('<Database> ', Color.BLUE.value) + str_color(database, Color.LIGHT.value))
+                for table in tree_to_print[database]:
+                    table_tree = Tree(str_color('<Table> ', Color.YELLOW.value) + str_color(list(table.keys())[0] , Color.LIGHT.value))
+                    for attribute in table[list(table.keys())[0]]:
+                        table_tree.add(str_color('<Attribute> ', Color.GREEN.value) + str_color(attribute, Color.LIGHT.value))
+                    database_tree.add(table_tree)
+                tree.add(database_tree)
+
+            print()
+            rich.print(tree)
+            print()
+
+        return 4
+    
+    commands_pattern = r'^\s*commands\s*$'
+    match_commands = re.match(commands_pattern, command)
+    if match_commands != None:
+        print()
+        print_commands()
+        print()
+
+        return 5
 
     exit_pattern = r'^\s*exit\s*$'
     match_exit = re.match(exit_pattern, command)
     if match_exit != None:
-        if CONNECTED_TO_SERVER == True:
+        if CONNECTED_TO_SERVER:
             print('\n' + str_color('Closing Server...', Color.GREEN.value))
-            
             send_one_message(client_socket, 'kill yourself')
 
         print('\n' + str_color('Have a great Day!', Color.GREEN.value) + '\n')
 
         client_socket.close()
+       
         return 0
 
 
 def start_application():
-    print_header()
+    print(str_color('Welcome to DBMSName!\n', Color.GREEN.value))
+    print_commands()
 
     status_code = -1
     while (status_code != 0):

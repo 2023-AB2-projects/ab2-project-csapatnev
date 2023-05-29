@@ -63,4 +63,8 @@
     </Tables>
 </Database>
 
+<Database name="ASD">
+    <Tables>
+        </Tables></Database>
+
 </Databases>
