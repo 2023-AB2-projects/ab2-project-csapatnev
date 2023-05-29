@@ -12,6 +12,7 @@ def get_sql_keywords():
         'from',
         'where',
         'select',
+        'from',
         'join',
         'on',
         'group',
@@ -20,7 +21,12 @@ def get_sql_keywords():
         'primary',
         'key',
         'references',
-        
+        'unique',
+        'as',
+        'not',
+        'and',
+        'or',
+        'like'
         # sql objects:
         'database',
         'table',
@@ -34,6 +40,7 @@ def get_sql_keywords():
         'float'
     ]
 
+
 def get_sql_function_keywords():
     return [
         'avg()',
@@ -42,3 +49,6 @@ def get_sql_function_keywords():
         'count()',
         'sum()',
     ]
+
+
+# def get_

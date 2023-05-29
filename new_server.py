@@ -26,6 +26,7 @@ PORT = 6969 # nice
 DATABASE_IN_USE = "MASTER"
 
 RESPONSE_MESSAGES = []
+TABLES_TO_SELECT = []
 
 
 # CREATE DATABASE database_name;
@@ -200,9 +201,30 @@ def update_request(mode, res, mongoclient, connection_socket: sck.socket):
 
 # SELECT columns FROM table_name <JOIN join_condition> <WHERE condition> <GROUP BY col1, col2, ...>;
 def select_request(mode, res, mongoclient, connection_socket: sck.socket):
-    print()
-    return 0
+    db_name = DATABASE_IN_USE
+    
+    select_clause = res['select_clause']
+    select_distinct = res['select_distinct']
+    from_clause = res['from_clause']
+    join_clause = res['join_clause']
+    where_clause = res['where_clause']
+    groupby_clause = res['groupby_clause']
+    
+    ret_val, err_msg = cmd.select(db_name, select_clause, select_distinct, from_clause, join_clause, where_clause, groupby_clause, mongoclient)
+    if ret_val >= 0:
+        response_msg = 'Selected successfully!'
+        
+        if mode == 'debug': print(response_msg)
+        else:
+            TABLES_TO_SELECT.append(err_msg) 
+            RESPONSE_MESSAGES.append(response_msg)
+    else:
+        if mode == 'debug': print(err_msg)
+        else:
+            send_one_message(connection_socket, err_msg)
+            send_one_message(connection_socket, 'breakout')
 
+    return ret_val
 
 # parse through the whole input file, and search for errors            
 def first_parse(syntax: str, mode = ''):
@@ -259,7 +281,12 @@ def test_syntax(syntax: str, connection_socket: sck.socket, mode=''):
 
     if status_code == 0:
         for response_msg in RESPONSE_MESSAGES:
-            send_one_message(connection_socket, response_msg)
+            if mode != 'debug':
+                send_one_message(connection_socket, response_msg)
+
+        if len(TABLES_TO_SELECT):
+            for table_to_select in TABLES_TO_SELECT:
+                print(table_to_select) # tmp -> send to client
 
         if mode != 'debug':
             send_one_message(connection_socket, 'breakout')
