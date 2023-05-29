@@ -2,6 +2,8 @@ from lxml import *
 from lxml import etree
 import mongoHandler
 import datetime
+from datagetter import load_table_data, load_table_data_from_index
+import re
 
 XML_FILE_LOCATION = './databases.xml'
 
@@ -362,14 +364,6 @@ def insert_into(db_name, table_name, columns, values, mongoclient):
                     # convert the value to the correct data type
                     if attribute.get('type') == 'INT':
                         values[i] = int(values[i])
-                    elif attribute.get('type') == 'FLOAT':
-                        values[i] = float(values[i])
-                    elif attribute.get('type') == 'BIT':
-                        values[i] = bool(values[i])
-                    elif attribute.get('type') == 'DATE':
-                        values[i] = datetime.strptime(values[i], '%Y-%m-%d')
-                    elif attribute.get('type') == 'DATETIME':
-                        values[i] = datetime.strptime(values[i], '%Y-%m-%d %H:%M:%S')
                     break
         # insert the values into the table
         primary_key_columns = find_pk_columns(structure)
@@ -440,16 +434,282 @@ def delete_from(db_name, table_name, filter_conditions, mongoclient):
     else:
         return mongoHandler.delete_from(mongoclient, table_name, db_name, filter_conditions, columns, unique_keys, foreign_keys, foreign_key_references, index_file_names, primary_key_columns)
 
+def distinctify(data):
+    seen = {}
+    for key, value in data.items():
+        pk_data = tuple(value['pk'].items())
+        if pk_data not in seen:
+            seen[pk_data] = value
+    return seen
 
-def select_all(db_name, table_name, mongodb):
-    # check for valid database and table
+def apply_condition(data, condition):
+    operator = condition['operator']
+    lhs = condition['lhs']
+    rhs = condition['rhs']
+
+    new_data = {}
+
+    if rhs['type'] == 'column':
+        lhs_column_name = lhs['column_name'].upper()
+        rhs_column_name = rhs['column_name'].upper()
+        
+        for _id, row in data.items():
+            column_value_lhs = row['pk'][lhs_column_name] if lhs_column_name in row['pk'] else row['value'][lhs_column_name]
+            column_value_rhs = row['pk'][rhs_column_name] if rhs_column_name in row['pk'] else row['value'][rhs_column_name]
+            if compare_values(operator, column_value_lhs, column_value_rhs):
+                new_data[_id] = row
+    else:
+        lhs_column_name = lhs['column_name'].upper()
+        
+        for _id, row in data.items():
+            column_value = row['pk'][lhs_column_name] if lhs_column_name in row['pk'] else row['value'][lhs_column_name]
+            comparison_value = rhs['value']
+            if compare_values(operator, column_value, comparison_value):
+                new_data[_id] = row
+    return new_data
+
+def compare_values(operator, value1, value2):
+    if isinstance(value1, str):
+        value1 = value1.strip('\'"')
+    if isinstance(value2, str):
+        value2 = value2.strip('\'"')
+   
+    if operator == "$eq":
+        return value1 == value2
+    elif operator == "$gt":
+        return value1 > value2
+    elif operator == "$gte":
+        return value1 >= value2
+    elif operator == "$lt":
+        return value1 < value2
+    elif operator == "$lte":
+        return value1 <= value2
+    elif operator == "$ne":
+        return value1 != value2
+    elif operator == "$regex":
+        return re.search(value2, value1)
+    else:
+        return False
+
+def apply_where_clause(data, where_clause):
+    for condition in where_clause:
+        data = apply_condition(data, condition)
+    return data
+
+def filter_columns(data, select_clause):
+    # Prepare a list of column names from the select_clause
+    column_names = {col['column_name'].upper(): (col.get('alias') or col['column_name']).upper() for col in select_clause}
+
+    for _id, row in data.items():
+        new_pk = {}
+        new_value = {}
+
+        for original_name, alias_name in column_names.items():
+            if original_name in row['pk']:
+                new_pk[alias_name] = row['pk'][original_name]
+            if original_name in row['value']:
+                new_value[alias_name] = row['value'][original_name]
+        
+        row['pk'] = new_pk
+        row['value'] = new_value
+
+    return data
+
+def get_index_columns(db_name, table_name, xml_root):
+    # Fetch index columns for a table from XML
+    index_columns = []
+    indexes = xml_root.findall(f"./Database[@name='{db_name}']/Tables/Table[@name='{table_name}']/IndexFiles/IndexFile")
+    for index in indexes:
+        index_cols = [iattrib.text.upper() for iattrib in index.findall('IAttribute')]
+        index_columns.append(index_cols)
+
+    # Automatically generated index files
+    # Fetch unique key columns for the table
+    uindexes = xml_root.findall(f"./Database[@name='{db_name}']/Tables/Table[@name='{table_name}']/uniqueKeys/uniqueKey")
+    for uindex in uindexes:
+        uindex_cols = uindex.text.upper()
+        index_columns.append([uindex_cols])
+
+    # Fetch foreign key columns for the table
+    findexes = xml_root.findall(f"./Database[@name='{db_name}']/Tables/Table[@name='{table_name}']/foreignKeys/foreignKey")
+    for findex in findexes:
+        findex_cols = findex.text.upper()
+        index_columns.append([findex_cols])
+
+    return index_columns
+
+def get_index_name(db_name, table_name, index_columns, xml_root):
+    # Define the general formats of the index file names
+    formats = ['{table}_{column}_UNIQUE_INDEX', '{table}_{column}_FOREIGN_INDEX']
+
+    for index_column in index_columns:
+        # Check for user-defined index files first
+        index_file_elem = xml_root.find(f"./Database[@name='{db_name}']/Tables/Table[@name='{table_name}']/IndexFiles/IndexFile[IAttribute='{index_column}']")
+        if index_file_elem is not None:
+            return index_file_elem.get('indexFileName')
+
+        # Then check for automatically generated index files
+        for fmt in formats:
+            index_name = fmt.format(table=table_name, column=index_column)
+            if xml_root.find(f"./Database[@name='{db_name}']/Tables/Table[@name='{table_name}']/IndexFiles/IndexFile[@indexFileName='{index_name}']") is not None:
+                return index_name
+
+    # If no matching index file was found, return None
+    return None
+
+def load_index_data(db_name, index_name, mongo_client):
+    db = mongo_client[db_name]
+    collection = db[index_name]
+
+    # Here, each document's '_id' is the indexed columns' values concatenated with '#',
+    # and 'value' is the primary key of the corresponding row in the table
+    data = {doc['_id']: doc['value'] for doc in collection.find()}
+
+    return 0, data
+
+def perform_nested_join(db_name, join_clause, mongoclient, xml_root):
+    print("SIMPLE NESTED LOOP JOIN ALGORITHM IS TO BE PERFORMED")
+    retVal, data = load_table_data(db_name, join_clause[0]['lhs']['table_name'].upper(), mongoclient, xml_root)
+    if retVal < 0:
+        return retVal, data
+
+    for join in join_clause:
+        retVal, rhs_data = load_table_data(db_name, join['rhs']['table_name'].upper(), mongoclient, xml_root)
+        if retVal < 0:
+            return retVal, rhs_data
+
+        new_data = {}
+
+        for lhs_id, lhs_row in data.items():
+            lhs_column_name = join['lhs']['column_name'].upper()
+            lhs_value = lhs_row['value'].get(lhs_column_name, lhs_row['pk'].get(lhs_column_name))
+
+            for rhs_id, rhs_row in rhs_data.items():
+                rhs_column_name = join['rhs']['column_name'].upper()
+                rhs_value = rhs_row['value'].get(rhs_column_name, rhs_row['pk'].get(rhs_column_name))
+
+                if lhs_value == rhs_value:
+                    # Construct the new row data
+                    new_row = {'pk': {**lhs_row['pk'], **rhs_row['pk']},
+                               'value': {**lhs_row['value'], **rhs_row['value']}}
+
+                    # If lhs_id is not string convert it to a string
+                    if not isinstance(lhs_id, str):
+                        lhs_id = str(lhs_id)
+                    # If rhs_id is not string convert it to a string
+                    if not isinstance(rhs_id, str):
+                        rhs_id = str(rhs_id)
+                    new_id = lhs_id + "#" + rhs_id
+                    new_data[new_id] = new_row
+
+        data = new_data  # Update data for the next join
+
+    return retVal, data
+
+def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_root):
+    print("INDEXED NESTED LOOP JOIN ALGORITHM IS TO BE PERFORMED")
+    data = {}
+    retVal = 0
+
+    for join in join_clause:
+        lhs_table_name = join['lhs']['table_name'].upper()
+        rhs_table_name = join['rhs']['table_name'].upper()
+
+        # We can arbitrarily choose the LHS to be the outer table and RHS to be the inner table for now
+        # You could improve this later by selecting the smaller table as the outer table, for example
+        retVal, outer_table_data = load_table_data(db_name, lhs_table_name, mongo_client, xml_root)
+        if retVal < 0:
+            return retVal, outer_table_data
+
+        # Get the index columns of the inner table
+        inner_table_index_columns = get_index_columns(db_name, rhs_table_name, xml_root)
+
+        # Use the join condition to select the appropriate index
+        join_column = join['rhs']['column_name'].upper()
+        index_columns = [index for index in inner_table_index_columns if join_column in index]
+
+        # For now, let's assume that there is only one index that includes the join column
+        # If there are more, you might need to choose among them
+        if not index_columns:
+            return 1, "No suitable index found for join operation"
+        
+        index_column = index_columns[0]  # choose the first suitable index
+
+        # Load the index data
+        index_name = get_index_name(db_name, rhs_table_name, index_column, xml_root)
+        retVal, index_data = load_index_data(db_name, index_name, mongo_client)
+        if retVal < 0:
+            return retVal, index_data
+
+        # Now we can perform the INLJ
+        for outer_id, outer_row in outer_table_data.items():
+            outer_column_value = outer_row['value'].get(join['lhs']['column_name'].upper(), outer_row['pk'].get(join['lhs']['column_name'].upper()))
+            
+            # Check if the outer column value exists in the index
+            # If yes, it means that there are matching rows in the inner table
+            if outer_column_value in index_data:
+                # Get the primary key of the matching row(s) in the inner table
+                inner_pks = index_data[outer_column_value]  # this could be a list if there are multiple matches
+                
+                # Load the matching rows from the inner table
+                retVal, matching_rows = load_table_data_from_index(db_name, rhs_table_name, {outer_column_value: inner_pks}, mongo_client, xml_root)
+                if retVal < 0:
+                    return retVal, matching_rows
+
+                # Merge the outer row with each matching inner row
+                for inner_id, inner_row in matching_rows.items():
+                    new_row = {'pk': {**outer_row['pk'], **inner_row['pk']},
+                                'value': {**outer_row['value'], **inner_row['value']}}
+                    new_id = outer_id + "#" + inner_id
+                    data[new_id] = new_row
+
+    return retVal, data
+
+
+def simplify_result(dbms_result):
+    simplified_result = {
+        k: {**v['pk'], **v['value']}
+        for k, v in dbms_result.items()
+    }
+
+    # Remove duplicates
+    simplified_result = list(simplified_result.values())
+
+    return simplified_result
+
+
+def select(db_name, select_clause, select_distinct, from_clause, join_clause, where_clause, groupby_clause, mongoclient):
     db_name = db_name.upper()
-    table_name = table_name.upper()
     xml_root = parse_xml_file(XML_FILE_LOCATION)
+
     if not database_exists(xml_root, db_name):
         return (-1, f"Error: Database {db_name} does not exist!")
-    elif not table_exists(xml_root, db_name, table_name):
-        return (-2, f"Error: Table {table_name} in database {db_name} does not exist!")
-    else:
-        # select all the values from the table
-        return mongoHandler.select_all(mongodb, table_name)
+
+    from_table_name = from_clause.upper()
+
+    if not table_exists(xml_root, db_name, from_table_name):
+        return (-2, f"Error: Table {from_table_name} in database {db_name} does not exist!")
+
+    if join_clause: # handle multi-table queries (with JOINs)
+        retVal, data = perform_indexed_nested_loop_join(db_name, join_clause, mongoclient, xml_root)
+        if retVal < 0:
+            return retVal, data
+        elif retVal == 1:
+            retVal, data = perform_nested_join(db_name, join_clause, mongoclient, xml_root)
+            if retVal < 0:
+                return retVal, data
+    else: # handle single table queries
+        retVal, data = load_table_data(db_name, from_table_name, mongoclient, xml_root)
+        if retVal < 0:
+            return retVal, data
+
+    if where_clause:
+        data = apply_where_clause(data, where_clause)
+
+    if select_clause[0]['column_name'] != '*':
+        data = filter_columns(data, select_clause)
+
+    if select_distinct:
+        data = distinctify(data)
+
+    return (0, simplify_result(data))
