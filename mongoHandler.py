@@ -45,6 +45,11 @@ def update_index_on_insert(mongoclient, db_name, table_name, index_name, columns
 
     if existing_document:
         # Append the primary key to the existing document
+        if isinstance(existing_document["value"], int):
+            existing_document["value"] = str(existing_document["value"])
+        if isinstance(primary_key, int):
+            primary_key = str(primary_key)
+
         existing_document["value"] = existing_document["value"] + "#" + primary_key
         index_collection.replace_one({"_id": indexed_column_values_str}, existing_document)
     else:
@@ -297,15 +302,3 @@ def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, un
         return 0, f"Deleted {result.deleted_count} document(s) matching the filter conditions."
     else:
         return -1, "No document found matching the filter conditions."
-
-
-# testing function
-def fetch_all_documents(mongodb, table_name):
-    collection = mongodb[table_name]
-    documents = collection.find()
-    return list(documents)
-
-def select_all(mongodb, table_name):
-    collection = mongodb[table_name]
-    documents = collection.find()
-    return list(documents)
