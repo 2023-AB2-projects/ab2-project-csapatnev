@@ -214,7 +214,7 @@ def select_request(mode, res, mongoclient, connection_socket: sck.socket):
     if ret_val >= 0:
         response_msg = 'Selected successfully!'
         
-        if mode == 'debug': print(response_msg)
+        if mode == 'debug': print(err_msg)
         else:
             TABLES_TO_SELECT.append(err_msg) 
             RESPONSE_MESSAGES.append(response_msg)
@@ -319,23 +319,13 @@ def server_side():
 
 
 if __name__ == "__main__":
-    server_side()
+    #server_side()
 
-    # syntax = """
-    #     USE BIGBOY;
-    #     DROP TABLE Companies;
+    syntax = """
+        USE BIGBOY;
+        
+        SELECT * FROM Users WHERE Password = 'PASSWORD15335';
+    """
 
-    #     CREATE TABLE Companies (
-    #         CompanyID VARCHAR(100) PRIMARY KEY,
-    #         UserID INT References Users(UserID)
-    #     );
-
-    #     INSERT INTO Companies (CompanyID, UserID) VALUES ('company1', 1);
-    #     INSERT INTO Companies (CompanyID, UserID) VALUES ('company2', 2);
-    #     INSERT INTO Companies (CompanyID, UserID) VALUES ('company3', 3);
-    #     INSERT INTO Companies (CompanyID, UserID) VALUES ('company4', 4);
-    #     INSERT INTO Companies (CompanyID, UserID) VALUES ('company5', 5);
-    # """
-
-    # syntax = prs.handle_my_sql_input(syntax)
-    # test_syntax(syntax, '', 'debug')
+    syntax = prs.handle_my_sql_input(syntax)
+    test_syntax(syntax, '', 'debug')
