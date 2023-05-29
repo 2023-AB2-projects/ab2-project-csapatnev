@@ -98,23 +98,30 @@ def client_parse_command(command):
             print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
         return 2
 
-    # console_pattern = r'^\s*console\s*$'
-    # match_console = re.match(console_pattern, command)
-    # if match_console != None:
-    #     if CONNECTED_TO_SERVER != False:
-    #         console_input = ''
-    #         request = ''
-    #         while (console_input != '<'):
-    #             print(str_color('[Console]: ', Color.BLUE.value), end='')
-    #             console_input = input()
-    #             if console_input != '<':
-    #                 request += console_input
-    #         client_socket.send(request.encode())
-    #         response = client_socket.recv(999999999).decode()
-    #         print(str_color('[Server]:', Color.YELLOW.value) + response)
-    #     else:
-    #         print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
-    #     return 3
+    console_pattern = r'^\s*console\s*$'
+    match_console = re.match(console_pattern, command)
+    if match_console != None:
+        if CONNECTED_TO_SERVER != False:
+            console_input = ''
+            request = ''
+            
+            while (console_input != '<'):
+                print(str_color('[Console]: ', Color.BLUE.value), end='')
+                
+                console_input = input()
+                
+                if console_input != '<':
+                    request += console_input
+            
+            send_one_message(client_socket, 'console')
+            send_one_message(client_socket, request)
+
+            response = recv_one_message(client_socket).decode()
+            
+            print(str_color('[Server]:', Color.YELLOW.value) + response)
+        else:
+            print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
+        return 3
 
     exit_pattern = r'^\s*exit\s*$'
     match_exit = re.match(exit_pattern, command)
