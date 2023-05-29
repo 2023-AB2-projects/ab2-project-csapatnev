@@ -293,3 +293,22 @@ def server_side():
 
 if __name__ == "__main__":
     server_side()
+
+    # syntax = """
+    #     USE BIGBOY;
+    #     DROP TABLE Companies;
+
+    #     CREATE TABLE Companies (
+    #         CompanyID VARCHAR(100) PRIMARY KEY,
+    #         UserID INT References Users(UserID)
+    #     );
+
+    #     INSERT INTO Companies (CompanyID, UserID) VALUES ('company1', 1);
+    #     INSERT INTO Companies (CompanyID, UserID) VALUES ('company2', 2);
+    #     INSERT INTO Companies (CompanyID, UserID) VALUES ('company3', 3);
+    #     INSERT INTO Companies (CompanyID, UserID) VALUES ('company4', 4);
+    #     INSERT INTO Companies (CompanyID, UserID) VALUES ('company5', 5);
+    # """
+
+    # syntax = prs.handle_my_sql_input(syntax)
+    # test_syntax(syntax, '', 'debug')

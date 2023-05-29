@@ -25,6 +25,28 @@
 
         </IndexFiles>
         </Table>
+    <Table name="COMPANIES">
+        <Structure>
+            <Attribute attributeName="COMPANYID" type="VARCHAR"/>
+            <Attribute attributeName="USERID" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>COMPANYID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>USERID</foreignKey>
+
+            <references>
+                <refTable>USERS</refTable>
+                <refAttribute>USERID</refAttribute>
+            </references>
+        </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
     </Tables>
 </Database>
 
