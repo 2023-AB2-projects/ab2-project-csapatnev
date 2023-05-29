@@ -1,14 +1,8 @@
 drop database tmp;
-
 create database tmp;
 
 use tmp;
 
-create table Subjects (
-    SubjectID int primary key,
-    SubjectName varchar(255),
-    Courses int
-);
 
 create table Subjects (
     SubjectID int primary key,
