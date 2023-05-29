@@ -104,7 +104,7 @@ def handle_my_sql_input(input_str: str):
     sql_code_without_comments = re.sub('/\*.*?\*/', '', input_str)
 
     # splits the string into commands
-    commands_raw = re.split('(CREATE|INSERT|USE|DROP|DELETE|UPDATE|SELECT)',
+    commands_raw = re.split('\s+(CREATE|INSERT|USE|DROP|DELETE|UPDATE|SELECT)\s+',
                             sql_code_without_comments, flags=re.IGNORECASE)
 
     # removes whitespaces
@@ -126,14 +126,7 @@ def handle_my_sql_input(input_str: str):
     commands = []
     for command_in_sql in commands_in_sql:
         command = parse(command_in_sql)
-        print(command)
+        # print(command)
         commands.append(command)
 
     return commands
-
-
-# syntax = '''
-# '''
-
-# asd = handle_my_sql_input(syntax)
-

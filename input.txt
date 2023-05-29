@@ -1,20 +1,63 @@
-    USE UNIVERSITY;
+drop database tmp;
 
-    DROP DATABASE UNIVERSITY;
+create database tmp;
 
-    create database University;
+use tmp;
 
-    USE University;
+create table Subjects (
+    SubjectID int primary key,
+    SubjectName varchar(255),
+    Courses int
+);
 
-    CREATE TABLE credits (
-        CreditNr int,
-        CName varchar(30) UNIQUE,
-        PRIMARY KEY (CreditNr, CName)
-    );
+create table Subjects (
+    SubjectID int primary key,
+    SubjectName varchar(255),
+    Courses int
+);
 
-    INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
-    INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
-    INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
-    INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
+create table Felhasznalok ( 
+    FID int primary key,
+    FName varchar(255),
+    FType varchar(255)
+);
 
-    DELETE FROM Credits WHERE CreditNr = 10 AND CName = 'MATHEMATICS';
+
+create table Resources (
+    RID int primary key,
+    RName varchar(255),
+    SubjectID int REFERENCES Subjects (SubjectID)
+);
+
+
+insert into Subjects (SubjectID, SubjectName, Courses) values (1, 'asd', 10);
+insert into Subjects (SubjectID, SubjectName, Courses) values (2, 'asd', 10);
+insert into Subjects (SubjectID, SubjectName, Courses) values (3, 'asd', 10);
+insert into Subjects (SubjectID, SubjectName, Courses) values (4, 'asd', 10);
+insert into Subjects (SubjectID, SubjectName, Courses) values (5, 'asd', 10);
+insert into Subjects (SubjectID, SubjectName, Courses) values (6, 'asd', 10);
+insert into Subjects (SubjectID, SubjectName, Courses) values (7, 'asd', 10);
+insert into Subjects (SubjectID, SubjectName, Courses) values (8, 'asd', 10);
+insert into Subjects (SubjectID, SubjectName, Courses) values (9, 'asd', 10);
+
+
+insert into Felhasznalok (FID, FName, FType) values (1, 'Name', 'client');
+insert into Felhasznalok (FID, FName, FType) values (2, 'Name', 'client');
+insert into Felhasznalok (FID, FName, FType) values (3, 'Name', 'client');
+insert into Felhasznalok (FID, FName, FType) values (4, 'Name', 'client');
+insert into Felhasznalok (FID, FName, FType) values (5, 'Name', 'client');
+insert into Felhasznalok (FID, FName, FType) values (6, 'Name', 'client');
+insert into Felhasznalok (FID, FName, FType) values (7, 'Name', 'client');
+insert into Felhasznalok (FID, FName, FType) values (8, 'Name', 'client');
+insert into Felhasznalok (FID, FName, FType) values (9, 'Name', 'client');
+
+
+insert into Resources (RID, RName, SubjectID) values (1, 'video', 1);
+insert into Resources (RID, RName, SubjectID) values (2, 'video', 2);
+insert into Resources (RID, RName, SubjectID) values (3, 'video', 3);
+insert into Resources (RID, RName, SubjectID) values (4, 'video', 4);
+insert into Resources (RID, RName, SubjectID) values (5, 'video', 5);
+insert into Resources (RID, RName, SubjectID) values (6, 'video', 6);
+insert into Resources (RID, RName, SubjectID) values (7, 'video', 7);
+insert into Resources (RID, RName, SubjectID) values (8, 'video', 8);
+insert into Resources (RID, RName, SubjectID) values (9, 'video', 9);
