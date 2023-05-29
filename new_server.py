@@ -254,7 +254,6 @@ def test_syntax(syntax: str, connection_socket: sck.socket, mode=''):
 
     status_code = 0
     for res in syntax: 
-        print(res['code'])
         status_code = REQUEST_HANDLING[res['code']](mode, res, mongoclient, connection_socket) 
         if status_code < 0: break      
 

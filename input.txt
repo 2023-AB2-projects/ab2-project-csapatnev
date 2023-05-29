@@ -10,11 +10,18 @@ create table Subjects (
     Courses int
 );
 
+create table Subjects (
+    SubjectID int primary key,
+    SubjectName varchar(255),
+    Courses int
+);
+
 create table Felhasznalok ( 
     FID int primary key,
     FName varchar(255),
     FType varchar(255)
 );
+
 
 create table Resources (
     RID int primary key,
@@ -24,7 +31,7 @@ create table Resources (
 
 
 insert into Subjects (SubjectID, SubjectName, Courses) values (1, 'asd', 10);
-insert into Subjects (SubjectID, SubjectName, Courses) values (1, 'asd', 10);
+insert into Subjects (SubjectID, SubjectName, Courses) values (2, 'asd', 10);
 insert into Subjects (SubjectID, SubjectName, Courses) values (3, 'asd', 10);
 insert into Subjects (SubjectID, SubjectName, Courses) values (4, 'asd', 10);
 insert into Subjects (SubjectID, SubjectName, Courses) values (5, 'asd', 10);
