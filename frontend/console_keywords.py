@@ -26,6 +26,7 @@ def get_sql_keywords():
         'not',
         'and',
         'or',
+        'like'
         # sql objects:
         'database',
         'table',
@@ -39,6 +40,7 @@ def get_sql_keywords():
         'float'
     ]
 
+
 def get_sql_function_keywords():
     return [
         'avg()',
@@ -47,3 +49,6 @@ def get_sql_function_keywords():
         'count()',
         'sum()',
     ]
+
+
+# def get_
