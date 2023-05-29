@@ -1,16 +1,15 @@
+__pycache__
 node_modules/
 package-lock.json
 yarn.lock
 
 *.pyc
 *.cpython-*
-__pycache__
 __pycache__/
 __pycache__/*
 __pycache__/commands.cpython-311.pyc
 __pycache__/mongoHandler.cpython-311.pyc
 __pycache__/parsing_syntax.cpython-311.pyc
-server.py
 __pycache__/mongoHandler.cpython-311.pyc
 __pycache__/parsing_syntax.cpython-311.pyc
 __pycache__/mongoHandler.cpython-311.pyc
@@ -18,4 +17,3 @@ __pycache__/mongoHandler.cpython-311.pyc
 
 
 __pycache__
-server.py
