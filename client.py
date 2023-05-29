@@ -86,6 +86,7 @@ def client_parse_command(command):
                 f_input = open(match_run.group(1), "r")
                 request = f_input.read()
                 
+                send_one_message(client_socket, 'run')
                 send_one_message(client_socket, request)
 
                 while True:
@@ -111,14 +112,15 @@ def client_parse_command(command):
                 console_input = input()
                 
                 if console_input != '<':
-                    request += console_input
+                    request += ' ' + console_input
             
             send_one_message(client_socket, 'console')
             send_one_message(client_socket, request)
 
-            response = recv_one_message(client_socket).decode()
-            
-            print(str_color('[Server]:', Color.YELLOW.value) + response)
+            while True:
+                    response = recv_one_message(client_socket).decode()
+                    if response == 'breakout': break                    
+                    print(str_color('[Server]: ', Color.YELLOW.value) + response)
         else:
             print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
         return 3

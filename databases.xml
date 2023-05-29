@@ -1,21 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
-<Database name="BIGBOY">
-    <Tables>
-        <Table name="USERS">
-        <Structure>
-            <Attribute attributeName="USERID" type="INT"/>
-            <Attribute attributeName="USERNAME" type="VARCHAR"/>
-            <Attribute attributeName="PASSWORD" type="VARCHAR"/>
-            <Attribute attributeName="EMAIL" type="VARCHAR"/>
-            <Attribute attributeName="FIRSTNAME" type="VARCHAR"/>
-            <Attribute attributeName="LASTNAME" type="VARCHAR"/>
-            <Attribute attributeName="ADDRESS" type="VARCHAR"/>
-            <Attribute attributeName="CITY" type="VARCHAR"/>
-        </Structure>
-        <primaryKey>
-            <pkAttribute>USERID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>

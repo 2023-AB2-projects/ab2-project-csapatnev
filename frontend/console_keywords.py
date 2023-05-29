@@ -51,4 +51,4 @@ def get_sql_function_keywords():
     ]
 
 
-# def get_
+def get_database_element_keywords():
