@@ -322,10 +322,357 @@ if __name__ == "__main__":
     #server_side()
 
     syntax = """
-        USE BIGBOY;
-        
-        SELECT * FROM Users WHERE Password = 'PASSWORD15335';
+    USE UNIVERSITY;
+
+    DROP DATABASE UNIVERSITY;
+
+    create database University;
+
+    USE University;
+
+    CREATE TABLE credits (
+        CreditNr int PRIMARY KEY,
+        CName varchar(30) UNIQUE
+    );
+
+    CREATE TABLE disciplines (
+        DiscID varchar(5) PRIMARY KEY,
+        DName varchar(30) UNIQUE,
+        CreditNr int REFERENCES credits(CreditNr)
+    );
+
+    INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Mathematics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
+    INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
+    INSERT INTO Credits (CreditNr, CName) VALUES (5, 'Geography');
+    INSERT INTO Credits (CreditNr, CName) VALUES (6, 'History');
+    INSERT INTO Credits (CreditNr, CName) VALUES (7, 'English');
+    INSERT INTO Credits (CreditNr, CName) VALUES (8, 'German');
+
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Mathematics', 1);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Chemistry', 3);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Physics', 2);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('GEO', 'AISYD', 6);
+    
+    Create index asd on disciplines (DName, CreditNr);
+
+    /* constraint violation: */
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH2', 'Mathematics', 1);
+
+    /* correct delete from: */
+    /* DELETE FROM Disciplines WHERE DiscID = 'MATH'; */
+
+    /* constraint violation delete from: */
+    /* -- Create a table for subjects */
+    
+    CREATE TABLE subjects (
+        subject_id int PRIMARY KEY,
+        subject_name varchar(30)
+    );
+
+    /* Create a table for students with a foreign key referencing subjects */
+    
+    CREATE TABLE students (
+        student_id int PRIMARY KEY,
+        student_name varchar(30),
+        subject_id int REFERENCES subjects(subject_id)
+    );
+
+    /* -- Insert a subject */
+    INSERT INTO subjects (subject_id, subject_name) VALUES (1, 'Mathematics');
+
+    INSERT INTO students (student_id, student_name, subject_id) VALUES (1, 'John Doe', 1);
+
+    /* -- Attempt to delete the subject which is being referenced by the student */
+    DELETE FROM subjects WHERE subject_id = 1;
+
+    SELECT DName AS DiscName, CreditNr FROM Disciplines WHERE CreditNr > 1 AND CreditNr < 4;
     """
 
-    syntax = prs.handle_my_sql_input(syntax)
+    
+    syntax2 = """
+    USE UNIVERSITY;
+    DROP DATABASE UNIVERSITY;
+    create database University;
+    USE University;
+
+    CREATE TABLE credits (
+        CreditNr int,
+        CName varchar(30) UNIQUE,
+        PRIMARY KEY (CreditNr, CName)
+    );
+
+    INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Matematics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
+    INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
+
+    SELECT CName AS CC, CreditNr FROM Credits WHERE CreditNr > 1;
+    """
+
+    syntax3 = """
+    DROP DATABASE SCHOOL;
+    CREATE DATABASE SCHOOL;
+
+    CREATE TABLE subjects (
+        subject_id int PRIMARY KEY,
+        subject_name varchar(30)
+        );
+
+    /* Create a table for students with a foreign key referencing subjects */
+    
+    CREATE TABLE students (
+        student_id int PRIMARY KEY,
+        student_name varchar(30),
+        subject_id int REFERENCES subjects(subject_id)
+    );
+
+    /* -- Insert a subject */
+    INSERT INTO subjects (subject_id, subject_name) VALUES (1, 'Mathematics');
+
+    INSERT INTO students (student_id, student_name, subject_id) VALUES (1, 'John Doe', 1);
+
+    /* -- Attempt to delete the subject which is being referenced by the student */
+    DELETE FROM subjects WHERE subject_id = 1;
+    """
+
+    syntax4 = """
+    DROP DATABASE UNIVERSITY;
+    CREATE DATABASE UNIVERSITY;
+
+    CREATE TABLE disciplines (
+        DiscID varchar(5) PRIMARY KEY,
+        DName varchar(30),
+        CreditNr int
+    );
+
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Matematics', 1);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Matematics', 3);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Matematics', 2);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
+
+    SELECT count(DiscID), max(CreditNr) AS MAX FROM Disciplines;
+    """
+
+    syntax5 = """
+    DROP DATABASE ONLINE_SHOP;
+    CREATE DATABASE ONLINE_SHOP;
+    USE ONLINE_SHOP;
+
+    CREATE TABLE Orders (
+        Order_ID INT PRIMARY KEY,
+        Product_ID INT,
+        Quantity INT
+    );
+
+    CREATE TABLE Products (
+        Product_ID INT PRIMARY KEY,
+        Product_Name VarChar(255),
+        Category_ID INT
+    );
+
+    CREATE TABLE Categories (
+        Category_ID INT PRIMARY KEY,
+        Category_Name VarChar(255)
+    );
+
+    CREATE INDEX orders_product_id ON Orders(Product_ID);
+    CREATE INDEX products_category_id ON Products(Category_ID);
+    
+    INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (1, 101, 5);
+    INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (2, 102, 10);
+    INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (3, 103, 2);
+
+    INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (101, 'iPhone', 201);
+    INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (102, 'MacBook', 202);
+    INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (103, 'iPad', 201);
+
+
+    INSERT INTO Categories (Category_ID, Category_Name) VALUES (201, 'Electronics');
+    INSERT INTO Categories (Category_ID, Category_Name) VALUES(202, 'Computers');
+
+    SELECT *
+    FROM Orders
+    JOIN Products ON Orders.Product_ID = Products.Product_ID
+    JOIN Categories ON Products.Category_ID = Categories.Category_ID;
+
+    """
+
+    syntax6 = """
+    drop database University;
+    create database University;
+    USE University;
+
+    CREATE TABLE disciplines (
+    DiscID varchar(5) PRIMARY KEY,
+    DName varchar(30),
+    CreditNr int
+    );
+
+
+    CREATE INDEX MixedIndex on disciplines (DiscID, CreditNr);
+
+
+    /*Data for the table disciplines */
+
+    insert into disciplines (DiscID,DName,CreditNr) values ('DB1','Databases 1', 7);
+    insert into disciplines (DiscID,DName,CreditNr) values ('DS','Data Structures',6);
+    insert into disciplines (DiscID,DName,CreditNr) values ('CP','C Programming',8);
+    insert into disciplines (DiscID,DName,CreditNr) values ('ST','Statistics',5);
+    insert into disciplines (DiscID,DName,CreditNr) values ('LT','Lattice Theory',8);
+    insert into disciplines (DiscID,DName,CreditNr) values ('OOP','Object Oriented Programming',6);
+    insert into disciplines (DiscID,DName,CreditNr) values ('AI','Artificial Intelligence',8);
+    insert into disciplines (DiscID,DName,CreditNr) values ('OS','Operating Systems',3);
+    insert into disciplines (DiscID,DName,CreditNr) values ('DB2','Databases 2',6);
+    insert into disciplines (DiscID,DName,CreditNr) values ('MA','Math Analysis',7);
+    insert into disciplines (DiscID,DName,CreditNr) values ('SI','Software Engineering',6);
+    insert into disciplines (DiscID,DName,CreditNr) values ('AL','Algebra',4);
+
+
+    /*Table structure for table specialization */
+
+
+    CREATE TABLE specialization (
+    SpecID varchar(5) PRIMARY KEY,
+    SpecName varchar(40),
+    Language varchar(20) 
+    );
+
+    /*Data for the table specialization */
+
+    insert into specialization (SpecID,SpecName,Language) values ('I','Informatics','English');
+    insert into specialization (SpecID,SpecName,Language) values ('MI','Mathematics Informatics','English');
+    insert into specialization (SpecID,SpecName,Language) values ('M','Mathematics','English');
+    insert into specialization (SpecID,SpecName,Language) values ('P','Physics','German');
+    insert into specialization (SpecID,SpecName,Language) values ('CM','Computational Mathematics','German');
+    insert into specialization (SpecID,SpecName,Language) values ('A','Automatization','French');
+    insert into specialization (SpecID,SpecName,Language) values ('ING','Engineering','French');
+    insert into specialization (SpecID,SpecName,Language) values ('C','Calculators','French');
+    insert into specialization (SpecID,SpecName,Language) values ('MP','Mathematics and Physics','German');
+
+    """
+
+    syntax7 = """
+        drop database tmp;
+        create database tmp;
+        use tmp;
+
+        create table Subjects (
+            SubjectID int primary key,
+            SubjectName varchar(255),
+            Courses int
+        );
+
+        create table Felhasznalok ( 
+            FID int primary key,
+            FName varchar(255),
+            FType varchar(255)
+        );
+
+
+        create table Resources (
+            RID int primary key,
+            RName varchar(255),
+            SubjectID int REFERENCES Subjects (SubjectID)
+        );
+
+
+        insert into Subjects (SubjectID, SubjectName, Courses) values (1, 'asd', 10);
+        insert into Subjects (SubjectID, SubjectName, Courses) values (2, 'asd', 10);
+        insert into Subjects (SubjectID, SubjectName, Courses) values (3, 'asd', 10);
+        insert into Subjects (SubjectID, SubjectName, Courses) values (4, 'asd', 10);
+        insert into Subjects (SubjectID, SubjectName, Courses) values (5, 'asd', 10);
+        insert into Subjects (SubjectID, SubjectName, Courses) values (6, 'asd', 10);
+        insert into Subjects (SubjectID, SubjectName, Courses) values (7, 'asd', 10);
+        insert into Subjects (SubjectID, SubjectName, Courses) values (8, 'asd', 10);
+        insert into Subjects (SubjectID, SubjectName, Courses) values (9, 'asd', 10);
+
+
+        insert into Felhasznalok (FID, FName, FType) values (1, 'Name', 'client');
+        insert into Felhasznalok (FID, FName, FType) values (2, 'Name', 'client');
+        insert into Felhasznalok (FID, FName, FType) values (3, 'Name', 'client');
+        insert into Felhasznalok (FID, FName, FType) values (4, 'Name', 'client');
+        insert into Felhasznalok (FID, FName, FType) values (5, 'Name', 'client');
+        insert into Felhasznalok (FID, FName, FType) values (6, 'Name', 'client');
+        insert into Felhasznalok (FID, FName, FType) values (7, 'Name', 'client');
+        insert into Felhasznalok (FID, FName, FType) values (8, 'Name', 'client');
+        insert into Felhasznalok (FID, FName, FType) values (9, 'Name', 'client');
+
+
+        insert into Resources (RID, RName, SubjectID) values (1, 'video', 1);
+        insert into Resources (RID, RName, SubjectID) values (2, 'video', 1);
+        insert into Resources (RID, RName, SubjectID) values (3, 'video', 1);
+        insert into Resources (RID, RName, SubjectID) values (4, 'video', 4);
+        insert into Resources (RID, RName, SubjectID) values (5, 'video', 5);
+        insert into Resources (RID, RName, SubjectID) values (6, 'video', 6);
+        insert into Resources (RID, RName, SubjectID) values (7, 'video', 7);
+        insert into Resources (RID, RName, SubjectID) values (8, 'video', 8);
+        insert into Resources (RID, RName, SubjectID) values (9, 'video', 9);
+    """
+
+    syntax8 = """
+    DROP DATABASE UNIVERSITY;
+    CREATE DATABASE UNIVERSITY;
+    USE UNIVERSITY;
+
+    CREATE TABLE Students (
+        StudentID INT PRIMARY KEY,
+        FirstName VARCHAR(100),
+        LastName VARCHAR(100),
+        Age INT
+    );
+
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (1, 'John', 'Doe', 20);
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (2, 'Jane', 'Smith', 22);
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (3, 'Bob', 'Johnson', 21);
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (4, 'Alice', 'Davis', 23);
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (5, 'Charlie', 'Brown', 20);
+
+    CREATE TABLE Courses (
+        CourseID INT PRIMARY KEY,
+        CourseName VARCHAR(100),
+        CreditHours INT
+    );
+
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (1, 'Math', 3);
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (2, 'English', 4);
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (3, 'Physics', 4);
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (4, 'Chemistry', 4);
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (5, 'History', 3);
+
+    CREATE TABLE Enrollments (
+        StudentID INT,
+        CourseID INT,
+        Grade INT,
+        PRIMARY KEY (StudentID, CourseID)
+    );
+
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (1, 1, 85);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (1, 2, 90);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (2, 1, 95);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (2, 3, 80);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (3, 2, 88);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (3, 3, 85);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (4, 2, 80);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (4, 3, 92);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (5, 1, 90);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (5, 2, 85);
+
+    SELECT avg(Age) AS AverageAge FROM Students;
+
+    SELECT count(StudentID) AS StudentCount, avg(Age) AS AverageAge FROM Students;
+
+    SELECT CourseID, avg(Grade) AS AverageGrade 
+    FROM Enrollments 
+    GROUP BY CourseID;
+        
+    SELECT CourseID, count(StudentID) AS StudentCount, avg(Grade) AS AverageGrade 
+    FROM Enrollments 
+    GROUP BY CourseID;
+
+    """
+
+    syntax = prs.handle_my_sql_input(syntax8)
     test_syntax(syntax, '', 'debug')

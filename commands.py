@@ -677,6 +677,72 @@ def simplify_result(dbms_result):
 
     return simplified_result
 
+def apply_aggregate_function(data, select_clause, groupby_clause=None):
+    """
+    Apply aggregate functions specified in the select clause.
+    """
+    # If there is a GROUP BY clause, we'll group the data first
+    if groupby_clause:
+        data = group_data(data, groupby_clause)
+
+    results = {}
+    for select_item in select_clause:
+        function = select_item.get('function')
+        column_name = select_item['column_name'].upper()
+
+        if function:
+            # Extract the specified column values from the data
+            column_values = []
+            for _id, row in data.items():
+                if column_name in row['pk']:
+                    column_values.append(row['pk'][column_name])
+                if column_name in row['value']:
+                    column_values.append(row['value'][column_name])
+
+            # Apply the aggregate function
+            if function == 'avg':
+                column_values = [int(value) for value in column_values]
+                result = sum(column_values) / len(column_values) if column_values else None
+            elif function == 'count':
+                result = len(column_values)
+            elif function == 'min':
+                result = min(column_values) if column_values else None
+            elif function == 'max':
+                result = max(column_values) if column_values else None
+            elif function == 'sum':
+                column_values = [int(value) for value in column_values]
+                result = sum(column_values) if column_values else None
+            else:
+                result = None  # ignore unsupported functions
+
+            results[select_item.get('alias', column_name)] = result
+
+    return [results] if not groupby_clause else results
+
+def group_data(data, groupby_clause):
+    """
+    Group data according to the GROUP BY clause.
+    """
+    grouped_data = {}
+
+    for _id, row in data.items():
+        key = tuple(row['value'].get(item['column_name'].upper()) for item in groupby_clause)
+        if key not in grouped_data:
+            grouped_data[key] = {'pk': {}, 'value': {}}
+
+        for column, value in row['pk'].items():
+            if column in grouped_data[key]['pk']:
+                grouped_data[key]['pk'][column].append(value)
+            else:
+                grouped_data[key]['pk'][column] = [value]
+
+        for column, value in row['value'].items():
+            if column in grouped_data[key]['value']:
+                grouped_data[key]['value'][column].append(value)
+            else:
+                grouped_data[key]['value'][column] = [value]
+
+    return grouped_data
 
 def select(db_name, select_clause, select_distinct, from_clause, join_clause, where_clause, groupby_clause, mongoclient):
     db_name = db_name.upper()
@@ -705,11 +771,22 @@ def select(db_name, select_clause, select_distinct, from_clause, join_clause, wh
 
     if where_clause:
         data = apply_where_clause(data, where_clause)
+    
+    aggregate_results = apply_aggregate_function(data, select_clause, groupby_clause)
+
+    if aggregate_results:
+        return (0, aggregate_results)
 
     if select_clause[0]['column_name'] != '*':
         data = filter_columns(data, select_clause)
 
     if select_distinct:
         data = distinctify(data)
+
+    # Replace each row with the results of the aggregate functions
+    print(data)
+    for j, result in enumerate(aggregate_results):
+        if result is not None:  # only replace if an aggregate function was applied
+            data[f'Aggregate Result {j}'] = {'pk': {select_clause[j]['column_name']: f'Aggregate Result {j}'}, 'value': {j: result}}
 
     return (0, simplify_result(data))

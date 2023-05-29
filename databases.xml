@@ -50,4 +50,62 @@
     </Tables>
 </Database>
 
+<Database name="UNIVERSITY">
+    <Tables>
+        <Table name="STUDENTS">
+        <Structure>
+            <Attribute attributeName="STUDENTID" type="INT"/>
+            <Attribute attributeName="FIRSTNAME" type="VARCHAR"/>
+            <Attribute attributeName="LASTNAME" type="VARCHAR"/>
+            <Attribute attributeName="AGE" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>STUDENTID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="COURSES">
+        <Structure>
+            <Attribute attributeName="COURSEID" type="INT"/>
+            <Attribute attributeName="COURSENAME" type="VARCHAR"/>
+            <Attribute attributeName="CREDITHOURS" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>COURSEID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="ENROLLMENTS">
+        <Structure>
+            <Attribute attributeName="STUDENTID" type="INT"/>
+            <Attribute attributeName="COURSEID" type="INT"/>
+            <Attribute attributeName="GRADE" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>STUDENTID</pkAttribute>
+            <pkAttribute>COURSEID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
 </Databases>
