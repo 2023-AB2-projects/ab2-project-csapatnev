@@ -12,6 +12,7 @@ def get_sql_keywords():
         'from',
         'where',
         'select',
+        'from',
         'join',
         'on',
         'group',
@@ -20,7 +21,11 @@ def get_sql_keywords():
         'primary',
         'key',
         'references',
-        
+        'unique',
+        'as',
+        'not',
+        'and',
+        'or',
         # sql objects:
         'database',
         'table',
