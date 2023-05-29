@@ -294,6 +294,7 @@ def test_syntax(syntax: str, connection_socket: sck.socket, mode=''):
 
 def server_side():
     global DATABASE_IN_USE
+    global RESPONSE_MESSAGES
 
     HOST = '127.0.0.1'
     PORT = 6969
@@ -308,14 +309,33 @@ def server_side():
     print('The client has connected to the server', addr)
 
     while True:
-        message = recv_one_message(connection_socket).decode()
+        request = recv_one_message(connection_socket).decode()
 
-        if message == 'kill yourself':
+        if request == 'kill yourself':
             break
 
-        if message:
+        if request == 'run':
+            RESPONSE_MESSAGES = []
+            
+            message = recv_one_message(connection_socket).decode()
+
             full_request = prs.handle_my_sql_input(message)
             test_syntax(full_request, connection_socket)
+            continue
+
+        if request == 'console':
+            RESPONSE_MESSAGES = []
+            
+            message = recv_one_message(connection_socket).decode()
+
+            print(message)
+
+            full_request = prs.handle_my_sql_input(message)
+            test_syntax(full_request, connection_socket)
+            continue
+        
+        if request == 'tree':
+            continue
 
 
 if __name__ == "__main__":

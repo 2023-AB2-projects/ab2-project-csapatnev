@@ -347,9 +347,6 @@ def parse_handle_select(syntax_in_sql):
         # print('4')
         return parse_handle_invalid_syntax_for_selecting()
 
-    if groupby_clause_str != None and where_clause_str is None:
-        return parse_handle_invalid_syntax_for_selecting()
-
     return {
         'code': 10,
         'type': 'select',
