@@ -126,7 +126,7 @@ def handle_my_sql_input(input_str: str):
     commands = []
     for command_in_sql in commands_in_sql:
         command = parse(command_in_sql)
-        # print(command)
+        print(command)
         commands.append(command)
 
     return commands

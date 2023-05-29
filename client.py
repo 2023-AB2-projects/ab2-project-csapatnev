@@ -112,7 +112,7 @@ def client_parse_command(command):
                 console_input = input()
                 
                 if console_input != '<':
-                    request += console_input
+                    request += ' ' + console_input
             
             send_one_message(client_socket, 'console')
             send_one_message(client_socket, request)
