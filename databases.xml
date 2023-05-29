@@ -1,26 +1,4 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
-<Database name="TMP">
-    <Tables>
-        <Table name="SUBJECTS">
-        <Structure>
-            <Attribute attributeName="SUBJECTID" type="INT"/>
-            <Attribute attributeName="SUBJECTNAME" type="VARCHAR"/>
-            <Attribute attributeName="COURSES" type="INT"/>
-        </Structure>
-        <primaryKey>
-            <pkAttribute>SUBJECTID</pkAttribute>
-        </primaryKey>
-        <foreignKeys>
-            </foreignKeys>
-        <uniqueKeys>
-            </uniqueKeys>
-        <IndexFiles>
-
-        </IndexFiles>
-        </Table>
-    </Tables>
-</Database>
-
 </Databases>
