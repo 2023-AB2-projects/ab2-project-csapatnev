@@ -4,7 +4,8 @@ yarn.lock
 
 *.pyc
 *.cpython-*
- __pycache__/
+__pycache__
+__pycache__/
 __pycache__/*
 __pycache__/commands.cpython-311.pyc
 __pycache__/mongoHandler.cpython-311.pyc
