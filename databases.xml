@@ -46,60 +46,55 @@
     </Tables>
 </Database>
 
-<Database name="UNIVERSITY">
+<Database name="ONLINE_SHOP">
     <Tables>
-        <Table name="CREDITS">
+        <Table name="ORDERS">
         <Structure>
-            <Attribute attributeName="CREDITNR" type="INT"/>
-            <Attribute attributeName="CNAME" type="VARCHAR"/>
+            <Attribute attributeName="ORDER_ID" type="INT"/>
+            <Attribute attributeName="PRODUCT_ID" type="INT"/>
+            <Attribute attributeName="QUANTITY" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>CREDITNR</pkAttribute>
+            <pkAttribute>ORDER_ID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
         <uniqueKeys>
-            <uniqueKey>CNAME</uniqueKey>
-        </uniqueKeys>
+            </uniqueKeys>
         <IndexFiles>
 
-        </IndexFiles>
-        </Table>
-    <Table name="DISCIPLINES">
-        <Structure>
-            <Attribute attributeName="DISCID" type="VARCHAR"/>
-            <Attribute attributeName="DNAME" type="VARCHAR"/>
-            <Attribute attributeName="CREDITNR" type="INT"/>
-        </Structure>
-        <primaryKey>
-            <pkAttribute>DISCID</pkAttribute>
-        </primaryKey>
-        <foreignKeys>
-            <foreignKey>CREDITNR</foreignKey>
-
-            <references>
-                <refTable>CREDITS</refTable>
-                <refAttribute>CREDITNR</refAttribute>
-            </references>
-        </foreignKeys>
-        <uniqueKeys>
-            <uniqueKey>DNAME</uniqueKey>
-        </uniqueKeys>
-        <IndexFiles>
-
-        <IndexFile indexName="ASD" indexType="BTree" indexFileName="DISCIPLINES_DNAME_CREDITNR_ASD_INDEX">
-            <IAttribute>DNAME</IAttribute>
-            <IAttribute>CREDITNR</IAttribute>
+        <IndexFile indexName="ORDERS_PRODUCT_ID" indexType="BTree" indexFileName="ORDERS_PRODUCT_ID_ORDERS_PRODUCT_ID_INDEX">
+            <IAttribute>PRODUCT_ID</IAttribute>
         </IndexFile>
         </IndexFiles>
         </Table>
-    <Table name="SUBJECTS">
+    <Table name="PRODUCTS">
         <Structure>
-            <Attribute attributeName="SUBJECT_ID" type="INT"/>
-            <Attribute attributeName="SUBJECT_NAME" type="VARCHAR"/>
+            <Attribute attributeName="PRODUCT_ID" type="INT"/>
+            <Attribute attributeName="PRODUCT_NAME" type="VARCHAR"/>
+            <Attribute attributeName="CATEGORY_ID" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>SUBJECT_ID</pkAttribute>
+            <pkAttribute>PRODUCT_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        <IndexFile indexName="PRODUCTS_CATEGORY_ID" indexType="BTree" indexFileName="PRODUCTS_CATEGORY_ID_PRODUCTS_CATEGORY_ID_INDEX">
+            <IAttribute>CATEGORY_ID</IAttribute>
+        </IndexFile>
+        </IndexFiles>
+        </Table>
+    <Table name="CATEGORIES">
+        <Structure>
+            <Attribute attributeName="CATEGORY_ID" type="INT"/>
+            <Attribute attributeName="CATEGORY_NAME" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>CATEGORY_ID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
@@ -109,21 +104,103 @@
 
         </IndexFiles>
         </Table>
-    <Table name="STUDENTS">
+    </Tables>
+</Database>
+
+<Database name="UNIVERSITY">
+    <Tables>
+        <Table name="DISCIPLINES">
         <Structure>
-            <Attribute attributeName="STUDENT_ID" type="INT"/>
-            <Attribute attributeName="STUDENT_NAME" type="VARCHAR"/>
-            <Attribute attributeName="SUBJECT_ID" type="INT"/>
+            <Attribute attributeName="DISCID" type="VARCHAR"/>
+            <Attribute attributeName="DNAME" type="VARCHAR"/>
+            <Attribute attributeName="CREDITNR" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>STUDENT_ID</pkAttribute>
+            <pkAttribute>DISCID</pkAttribute>
         </primaryKey>
         <foreignKeys>
-            <foreignKey>SUBJECT_ID</foreignKey>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        <IndexFile indexName="MIXEDINDEX" indexType="BTree" indexFileName="DISCIPLINES_DISCID_CREDITNR_MIXEDINDEX_INDEX">
+            <IAttribute>DISCID</IAttribute>
+            <IAttribute>CREDITNR</IAttribute>
+        </IndexFile>
+        </IndexFiles>
+        </Table>
+    <Table name="SPECIALIZATION">
+        <Structure>
+            <Attribute attributeName="SPECID" type="VARCHAR"/>
+            <Attribute attributeName="SPECNAME" type="VARCHAR"/>
+            <Attribute attributeName="LANGUAGE" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>SPECID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
+<Database name="TMP">
+    <Tables>
+        <Table name="SUBJECTS">
+        <Structure>
+            <Attribute attributeName="SUBJECTID" type="INT"/>
+            <Attribute attributeName="SUBJECTNAME" type="VARCHAR"/>
+            <Attribute attributeName="COURSES" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>SUBJECTID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="FELHASZNALOK">
+        <Structure>
+            <Attribute attributeName="FID" type="INT"/>
+            <Attribute attributeName="FNAME" type="VARCHAR"/>
+            <Attribute attributeName="FTYPE" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>FID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="RESOURCES">
+        <Structure>
+            <Attribute attributeName="RID" type="INT"/>
+            <Attribute attributeName="RNAME" type="VARCHAR"/>
+            <Attribute attributeName="SUBJECTID" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>RID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>SUBJECTID</foreignKey>
 
             <references>
                 <refTable>SUBJECTS</refTable>
-                <refAttribute>SUBJECT_ID</refAttribute>
+                <refAttribute>SUBJECTID</refAttribute>
             </references>
         </foreignKeys>
         <uniqueKeys>
