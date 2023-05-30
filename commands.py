@@ -488,13 +488,13 @@ def compare_values(operator, value1, value2):
     if operator == "$eq":
         return value1 == value2
     elif operator == "$gt":
-        return value1 > value2
-    elif operator == "$gte":
-        return value1 >= value2
-    elif operator == "$lt":
         return value1 < value2
-    elif operator == "$lte":
+    elif operator == "$gte":
         return value1 <= value2
+    elif operator == "$lt":
+        return value1 > value2
+    elif operator == "$lte":
+        return value1 >= value2
     elif operator == "$ne":
         return value1 != value2
     elif operator == "$regex":
@@ -857,6 +857,7 @@ def select(db_name, select_clause, select_distinct, from_clause, join_clause, wh
             return retVal, data
 
     if where_clause:
+        print(f"where_clause: {where_clause}")
         data = apply_where_clause(data, where_clause)
 
     if groupby_clause:

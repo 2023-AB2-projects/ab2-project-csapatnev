@@ -296,4 +296,25 @@
     </Tables>
 </Database>
 
+<Database name="ONLINE_SHOP">
+    <Tables>
+        <Table name="GROCERY">
+        <Structure>
+            <Attribute attributeName="GROCERYNAME" type="VARCHAR"/>
+            <Attribute attributeName="QUANTITY" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>GROCERYNAME</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
 </Databases>
