@@ -578,13 +578,19 @@ def load_index_data(db_name, index_name, mongo_client):
 
     return 0, data
 
-def perform_nested_join(db_name, join_clause, mongoclient, xml_root):
+def perform_nested_join(db_name, join_clause, mongoclient, xml_root, starting_data=None):
     print("SIMPLE NESTED LOOP JOIN ALGORITHM IS TO BE PERFORMED")
-    retVal, data = load_table_data(db_name, join_clause[0]['lhs']['table_name'].upper(), mongoclient, xml_root)
-    if retVal < 0:
-        return retVal, data
+    
+    if starting_data is None:
+        retVal, data = load_table_data(db_name, join_clause[0]['lhs']['table_name'].upper(), mongoclient, xml_root)
+        if retVal < 0:
+            return retVal, data
+        starting_join_index = 0  # start the join from the first join in the join clause
+    else:
+        data = starting_data  # use the provided starting data as the left-hand side table in the join operation
+        starting_join_index = 1  # start the join from the second join in the join clause
 
-    for join in join_clause:
+    for join in join_clause[starting_join_index:]:
         retVal, rhs_data = load_table_data(db_name, join['rhs']['table_name'].upper(), mongoclient, xml_root)
         if retVal < 0:
             return retVal, rhs_data
@@ -617,19 +623,36 @@ def perform_nested_join(db_name, join_clause, mongoclient, xml_root):
 
     return retVal, data
 
-def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_root):
+def value_exists_in_index_data(outer_column_value, index_data):
+    for value in index_data.values():
+        split_value = value.split('#')
+        if outer_column_value in split_value:
+            return True
+        for val in split_value:
+            try:
+                val = int(val)
+            except ValueError:
+                pass
+            if outer_column_value == val:
+                return True
+    return False
+
+def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_root, starting_data=None):
     data = {}
     retVal = 0
 
-    for join in join_clause:
-        lhs_table_name = join['lhs']['table_name'].upper()
-        rhs_table_name = join['rhs']['table_name'].upper()
-
-        # We can arbitrarily choose the LHS to be the outer table and RHS to be the inner table for now
-        # You could improve this later by selecting the smaller table as the outer table, for example
-        retVal, outer_table_data = load_table_data(db_name, lhs_table_name, mongo_client, xml_root)
+    if starting_data is None:
+        # Load the data for the first table in the join clause
+        retVal, outer_table_data = load_table_data(db_name, join_clause[0]['lhs']['table_name'].upper(), mongo_client, xml_root)
         if retVal < 0:
             return retVal, outer_table_data
+        starting_join_index = 0  # start the join from the first join in the join clause
+    else:
+        outer_table_data = starting_data  # use the provided starting data as the left-hand side table in the join operation
+        starting_join_index = 1  # start the join from the second join in the join clause
+
+    for join in join_clause[starting_join_index:]:
+        rhs_table_name = join['rhs']['table_name'].upper()
 
         # Get the index columns of the inner table
         inner_table_index_columns = get_index_columns(db_name, rhs_table_name, xml_root)
@@ -638,10 +661,9 @@ def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_roo
         join_column = join['rhs']['column_name'].upper()
         index_columns = [index for index in inner_table_index_columns if join_column in index]
 
-        # For now, let's assume that there is only one index that includes the join column
-        # If there are more, you might need to choose among them
+        # If there are no suitable indexes, return an error
         if not index_columns:
-            return 1, "No suitable index found for join operation"
+            return 1, outer_table_data
         
         print("INDEXED NESTED LOOP JOIN ALGORITHM IS TO BE PERFORMED")
 
@@ -649,25 +671,22 @@ def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_roo
 
         # Load the index data
         index_name = get_index_name(db_name, rhs_table_name, index_column, xml_root, mongo_client)
-        print(f"index_name: {index_name}")
         retVal, index_data = load_index_data(db_name, index_name, mongo_client)
         if retVal < 0:
             return retVal, index_data
 
-        # Now we can perform the INLJ
+        # Perform the Indexed Nested Loop Join
+        new_data = {}
         for outer_id, outer_row in outer_table_data.items():
             outer_column_value = outer_row['value'].get(join['lhs']['column_name'].upper(), outer_row['pk'].get(join['lhs']['column_name'].upper()))
-            # convert it to int if possible
+
             try:
                 outer_column_value = int(outer_column_value)
             except ValueError:
                 pass
 
-
-
             # Check if the outer column value exists in the index
-            # If yes, it means that there are matching rows in the inner table
-            if outer_column_value in index_data:
+            if value_exists_in_index_data(outer_column_value, index_data):
                 # Get the primary key of the matching row(s) in the inner table
                 inner_pks = index_data[outer_column_value]  # this could be a list if there are multiple matches
                 
@@ -679,19 +698,21 @@ def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_roo
                 # Merge the outer row with each matching inner row
                 for inner_id, inner_row in matching_rows.items():
                     new_row = {'pk': {**outer_row['pk'], **inner_row['pk']},
-                                'value': {**outer_row['value'], **inner_row['value']}}
-                    
-                    # If outer_id is not string convert it to a string
-                    if not isinstance(outer_id, str):
-                        outer_id = str(outer_id)
-                    # If inner_id is not string convert it to a string
-                    if not isinstance(inner_id, str):
-                        inner_id = str(inner_id)
+                               'value': {**outer_row['value'], **inner_row['value']}}
+                    print(f"new_row: {new_row}")
+
+                    # Ensure the ids are strings for concatenation
+                    outer_id = str(outer_id)
+                    inner_id = str(inner_id)
                     
                     new_id = outer_id + "#" + inner_id
-                    data[new_id] = new_row
+                    new_data[new_id] = new_row
 
-    return retVal, data
+        # Replace the outer_table_data with the newly joined data for the next join operation
+        outer_table_data = new_data
+
+    return retVal, outer_table_data
+
 
 def simplify_result(dbms_result):
     simplified_result = {
@@ -822,11 +843,12 @@ def select(db_name, select_clause, select_distinct, from_clause, join_clause, wh
         return (-2, f"Error: Table {from_table_name} in database {db_name} does not exist!")
 
     if join_clause: # handle multi-table queries (with JOINs)
+        print(f"join_clause: {join_clause}")
         retVal, data = perform_indexed_nested_loop_join(db_name, join_clause, mongoclient, xml_root)
         if retVal < 0:
             return retVal, data
         elif retVal == 1:
-            retVal, data = perform_nested_join(db_name, join_clause, mongoclient, xml_root)
+            retVal, data = perform_nested_join(db_name, join_clause, mongoclient, xml_root, starting_data=data)
             if retVal < 0:
                 return retVal, data
     else: # handle single table queries
@@ -853,6 +875,8 @@ def select(db_name, select_clause, select_distinct, from_clause, join_clause, wh
             tmp.append(d['column_name'].upper())
         retVal, aggregate_results = apply_aggregate_function(data, select_clause, tmp)
         return retVal, aggregate_results
+
+    print(f"data: {data}")
 
     if select_clause[0]['column_name'] != '*':
         data = filter_columns(data, select_clause)
