@@ -379,7 +379,7 @@ if __name__ == "__main__":
     Create index asd on disciplines (DName, CreditNr);
 
     /* constraint violation: */
-    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH2', 'Mathematics', 1);
+    /* INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH2', 'Mathematics', 1); */
 
     /* correct delete from: */
     /* DELETE FROM Disciplines WHERE DiscID = 'MATH'; */
@@ -406,7 +406,7 @@ if __name__ == "__main__":
     INSERT INTO students (student_id, student_name, subject_id) VALUES (1, 'John Doe', 1);
 
     /* -- Attempt to delete the subject which is being referenced by the student */
-    DELETE FROM subjects WHERE subject_id = 1;
+    /* DELETE FROM subjects WHERE subject_id = 1; */
 
     SELECT DName AS DiscName, CreditNr FROM Disciplines WHERE CreditNr > 1 AND CreditNr < 4;
     """
@@ -473,7 +473,7 @@ if __name__ == "__main__":
     INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Matematics', 2);
     INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
 
-    SELECT count(DiscID), max(CreditNr) AS MAX FROM Disciplines;
+    SELECT * FROM Disciplines WHERE CreditNr > 4;
     """
 
     syntax5 = """
@@ -688,11 +688,11 @@ if __name__ == "__main__":
     FROM Enrollments 
     GROUP BY CourseID;
         
-    SELECT CourseID, count(StudentID) AS StudentCount, avg(Grade) AS AverageGrade 
+    SELECT CourseID, count(StudentID) AS StudentCount, min(Grade)
     FROM Enrollments 
     GROUP BY CourseID;
 
     """
 
-    syntax = prs.handle_my_sql_input(syntax8)
+    syntax = prs.handle_my_sql_input(syntax4)
     test_syntax(syntax, '', 'debug')

@@ -72,7 +72,7 @@ def insert_into(mongoclient, db_name, table_name, primary_key_columns, foreign_k
 
      # Check if primary key data already exists
     if collection.count_documents({"_id": primary_keys}) > 0:
-        return -1, f"Error inserting document: Primary key constraint violation for {primary_key_columns} with values {primary_keys}"
+        return 1, f"Error inserting document: Primary key constraint violation for {primary_key_columns} with values {primary_keys}"
 
     # Validate unique keys
     for uk in unique_keys:
@@ -227,6 +227,19 @@ def process_filter_conditions(conditions, primary_key_columns):
                         combined_condition[op] = str(val)  # Ensure val is converted to string
         new_conditions['_id'] = combined_condition
         del new_conditions['$and']
+
+    # go through the conditions and convert the values to int if possible
+    for key, value in new_conditions.items():
+        if isinstance(value, dict):
+            for op, val in value.items():
+                if isinstance(val, str) and val.isdigit():
+                    new_conditions[key][op] = int(val)
+        elif isinstance(value, list):
+            for i in range(len(value)):
+                if isinstance(value[i], dict):
+                    for op, val in value[i].items():
+                        if isinstance(val, str) and val.isdigit():
+                            new_conditions[key][i][op] = int(val)
 
     return new_conditions
 
