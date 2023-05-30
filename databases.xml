@@ -1,20 +1,96 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
-
-<Database name="UNIVERSITY">
+    
+<Database name="BIGBOY">
     <Tables>
-        <Table name="DISCIPLINES">
+        <Table name="USERS">
         <Structure>
-            <Attribute attributeName="DISCID" type="VARCHAR"/>
-            <Attribute attributeName="DNAME" type="VARCHAR"/>
-            <Attribute attributeName="CREDITNR" type="INT"/>
+            <Attribute attributeName="USERID" type="INT"/>
+            <Attribute attributeName="USERNAME" type="VARCHAR"/>
+            <Attribute attributeName="PASSWORD" type="VARCHAR"/>
+            <Attribute attributeName="EMAIL" type="VARCHAR"/>
+            <Attribute attributeName="FIRSTNAME" type="VARCHAR"/>
+            <Attribute attributeName="LASTNAME" type="VARCHAR"/>
+            <Attribute attributeName="ADDRESS" type="VARCHAR"/>
+            <Attribute attributeName="CITY" type="VARCHAR"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>DISCID</pkAttribute>
+            <pkAttribute>USERID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="COMPANIES">
+        <Structure>
+            <Attribute attributeName="COMPANYID" type="VARCHAR"/>
+            <Attribute attributeName="USERID" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>COMPANYID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>USERID</foreignKey>
+
+            <references>
+                <refTable>USERS</refTable>
+                <refAttribute>USERID</refAttribute>
+            </references>
+        </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
+<Database name="LITTLEBOY">
+    <Tables>
+        <Table name="USERS">
+        <Structure>
+            <Attribute attributeName="USERID" type="INT"/>
+            <Attribute attributeName="USERNAME" type="VARCHAR"/>
+            <Attribute attributeName="PASSWORD" type="VARCHAR"/>
+            <Attribute attributeName="EMAIL" type="VARCHAR"/>
+            <Attribute attributeName="FIRSTNAME" type="VARCHAR"/>
+            <Attribute attributeName="LASTNAME" type="VARCHAR"/>
+            <Attribute attributeName="ADDRESS" type="VARCHAR"/>
+            <Attribute attributeName="CITY" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>USERID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="COMPANIES">
+        <Structure>
+            <Attribute attributeName="COMPANYID" type="VARCHAR"/>
+            <Attribute attributeName="USERID" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>COMPANYID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>USERID</foreignKey>
+
+            <references>
+                <refTable>USERS</refTable>
+                <refAttribute>USERID</refAttribute>
+            </references>
+        </foreignKeys>
         <uniqueKeys>
             </uniqueKeys>
         <IndexFiles>

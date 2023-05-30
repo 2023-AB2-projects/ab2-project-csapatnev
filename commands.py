@@ -549,7 +549,7 @@ def get_index_columns(db_name, table_name, xml_root):
 
     return index_columns
 
-def get_index_name(db_name, table_name, index_columns, xml_root):
+def get_index_name(db_name, table_name, index_columns, xml_root, mongo_client):
     # Define the general formats of the index file names
     formats = ['{table}_{column}_UNIQUE_INDEX', '{table}_{column}_FOREIGN_INDEX']
 
@@ -562,9 +562,9 @@ def get_index_name(db_name, table_name, index_columns, xml_root):
         # Then check for automatically generated index files
         for fmt in formats:
             index_name = fmt.format(table=table_name, column=index_column)
-            if xml_root.find(f"./Database[@name='{db_name}']/Tables/Table[@name='{table_name}']/IndexFiles/IndexFile[@indexFileName='{index_name}']") is not None:
+            db = mongo_client[db_name]
+            if index_name in db.list_collection_names():
                 return index_name
-
     # If no matching index file was found, return None
     return None
 
@@ -618,7 +618,6 @@ def perform_nested_join(db_name, join_clause, mongoclient, xml_root):
     return retVal, data
 
 def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_root):
-    print("INDEXED NESTED LOOP JOIN ALGORITHM IS TO BE PERFORMED")
     data = {}
     retVal = 0
 
@@ -644,10 +643,13 @@ def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_roo
         if not index_columns:
             return 1, "No suitable index found for join operation"
         
+        print("INDEXED NESTED LOOP JOIN ALGORITHM IS TO BE PERFORMED")
+
         index_column = index_columns[0]  # choose the first suitable index
 
         # Load the index data
-        index_name = get_index_name(db_name, rhs_table_name, index_column, xml_root)
+        index_name = get_index_name(db_name, rhs_table_name, index_column, xml_root, mongo_client)
+        print(f"index_name: {index_name}")
         retVal, index_data = load_index_data(db_name, index_name, mongo_client)
         if retVal < 0:
             return retVal, index_data
@@ -655,7 +657,14 @@ def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_roo
         # Now we can perform the INLJ
         for outer_id, outer_row in outer_table_data.items():
             outer_column_value = outer_row['value'].get(join['lhs']['column_name'].upper(), outer_row['pk'].get(join['lhs']['column_name'].upper()))
-            
+            # convert it to int if possible
+            try:
+                outer_column_value = int(outer_column_value)
+            except ValueError:
+                pass
+
+
+
             # Check if the outer column value exists in the index
             # If yes, it means that there are matching rows in the inner table
             if outer_column_value in index_data:
@@ -671,6 +680,14 @@ def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_roo
                 for inner_id, inner_row in matching_rows.items():
                     new_row = {'pk': {**outer_row['pk'], **inner_row['pk']},
                                 'value': {**outer_row['value'], **inner_row['value']}}
+                    
+                    # If outer_id is not string convert it to a string
+                    if not isinstance(outer_id, str):
+                        outer_id = str(outer_id)
+                    # If inner_id is not string convert it to a string
+                    if not isinstance(inner_id, str):
+                        inner_id = str(inner_id)
+                    
                     new_id = outer_id + "#" + inner_id
                     data[new_id] = new_row
 
