@@ -1,6 +1,17 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
+
+<Database name="UNIVERSITY">
+    <Tables>
+        <Table name="DISCIPLINES">
+        <Structure>
+            <Attribute attributeName="DISCID" type="VARCHAR"/>
+            <Attribute attributeName="DNAME" type="VARCHAR"/>
+            <Attribute attributeName="CREDITNR" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>DISCID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
