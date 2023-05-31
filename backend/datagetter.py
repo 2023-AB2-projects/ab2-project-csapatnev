@@ -83,3 +83,11 @@ def load_table_data_from_index(db_name, table_name, index_data, mongo_client, xm
         data[row['_id']] = {'pk': pk_dict, 'value': value_dict}
 
     return 0, data
+
+def load_index_data(db_name, index_name, mongo_client):
+    db = mongo_client[db_name]
+    collection = db[index_name]
+
+    data = {doc['_id']: doc['value'] for doc in collection.find()}
+
+    return 0, data

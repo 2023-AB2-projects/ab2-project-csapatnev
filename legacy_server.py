@@ -13,9 +13,9 @@
 #                            varchar(or string without specified length)
 
 from socket import *
-import commands as cmd
+import backend.commands as cmd
 import myparser.parsing_syntax as prs
-import mongoHandler as mh
+import backend.mongoHandler as mh
 import pdb
 
 HOST = '127.0.0.1'

@@ -1,0 +1,15 @@
+DROP DATABASE UNIVERSITY;
+    CREATE DATABASE UNIVERSITY;
+
+    CREATE TABLE disciplines (
+        DiscID varchar(5) PRIMARY KEY,
+        DName varchar(30),
+        CreditNr int
+    );
+
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('MATH', 'Matematics', 1);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('CHEM', 'Matematics', 3);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('PHY', 'Matematics', 2);
+    INSERT INTO Disciplines (DiscID, DName, CreditNr) VALUES ('BIO', 'Biology', 4);
+
+    SELECT * FROM Disciplines WHERE CreditNr > 4;

@@ -1,0 +1,17 @@
+ USE UNIVERSITY;
+    DROP DATABASE UNIVERSITY;
+    create database University;
+    USE University;
+
+    CREATE TABLE credits (
+        CreditNr int,
+        CName varchar(30) UNIQUE,
+        PRIMARY KEY (CreditNr, CName)
+    );
+
+    INSERT INTO Credits (CreditNr, CName) VALUES (1, 'Matematics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (2, 'Physics');
+    INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
+    INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
+
+    SELECT CName AS CC, CreditNr FROM Credits WHERE CreditNr > 1;

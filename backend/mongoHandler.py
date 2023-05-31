@@ -12,7 +12,6 @@ def connect_mongo(db_name):
         db = client[db_name]
         return db, client
 
-# When these functions are called, parameters have already been checked for correctness
 def drop_database(db_name, mongoclient):
     mongoclient.drop_database(db_name)
 
@@ -24,27 +23,20 @@ def drop_collection(db_name, table_name, mongoclient):
 def update_index_on_insert(mongoclient, db_name, table_name, index_name, columns, column_indices, primary_key, non_primary_values):
     db = mongoclient[db_name]
 
-    # Get the index collection
     index_collection_name = f"{table_name}_{'_'.join(columns)}_{index_name}_INDEX"
     index_collection = db[index_collection_name]
 
-    # Get the value string and split it into a list of values
     value_list = non_primary_values
 
-    # Get the indexed column values from the list of values using the provided column_indices
     indexed_column_values = [value_list[i-1] if i != -1 else primary_key for i in column_indices]
 
-    # Try to cast values to integers if possible
     indexed_column_values = [int(value) if str(value).isdigit() else value for value in indexed_column_values]
 
-    # Convert the tuple to a string by joining with a separator
     indexed_column_values_str = '#'.join(str(value) for value in indexed_column_values)
 
-    # Check if the indexed column values already exist in the index collection
     existing_document = index_collection.find_one({"_id": indexed_column_values_str})
 
     if existing_document:
-        # Append the primary key to the existing document
         if isinstance(existing_document["value"], int):
             existing_document["value"] = str(existing_document["value"])
         if isinstance(primary_key, int):
@@ -53,7 +45,6 @@ def update_index_on_insert(mongoclient, db_name, table_name, index_name, columns
         existing_document["value"] = existing_document["value"] + "#" + primary_key
         index_collection.replace_one({"_id": indexed_column_values_str}, existing_document)
     else:
-        # Insert a new document with the indexed column values and primary key
         index_data = {"_id": indexed_column_values_str, "value": primary_key}
         index_collection.insert_one(index_data)
 
@@ -66,11 +57,9 @@ def insert_into(mongoclient, db_name, table_name, primary_key_columns, foreign_k
     primary_key_values = [values[columns.index(pk)] for pk in primary_key_columns]
     primary_keys = primary_key_values[0] if len(primary_key_columns) == 1 else "#".join(map(str, primary_key_values))
     
-    # Create new lists without the primary key columns
     non_primary_columns = [col for col in columns if col not in primary_key_columns]
     non_primary_values = [val for col, val in zip(columns, values) if col not in primary_key_columns]
 
-     # Check if primary key data already exists
     if collection.count_documents({"_id": primary_keys}) > 0:
         return 1, f"Error inserting document: Primary key constraint violation for {primary_key_columns} with values {primary_keys}"
 
@@ -104,10 +93,8 @@ def insert_into(mongoclient, db_name, table_name, primary_key_columns, foreign_k
 
         return -1, f"Error inserting document: Foreign key constraint violation for {fk} with value {fk_value} - Referenced value not found in {referenced_collection_name}"
 
-    # Create a dictionary of column name to value
     data = {"_id": primary_keys, "value": "#".join(str(value) for value in non_primary_values)}
 
-    # Insert the data into the collection
     result = collection.insert_one(data)
 
     # Update unique keys index collections
@@ -147,32 +134,24 @@ def insert_into(mongoclient, db_name, table_name, primary_key_columns, foreign_k
 def create_index(mongoclient, db_name, table_name, index_name, columns, column_indices):
     db = mongoclient[db_name]
 
-    # Create the index file collection
     index_collection_name = f"{table_name}_{'_'.join(columns)}_{index_name}_INDEX"
     index_collection = db[index_collection_name]
 
-    # Find the collection for the table
     table_collection = db[table_name]
 
     if table_collection.estimated_document_count() == 0:
-        # If there's no data in the main collection, create an empty index
         return 0, f"Created an empty compound index {index_name} on columns {', '.join(columns)} for table {table_name}."
 
     try:
         for document in table_collection.find():
-            # Get the primary key
             primary_key = document["_id"]
 
-            # Get the value string and split it into a list of values
             value_list = document["value"].split("#")
 
-            # Get the indexed column values from the list of values using the provided column_indices
             indexed_column_values = tuple(value_list[i-1] if i != -1 else primary_key for i in column_indices)
 
-            # Convert the tuple to a string by joining with a separator
             indexed_column_values_str = '#'.join(indexed_column_values)
 
-            # Check if the indexed column values already exist in the index collection
             existing_document = index_collection.find_one({"_id": indexed_column_values_str})
 
             if existing_document:
@@ -187,7 +166,6 @@ def create_index(mongoclient, db_name, table_name, index_name, columns, column_i
         return 0, f"Compound index {index_name} on columns {', '.join(columns)} for table {table_name} created successfully."
     
     except Exception as e:
-        # Step 6: Return an error message
         return -1, f"Error creating compound index {index_name} on columns {', '.join(columns)} for table {table_name}. Error: {e}"
     
 def process_filter_conditions(conditions, primary_key_columns):
@@ -198,7 +176,6 @@ def process_filter_conditions(conditions, primary_key_columns):
             new_conditions[key] = [process_filter_conditions(cond, primary_key_columns) for cond in value]
         else:
             if key in primary_key_columns:
-                # Find the index of this key in the primary key list
                 index = primary_key_columns.index(key)
 
                 # Iterate through the conditions for this key
@@ -206,7 +183,6 @@ def process_filter_conditions(conditions, primary_key_columns):
                     if isinstance(val, str) and val.isdigit():
                         val = int(val)
                     
-                    # If "_id" in new_conditions
                     if "_id" in new_conditions:
                         # Add a '#' separator if it's not the first key
                         if index != 0:
@@ -215,7 +191,6 @@ def process_filter_conditions(conditions, primary_key_columns):
                     else:
                         new_conditions["_id"] = {condition: str(val)}
     
-    # For composite primary keys, handle the "$and" operator differently.
     if '$and' in new_conditions:
         combined_condition = {}
         for condition in new_conditions['$and']:
@@ -228,7 +203,6 @@ def process_filter_conditions(conditions, primary_key_columns):
         new_conditions['_id'] = combined_condition
         del new_conditions['$and']
 
-    # go through the conditions and convert the values to int if possible
     for key, value in new_conditions.items():
         if isinstance(value, dict):
             for op, val in value.items():
@@ -247,10 +221,8 @@ def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, un
     db = mongoclient[db_name]
     collection = db[table_name]
 
-    # Create a new filter_conditions with the "_id" field
     new_filter_conditions = process_filter_conditions(filter_conditions, primary_key_columns)
 
-    # Fetch the documents to be deleted
     docs_to_delete = list(collection.find(new_filter_conditions))
 
     # Validate foreign key constraints
@@ -261,7 +233,6 @@ def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, un
                     referencing_key = fk_info['referencing_key']
                     referencing_key_index = columns.index(referencing_key) - 1
 
-                    # Check if there's any document with a reference to the primary key value of the document to be deleted
                     referenced_doc = referencing_collection.find_one({"value": {"$regex": f"(^|.*#){doc['_id']}($|#.*)"}})
                     if referenced_doc:
                         return -1, f"Error: Foreign key constraint violation. Cannot delete {table_name}.{fk_info['key']} with value {doc['_id']} because it is being referenced in {fk_info['referencing_collection']}."
@@ -303,14 +274,12 @@ def delete_from(mongoclient, table_name, db_name, filter_conditions, columns, un
             index_doc = index_collection.find_one({"value": {"$regex": f"(^|.*#){doc['_id']}($|#.*)"}})
 
             if index_doc:
-                # Update the index entry in the index collection
                 updated_value_list = [v for v in index_doc["value"].split("#") if v != str(doc["_id"])]
                 if updated_value_list:
                     index_collection.update_one({"_id": index_doc["_id"]}, {"$set": {"value": "#".join(updated_value_list)}})
                 else:
                     index_collection.delete_one({"_id": index_doc["_id"]})
 
-    # Delete the documents from the main collection
     result = collection.delete_many(new_filter_conditions)
     if result.deleted_count > 0:
         return 0, f"Deleted {result.deleted_count} document(s) matching the filter conditions."
