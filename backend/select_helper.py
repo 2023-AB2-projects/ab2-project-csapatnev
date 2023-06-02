@@ -61,13 +61,13 @@ def compare_values(operator, value1, value2):
     if operator == "$eq":
         return value1 == value2
     elif operator == "$gt":
-        return value1 < value2
-    elif operator == "$gte":
-        return value1 <= value2
-    elif operator == "$lt":
         return value1 > value2
-    elif operator == "$lte":
+    elif operator == "$gte":
         return value1 >= value2
+    elif operator == "$lt":
+        return value1 < value2
+    elif operator == "$lte":
+        return value1 <= value2
     elif operator == "$ne":
         return value1 != value2
     elif operator == "$regex":
