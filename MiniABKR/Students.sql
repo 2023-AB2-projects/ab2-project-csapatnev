@@ -248,18 +248,7 @@ insert into marks (StudID,DiscID,Mark) values (50,'AI',7);
 insert into marks (StudID,DiscID,Mark) values (50,'OOP',10);
 insert into marks (StudID,DiscID,Mark) values (50,'OS',5);
 
-select count(*) from students;
-
 /* Data manipulation  */
-
-update students set email = 'RosaWhite@gmail.com' where StudID = 50;
-update marks set Mark = 6 where StudID = 50 and DiscID = 'OS';
-update marks set Mark = 6 where StudID = 49 and DiscID = 'OS';
-
-
-delete from marks where StudID = 50 and DiscID = 'OOP';
-delete from marks where StudID = 49 and DiscID = 'OOP';
-
 delete from students where StudID = 50;
 delete from students where GroupId = 531;
 
@@ -273,7 +262,7 @@ select StudName, students.GroupId, Email
 from students
 Join groups on students.GroupId = groups.GroupId
 join specialization on groups.SpecID  = specialization.SpecID
-where  SpecName = 'Mathematics'
+where SpecName = 'MATHEMATICS'
 
 select mark from marks
 where StudID = 50 and DiscID = 'OS';
@@ -282,23 +271,16 @@ select DName, CreditNr, Mark
 from students
 join marks on students.StudID = marks.StudID
 join disciplines on marks.discID = disciplines.discID
-where StudName = 'Rosa White';
+where StudName = 'ROBERT WHITE';
 
 select StudName, students.GroupId, Email
 from students
-where Email like '%email.com';
+where Email like '%EMAIL.COM';
 
 select StudID, discID, mark from marks
-where StudID = 50 and StudID = 41;
+where StudID = 50;
 
 select StudID, avg(Mark) as avg_Mark, min(Mark) as min_Mark, max(Mark) as max_Mark
 from marks
 where mark > 4
 group by StudID;
-
-
-select DName, avg(Mark) as avg_Mark
-from marks, disciplines
-join disciplines on marks.discID = disciplines.discID
-where mark > 4
-group by DName;

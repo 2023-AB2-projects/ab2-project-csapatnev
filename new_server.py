@@ -13,9 +13,9 @@
 #                            varchar(or string without specified length)
 
 import socket as sck
-import commands as cmd
+import backend.commands as cmd
 import myparser.parsing_syntax as prs
-import mongoHandler as mh
+import backend.mongoHandler as mh
 import pdb
 
 import xml.etree.ElementTree as ET

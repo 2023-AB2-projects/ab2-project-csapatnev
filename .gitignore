@@ -1,3 +1,4 @@
+__pycache__
 node_modules/
 package-lock.json
 yarn.lock
@@ -5,13 +6,11 @@ yarn.lock
 databases.xml
 *.pyc
 *.cpython-*
-__pycache__
 __pycache__/
 __pycache__/*
 __pycache__/commands.cpython-311.pyc
 __pycache__/mongoHandler.cpython-311.pyc
 __pycache__/parsing_syntax.cpython-311.pyc
-server.py
 __pycache__/mongoHandler.cpython-311.pyc
 __pycache__/parsing_syntax.cpython-311.pyc
 __pycache__/mongoHandler.cpython-311.pyc
@@ -21,4 +20,5 @@ cli_prompt_history
 sql_prompt_history
 
 __pycache__
-server.py
+databases.xml
+databases.xml

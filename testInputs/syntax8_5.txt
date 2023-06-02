@@ -1,0 +1,42 @@
+ DROP DATABASE UNIVERSITY2;
+        CREATE DATABASE UNIVERSITY2;
+
+        CREATE TABLE disciplines (
+            DiscID varchar(5) PRIMARY KEY,
+            DName varchar(30),
+            CreditNr int
+        );
+
+        CREATE TABLE students (
+            StudID int PRIMARY KEY,
+            GroupId int,
+            StudName varchar(20),
+            Email varchar(20) 
+        );
+
+        CREATE TABLE marks (
+        StudID int(10) REFERENCES students (StudID),
+        DiscID varchar(20) REFERENCES disciplines (DiscID),
+        Mark int,
+        PRIMARY KEY (StudID,DiscID)
+        );
+
+        INSERT INTO disciplines (DiscID, DName, CreditNr) VALUES ('DISC1', 'Computer Science', 4);
+        INSERT INTO disciplines (DiscID, DName, CreditNr) VALUES ('DISC2', 'Mathematics', 3);
+        INSERT INTO disciplines (DiscID, DName, CreditNr) VALUES ('DISC3', 'Physics', 4);
+        INSERT INTO disciplines (DiscID, DName, CreditNr) VALUES ('DISC4', 'Chemistry', 3);
+
+        
+        INSERT INTO students (StudID, GroupId, StudName, Email) VALUES (1, 101, 'John Doe', 'johndoe@example.com');
+        INSERT INTO students (StudID, GroupId, StudName, Email) VALUES (2, 101, 'Jane Doe', 'janedoe@example.com');
+        INSERT INTO students (StudID, GroupId, StudName, Email) VALUES (3, 102, 'Alice Smith', 'alicesmith@example.com');
+        INSERT INTO students (StudID, GroupId, StudName, Email) VALUES (4, 102, 'Bob Johnson', 'bobjohnson@example.com');
+
+        INSERT INTO marks (StudID, DiscID, Mark) VALUES (1, 'DISC1', 85);
+        INSERT INTO marks (StudID, DiscID, Mark) VALUES (1, 'DISC2', 90);
+        INSERT INTO marks (StudID, DiscID, Mark) VALUES (2, 'DISC1', 95);
+        INSERT INTO marks (StudID, DiscID, Mark) VALUES (2, 'DISC3', 88);
+        INSERT INTO marks (StudID, DiscID, Mark) VALUES (3, 'DISC2', 80);
+        INSERT INTO marks (StudID, DiscID, Mark) VALUES (3, 'DISC4', 78);
+        INSERT INTO marks (StudID, DiscID, Mark) VALUES (4, 'DISC1', 70);
+        INSERT INTO marks (StudID, DiscID, Mark) VALUES (4, 'DISC3', 75);
