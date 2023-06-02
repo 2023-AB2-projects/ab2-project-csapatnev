@@ -26,15 +26,15 @@ create table Resources (
 );
 
 
-insert into SUBJECTS (SubjectID, SubjectName, Courses) values (1, 'asd', 10);
+insert into SUBJECTS (SubjectID, SubjectName, Courses) values (1, 'asd', 3);
 insert into Subjects (SubjectID, SubjectName, Courses) values (2, 'asd', 10);
-insert into Subjects (SubjectID, SubjectName, Courses) values (3, 'asd', 10);
+insert into Subjects (SubjectID, SubjectName, Courses) values (3, 'asd', 2);
 insert into Subjects (SubjectID, SubjectName, Courses) values (4, 'asd', 10);
-insert into Subjects (SubjectID, SubjectName, Courses) values (5, 'asd', 10);
-insert into Subjects (SubjectID, SubjectName, Courses) values (6, 'asd', 10);
-insert into Subjects (SubjectID, SubjectName, Courses) values (7, 'asd', 10);
-insert into Subjects (SubjectID, SubjectName, Courses) values (8, 'asd', 10);
-insert into Subjects (SubjectID, SubjectName, Courses) values (9, 'asd', 10);
+insert into Subjects (SubjectID, SubjectName, Courses) values (5, 'asd', 1);
+insert into Subjects (SubjectID, SubjectName, Courses) values (6, 'asd', 8);
+insert into Subjects (SubjectID, SubjectName, Courses) values (7, 'asd', 7);
+insert into Subjects (SubjectID, SubjectName, Courses) values (8, 'asd', 6);
+insert into Subjects (SubjectID, SubjectName, Courses) values (9, 'asd', 5);
 
 
 insert into Felhasznalok (FID, FName, FType) values (1, 'Name', 'client');
@@ -48,13 +48,16 @@ insert into Felhasznalok (FID, FName, FType) values (8, 'Name', 'client');
 insert into Felhasznalok (FID, FName, FType) values (9, 'Name', 'client');
 
 
-insert into Resources (RID, RName, SubjectID) values (1, 'video', 1);
-insert into Resources (RID, RName, SubjectID) values (2, 'video', 2);
-insert into Resources (RID, RName, SubjectID) values (3, 'video', 3);
-insert into Resources (RID, RName, SubjectID) values (4, 'video', 4);
-insert into Resources (RID, RName, SubjectID) values (5, 'video', 5);
-insert into Resources (RID, RName, SubjectID) values (6, 'video', 6);
-insert into Resources (RID, RName, SubjectID) values (7, 'video', 7);
-insert into Resources (RID, RName, SubjectID) values (8, 'video', 8);
-insert into Resources (RID, RName, SubjectID) values (9, 'video', 9);
+insert into Resources (RID, RName, SubjectID) values (11, 'video', 1);
+insert into Resources (RID, RName, SubjectID) values (2, 'video', 1);
+insert into Resources (RID, RName, SubjectID) values (3, 'video', 1);
+insert into Resources (RID, RName, SubjectID) values (4, 'video', 2);
+insert into Resources (RID, RName, SubjectID) values (5, 'video', 2);
+insert into Resources (RID, RName, SubjectID) values (6, 'video', 2);
+insert into Resources (RID, RName, SubjectID) values (7, 'video', 3);
+insert into Resources (RID, RName, SubjectID) values (8, 'video', 3);
+insert into Resources (RID, RName, SubjectID) values (9, 'video', 3);
 
+select *
+from Subjects
+where Subjects.Courses = 10;

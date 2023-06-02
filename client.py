@@ -10,11 +10,15 @@ import sys
 import os.path
 import rich
 
+from prompt.cli_prompts import cli_prompt, sql_prompt
+
 from enum import Enum
 from protocol.simple_protocol import *
+
 from rich.tree import Tree
 from rich.console import Console
 from rich.table import Table
+
 
 HOST = '127.0.0.1'
 PORT = 6969     # nice
@@ -131,14 +135,42 @@ def client_parse_command(command):
             print(str_color('[Error]: You need to connect to the server first!', Color.RED.value))
             return 3
         
+        send_one_message(client_socket, 'sql_prompt_data')
+        response = recv_one_message(client_socket).decode()
+        prompt_info = eval(response)
+        
+        db_in_use = prompt_info['db_in_use']
+        databases = prompt_info['databases']
+        tables = prompt_info['tables']
+
+        tables_with_columns_in_database = {}
+        tables_in_database = []
+
+        if db_in_use != 'MASTER':
+            tables_in_database = databases[db_in_use]
+            tables_with_columns_in_database = {}
+            for table in tables_in_database:
+                tables_with_columns_in_database[table] = tables.get(table)
+
         console_input = ''
         request = ''
-        
-        while (console_input != '<'):
-            print(str_color('[Console]: ', Color.BLUE.value), end='')
-            
-            console_input = input()
-            
+
+        while console_input != '<':
+            console_input = sql_prompt(None, databases.keys(), tables_in_database, tables_with_columns_in_database)
+
+            use_pattern = r'^use\s+(\w+)\s*;?.*?$'
+            match = re.match(use_pattern, console_input, flags=re.IGNORECASE)
+            if match:
+                db_in_use = match.group(1)
+                if db_in_use in databases.keys():
+                    tables_in_database = databases[db_in_use]
+                    tables_with_columns_in_database = {}
+                    for table in tables_in_database:
+                        tables_with_columns_in_database[table] = tables.get(table)
+                else:
+                    tables_with_columns_in_database = {}
+                    tables_in_database = []
+
             if console_input != '<':
                 request += ' ' + console_input
         
@@ -238,8 +270,7 @@ def start_application():
 
     status_code = -1
     while (status_code != 0):
-        print(str_color('[Input]:', Color.GREEN.value), end=' ')
-        command = input()
+        command = cli_prompt()
         status_code = client_parse_command(command)
 
 
