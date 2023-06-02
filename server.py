@@ -218,7 +218,7 @@ def select_request(mode, res, mongoclient, connection_socket: sck.socket):
     if ret_val >= 0:
         response_msg = 'Selected successfully!'
         
-        if mode == 'debug': print(err_msg)
+        if mode == 'debug': print(response_msg)
         else:
             RESPONSE_MESSAGES.append(response_msg)
             RESPONSE_MESSAGES.append('select') 
@@ -313,6 +313,24 @@ def create_tree_from_xml():
     return response
 
 
+def get_databases_and_tables_from_xml():
+    response_databases = {}
+    response_tables = {}
+    
+    tree = ET.parse('databases.xml')
+    root = tree.getroot()
+
+    for database in root.findall('Database'):
+        response_databases[database.attrib['name']] = []
+        for table in database.findall('.//Table'):
+            response_databases[database.attrib['name']].append(table.attrib['name'])
+            response_tables[table.attrib['name']] = []
+            for attribute in table.findall('.//Attribute'):
+                response_tables[table.attrib['name']].append(attribute.attrib['attributeName'])
+
+    return response_databases, response_tables
+
+
 # CLIENT's 'run' COMMAND:
 def handle_run_request(connection_socket):
     global RESPONSE_MESSAGES
@@ -343,6 +361,19 @@ def handle_tree_request(connection_socket):
     send_one_message(connection_socket, 'breakout')
 
 
+# send additional data for console command:
+def handle_sql_prompt_request(connection_socket):
+    db_in_use = DATABASE_IN_USE
+    databases, tables = get_databases_and_tables_from_xml()
+
+    response = {
+        'db_in_use': db_in_use,
+        'databases': databases,
+        'tables': tables,
+    }
+    send_one_message(connection_socket, str(response))
+
+
 def server_side():
     global DATABASE_IN_USE
     global RESPONSE_MESSAGES
@@ -368,6 +399,10 @@ def server_side():
         if request == 'run':
             handle_run_request(connection_socket)
             continue
+        
+        if request == 'sql_prompt_data':
+            handle_sql_prompt_request(connection_socket)
+            continue
 
         if request == 'console':
             handle_console_request(connection_socket)
@@ -380,10 +415,3 @@ def server_side():
 
 if __name__ == "__main__":
     server_side()
-
-    # syntax = """
-
-    # """
-
-    # syntax = prs.handle_my_sql_input(syntax)
-    # test_syntax(syntax, '', 'debug')

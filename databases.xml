@@ -1,22 +1,16 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Databases>
     <!-- All databases will be found here -->
-    
-<Database name="BIGBOY">
+<Database name="TMP">
     <Tables>
-        <Table name="USERS">
+        <Table name="SUBJECTS">
         <Structure>
-            <Attribute attributeName="USERID" type="INT"/>
-            <Attribute attributeName="USERNAME" type="VARCHAR"/>
-            <Attribute attributeName="PASSWORD" type="VARCHAR"/>
-            <Attribute attributeName="EMAIL" type="VARCHAR"/>
-            <Attribute attributeName="FIRSTNAME" type="VARCHAR"/>
-            <Attribute attributeName="LASTNAME" type="VARCHAR"/>
-            <Attribute attributeName="ADDRESS" type="VARCHAR"/>
-            <Attribute attributeName="CITY" type="VARCHAR"/>
+            <Attribute attributeName="SUBJECTID" type="INT"/>
+            <Attribute attributeName="SUBJECTNAME" type="VARCHAR"/>
+            <Attribute attributeName="COURSES" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>USERID</pkAttribute>
+            <pkAttribute>SUBJECTID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
@@ -26,46 +20,14 @@
 
         </IndexFiles>
         </Table>
-    <Table name="COMPANIES">
+    <Table name="FELHASZNALOK">
         <Structure>
-            <Attribute attributeName="COMPANYID" type="VARCHAR"/>
-            <Attribute attributeName="USERID" type="INT"/>
+            <Attribute attributeName="FID" type="INT"/>
+            <Attribute attributeName="FNAME" type="VARCHAR"/>
+            <Attribute attributeName="FTYPE" type="VARCHAR"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>COMPANYID</pkAttribute>
-        </primaryKey>
-        <foreignKeys>
-            <foreignKey>USERID</foreignKey>
-
-            <references>
-                <refTable>USERS</refTable>
-                <refAttribute>USERID</refAttribute>
-            </references>
-        </foreignKeys>
-        <uniqueKeys>
-            </uniqueKeys>
-        <IndexFiles>
-
-        </IndexFiles>
-        </Table>
-    </Tables>
-</Database>
-
-<Database name="LITTLEBOY">
-    <Tables>
-        <Table name="USERS">
-        <Structure>
-            <Attribute attributeName="USERID" type="INT"/>
-            <Attribute attributeName="USERNAME" type="VARCHAR"/>
-            <Attribute attributeName="PASSWORD" type="VARCHAR"/>
-            <Attribute attributeName="EMAIL" type="VARCHAR"/>
-            <Attribute attributeName="FIRSTNAME" type="VARCHAR"/>
-            <Attribute attributeName="LASTNAME" type="VARCHAR"/>
-            <Attribute attributeName="ADDRESS" type="VARCHAR"/>
-            <Attribute attributeName="CITY" type="VARCHAR"/>
-        </Structure>
-        <primaryKey>
-            <pkAttribute>USERID</pkAttribute>
+            <pkAttribute>FID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
@@ -75,22 +37,38 @@
 
         </IndexFiles>
         </Table>
-    <Table name="COMPANIES">
+    <Table name="RESOURCES">
         <Structure>
-            <Attribute attributeName="COMPANYID" type="VARCHAR"/>
-            <Attribute attributeName="USERID" type="INT"/>
+            <Attribute attributeName="RID" type="INT"/>
+            <Attribute attributeName="RNAME" type="VARCHAR"/>
+            <Attribute attributeName="SUBJECTID" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>COMPANYID</pkAttribute>
+            <pkAttribute>RID</pkAttribute>
         </primaryKey>
         <foreignKeys>
-            <foreignKey>USERID</foreignKey>
+            <foreignKey>SUBJECTID</foreignKey>
 
             <references>
-                <refTable>USERS</refTable>
-                <refAttribute>USERID</refAttribute>
+                <refTable>SUBJECTS</refTable>
+                <refAttribute>SUBJECTID</refAttribute>
             </references>
         </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="ASD">
+        <Structure>
+            <Attribute attributeName="ASD" type="INT"/>
+            <Attribute attributeName="ASD" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
         <uniqueKeys>
             </uniqueKeys>
         <IndexFiles>
