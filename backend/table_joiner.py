@@ -3,10 +3,10 @@ from backend.column_finder import *
 from backend.commands_helper import *
 from backend.datagetter import *
 
-def perform_nested_join(db_name, join_clause, mongoclient, xml_root, starting_data=None):
+def perform_nested_join(db_name, join_clause, mongoclient, xml_root, join_performed, starting_data=None):
     print("SIMPLE NESTED LOOP JOIN ALGORITHM IS TO BE PERFORMED")
     
-    if starting_data is None:
+    if starting_data is None or not join_performed:
         retVal, data = load_table_data(db_name, join_clause[0]['lhs']['table_name'].upper(), mongoclient, xml_root)
         if retVal < 0:
             return retVal, data
@@ -52,11 +52,13 @@ def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_roo
     data = {}
     retVal = 0
 
+    join_performed = False
+
     if starting_data is None:
         # Load the data for the first table in the join clause
         retVal, outer_table_data = load_table_data(db_name, join_clause[0]['lhs']['table_name'].upper(), mongo_client, xml_root)
         if retVal < 0:
-            return retVal, outer_table_data
+            return retVal, outer_table_data, join_performed
         starting_join_index = 0
     else:
         outer_table_data = starting_data
@@ -72,9 +74,10 @@ def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_roo
         index_columns = [index for index in inner_table_index_columns if join_column in index]
 
         if not index_columns:
-            return 1, outer_table_data
+            return 1, outer_table_data, join_performed
         
         print("INDEXED NESTED LOOP JOIN ALGORITHM IS TO BE PERFORMED")
+        join_performed = True
 
         index_column = index_columns[0]  # choose the first suitable index
 
@@ -82,7 +85,7 @@ def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_roo
         index_name = get_index_name(db_name, rhs_table_name, index_column, xml_root, mongo_client)
         retVal, index_data = load_index_data(db_name, index_name, mongo_client)
         if retVal < 0:
-            return retVal, index_data
+            return retVal, index_data, join_performed
 
         # Perform the Indexed Nested Loop Join
         new_data = {}
@@ -99,7 +102,7 @@ def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_roo
                 
                 retVal, matching_rows = load_table_data_from_index(db_name, rhs_table_name, {outer_column_value: inner_pks}, mongo_client, xml_root)
                 if retVal < 0:
-                    return retVal, matching_rows
+                    return retVal, matching_rows, join_performed
 
                 for inner_id, inner_row in matching_rows.items():
                     new_row = {'pk': {**outer_row['pk'], **inner_row['pk']},
@@ -114,4 +117,4 @@ def perform_indexed_nested_loop_join(db_name, join_clause, mongo_client, xml_roo
 
         outer_table_data = new_data
 
-    return retVal, outer_table_data
+    return retVal, outer_table_data, join_performed

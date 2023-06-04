@@ -249,6 +249,10 @@ insert into marks (StudID,DiscID,Mark) values (50,'OOP',10);
 insert into marks (StudID,DiscID,Mark) values (50,'OS',5);
 
 /* Data manipulation  */
+
+delete from marks where StudID = 50 and DiscID = 'OOP';
+delete from marks where StudID = 49 and DiscID = 'OOP';
+
 delete from students where StudID = 50;
 delete from students where GroupId = 531;
 

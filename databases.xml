@@ -67,4 +67,240 @@
     <Tables>
         </Tables></Database>
 
+<Database name="UNIVERSITY">
+    <Tables>
+        <Table name="DISCIPLINES">
+        <Structure>
+            <Attribute attributeName="DISCID" type="VARCHAR"/>
+            <Attribute attributeName="DNAME" type="VARCHAR"/>
+            <Attribute attributeName="CREDITNR" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>DISCID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        <IndexFile indexName="MIXEDINDEX" indexType="BTree" indexFileName="DISCIPLINES_DISCID_CREDITNR_MIXEDINDEX_INDEX">
+            <IAttribute>DISCID</IAttribute>
+            <IAttribute>CREDITNR</IAttribute>
+        </IndexFile>
+        <IndexFile indexName="" indexType="BTree" indexFileName="DISCIPLINES_DISCID__INDEX">
+            <IAttribute>DISCID</IAttribute>
+        </IndexFile>
+        </IndexFiles>
+        </Table>
+    <Table name="SPECIALIZATION">
+        <Structure>
+            <Attribute attributeName="SPECID" type="VARCHAR"/>
+            <Attribute attributeName="SPECNAME" type="VARCHAR"/>
+            <Attribute attributeName="LANGUAGE" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>SPECID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="GROUPS">
+        <Structure>
+            <Attribute attributeName="GROUPID" type="INT"/>
+            <Attribute attributeName="SPECID" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>GROUPID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>SPECID</foreignKey>
+
+            <references>
+                <refTable>SPECIALIZATION</refTable>
+                <refAttribute>SPECID</refAttribute>
+            </references>
+        </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="STUDENTS">
+        <Structure>
+            <Attribute attributeName="STUDID" type="INT"/>
+            <Attribute attributeName="GROUPID" type="INT"/>
+            <Attribute attributeName="STUDNAME" type="VARCHAR"/>
+            <Attribute attributeName="EMAIL" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>STUDID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>GROUPID</foreignKey>
+
+            <references>
+                <refTable>GROUPS</refTable>
+                <refAttribute>GROUPID</refAttribute>
+            </references>
+        </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="MARKS">
+        <Structure>
+            <Attribute attributeName="STUDID" type="INT"/>
+            <Attribute attributeName="DISCID" type="VARCHAR"/>
+            <Attribute attributeName="MARK" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>STUDID</pkAttribute>
+            <pkAttribute>DISCID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>STUDID</foreignKey>
+
+            <references>
+                <refTable>STUDENTS</refTable>
+                <refAttribute>STUDID</refAttribute>
+            </references>
+        <foreignKey>DISCID</foreignKey>
+
+            <references>
+                <refTable>DISCIPLINES</refTable>
+                <refAttribute>DISCID</refAttribute>
+            </references>
+        </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
+<Database name="UNIVERSITY2">
+    <Tables>
+        <Table name="DISCIPLINES">
+        <Structure>
+            <Attribute attributeName="DISCID" type="VARCHAR"/>
+            <Attribute attributeName="DNAME" type="VARCHAR"/>
+            <Attribute attributeName="CREDITNR" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>DISCID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="STUDENTS">
+        <Structure>
+            <Attribute attributeName="STUDID" type="INT"/>
+            <Attribute attributeName="GROUPID" type="INT"/>
+            <Attribute attributeName="STUDNAME" type="VARCHAR"/>
+            <Attribute attributeName="EMAIL" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>STUDID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="MARKS">
+        <Structure>
+            <Attribute attributeName="STUDID" type="INT"/>
+            <Attribute attributeName="DISCID" type="VARCHAR"/>
+            <Attribute attributeName="MARK" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>STUDID</pkAttribute>
+            <pkAttribute>DISCID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>STUDID</foreignKey>
+
+            <references>
+                <refTable>STUDENTS</refTable>
+                <refAttribute>STUDID</refAttribute>
+            </references>
+        <foreignKey>DISCID</foreignKey>
+
+            <references>
+                <refTable>DISCIPLINES</refTable>
+                <refAttribute>DISCID</refAttribute>
+            </references>
+        </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
+<Database name="ONLINE_SHOP">
+    <Tables>
+        <Table name="GROCERY">
+        <Structure>
+            <Attribute attributeName="GROCERYNAME" type="VARCHAR"/>
+            <Attribute attributeName="QUANTITY" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>GROCERYNAME</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
+<Database name="SUTI">
+    <Tables>
+        <Table name="DOBOS">
+        <Structure>
+            <Attribute attributeName="ID" type="INT"/>
+            <Attribute attributeName="DB" type="INT"/>
+            <Attribute attributeName="PRICE" type="INT"/>
+            <Attribute attributeName="NAME" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
 </Databases>
