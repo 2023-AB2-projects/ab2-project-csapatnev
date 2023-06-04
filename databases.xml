@@ -274,4 +274,65 @@
     </Tables>
 </Database>
 
+<Database name="ONLINE_SHOP">
+    <Tables>
+        <Table name="ORDERS">
+        <Structure>
+            <Attribute attributeName="ORDER_ID" type="INT"/>
+            <Attribute attributeName="PRODUCT_ID" type="INT"/>
+            <Attribute attributeName="QUANTITY" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>ORDER_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        <IndexFile indexName="ORDERS_PRODUCT_ID" indexType="BTree" indexFileName="ORDERS_PRODUCT_ID_ORDERS_PRODUCT_ID_INDEX">
+            <IAttribute>PRODUCT_ID</IAttribute>
+        </IndexFile>
+        </IndexFiles>
+        </Table>
+    <Table name="PRODUCTS">
+        <Structure>
+            <Attribute attributeName="PRODUCT_ID" type="INT"/>
+            <Attribute attributeName="PRODUCT_NAME" type="VARCHAR"/>
+            <Attribute attributeName="CATEGORY_ID" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>PRODUCT_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        <IndexFile indexName="PRODUCTS_CATEGORY_ID" indexType="BTree" indexFileName="PRODUCTS_CATEGORY_ID_PRODUCTS_CATEGORY_ID_INDEX">
+            <IAttribute>CATEGORY_ID</IAttribute>
+        </IndexFile>
+        </IndexFiles>
+        </Table>
+    <Table name="CATEGORIES">
+        <Structure>
+            <Attribute attributeName="CATEGORY_ID" type="INT"/>
+            <Attribute attributeName="CATEGORY_NAME" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>CATEGORY_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
 </Databases>
