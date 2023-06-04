@@ -414,51 +414,72 @@ def server_side():
 
 
 if __name__ == "__main__":
-    server_side()
+    #server_side()
 
-    # syntax = """
-    # DROP DATABASE ONLINE_SHOP;
-    # CREATE DATABASE ONLINE_SHOP;
-    # USE ONLINE_SHOP;
+    syntax = """
+    drop database tmp;
+    create database tmp;
 
-    # CREATE TABLE Orders (
-    #     Order_ID INT PRIMARY KEY,
-    #     Product_ID INT,
-    #     Quantity INT
-    # );
+    use tmp;
 
-    # CREATE TABLE Products (
-    #     Product_ID INT PRIMARY KEY,
-    #     Product_Name VarChar(255),
-    #     Category_ID INT
-    # );
+    create table Subjects (
+        SubjectID int primary key,
+        SubjectName varchar(255),
+        Courses int
+    );
 
-    # CREATE TABLE Categories (
-    #     Category_ID INT PRIMARY KEY,
-    #     Category_Name VarChar(255)
-    # );
-
-    # CREATE INDEX orders_product_id ON Orders(Product_ID);
-    # CREATE INDEX products_category_id ON Products(Category_ID);
-    
-    # INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (1, 101, 5);
-    # INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (2, 102, 10);
-    # INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (3, 103, 2);
-
-    # INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (101, 'iPhone', 201);
-    # INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (102, 'MacBook', 202);
-    # INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (103, 'iPad', 201);
+    create table Felhasznalok ( 
+        FID int primary key,
+        FName varchar(255),
+        FType varchar(255)
+    );
 
 
-    # INSERT INTO Categories (Category_ID, Category_Name) VALUES (201, 'Electronics');
-    # INSERT INTO Categories (Category_ID, Category_Name) VALUES(202, 'Computers');
+    create table Resources (
+        RID int primary key,
+        RName varchar(255),
+        SubjectID int REFERENCES Subjects (SubjectID)
+    );
 
-    # SELECT *
-    # FROM Orders
-    # JOIN Products ON Orders.Product_ID = Products.Product_ID
-    # JOIN Categories ON Products.Category_ID = Categories.Category_ID;
 
-    # """
+    insert into SUBJECTS (SubjectID, SubjectName, Courses) values (1, 'asd', 3);
+    insert into Subjects (SubjectID, SubjectName, Courses) values (2, 'asd', 10);
+    insert into Subjects (SubjectID, SubjectName, Courses) values (3, 'asd', 2);
+    insert into Subjects (SubjectID, SubjectName, Courses) values (4, 'asd', 10);
+    insert into Subjects (SubjectID, SubjectName, Courses) values (5, 'asd', 1);
+    insert into Subjects (SubjectID, SubjectName, Courses) values (6, 'asd', 8);
+    insert into Subjects (SubjectID, SubjectName, Courses) values (7, 'asd', 7);
+    insert into Subjects (SubjectID, SubjectName, Courses) values (8, 'asd', 6);
+    insert into Subjects (SubjectID, SubjectName, Courses) values (9, 'asd', 5);
 
-    # syntax = prs.handle_my_sql_input(syntax)
-    # test_syntax(syntax, '', 'debug')
+
+    insert into Felhasznalok (FID, FName, FType) values (1, 'Name', 'client');
+    insert into Felhasznalok (FID, FName, FType) values (2, 'Name', 'client');
+    insert into Felhasznalok (FID, FName, FType) values (3, 'Name', 'client');
+    insert into Felhasznalok (FID, FName, FType) values (4, 'Name', 'client');
+    insert into Felhasznalok (FID, FName, FType) values (5, 'Name', 'client');
+    insert into Felhasznalok (FID, FName, FType) values (6, 'Name', 'client');
+    insert into Felhasznalok (FID, FName, FType) values (7, 'Name', 'client');
+    insert into Felhasznalok (FID, FName, FType) values (8, 'Name', 'client');
+    insert into Felhasznalok (FID, FName, FType) values (9, 'Name', 'client');
+
+
+    insert into Resources (RID, RName, SubjectID) values (11, 'video', 1);
+    insert into Resources (RID, RName, SubjectID) values (2, 'video', 1);
+    insert into Resources (RID, RName, SubjectID) values (3, 'video', 1);
+    insert into Resources (RID, RName, SubjectID) values (4, 'video', 2);
+    insert into Resources (RID, RName, SubjectID) values (5, 'video', 2);
+    insert into Resources (RID, RName, SubjectID) values (6, 'video', 2);
+    insert into Resources (RID, RName, SubjectID) values (7, 'video', 3);
+    insert into Resources (RID, RName, SubjectID) values (8, 'video', 3);
+    insert into Resources (RID, RName, SubjectID) values (9, 'video', 3);
+
+    select *
+    from Subjects
+    where Subjects.Courses = 10;
+
+    select * from SUBJECTS join RESOURCES on SUBJECTS.SUBJECTID = RESOURCES.SUBJECTID where SUBJECTS.SUBJECTNAME = 'ASD';
+    """
+
+    syntax = prs.handle_my_sql_input(syntax)
+    test_syntax(syntax, '', 'debug')

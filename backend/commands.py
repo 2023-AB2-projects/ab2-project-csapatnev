@@ -300,10 +300,16 @@ def select(db_name, select_clause, select_distinct, from_clause, join_clause, wh
 
     if join_clause: # handle multi-table queries (with JOINs)
         print(f"join_clause: {join_clause}")
-        retVal, data, join_performed = perform_indexed_nested_loop_join(db_name, join_clause, mongoclient, xml_root)
+        try:
+            retVal, data, join_performed = perform_indexed_nested_loop_join(db_name, join_clause, mongoclient, xml_root)
+        except:
+            retVal = 2
+            join_performed = False
+            data = None
+            pass
         if retVal < 0:
             return retVal, data
-        elif retVal == 1:
+        elif retVal == 1 or retVal == 2:
             retVal, data = perform_nested_join(db_name, join_clause, mongoclient, xml_root, join_performed, starting_data=data)
             if retVal < 0:
                 return retVal, data
