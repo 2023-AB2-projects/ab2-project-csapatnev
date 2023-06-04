@@ -82,16 +82,16 @@
     <Tables>
         </Tables></Database>
 
-<Database name="UNIVERSITY">
+<Database name="ONLINE_SHOP">
     <Tables>
-        <Table name="DISCIPLINES">
+        <Table name="ORDERS">
         <Structure>
-            <Attribute attributeName="DISCID" type="VARCHAR"/>
-            <Attribute attributeName="DNAME" type="VARCHAR"/>
-            <Attribute attributeName="CREDITNR" type="INT"/>
+            <Attribute attributeName="ORDER_ID" type="INT"/>
+            <Attribute attributeName="PRODUCT_ID" type="INT"/>
+            <Attribute attributeName="QUANTITY" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>DISCID</pkAttribute>
+            <pkAttribute>ORDER_ID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
@@ -99,23 +99,19 @@
             </uniqueKeys>
         <IndexFiles>
 
-        <IndexFile indexName="MIXEDINDEX" indexType="BTree" indexFileName="DISCIPLINES_DISCID_CREDITNR_MIXEDINDEX_INDEX">
-            <IAttribute>DISCID</IAttribute>
-            <IAttribute>CREDITNR</IAttribute>
-        </IndexFile>
-        <IndexFile indexName="" indexType="BTree" indexFileName="DISCIPLINES_DISCID__INDEX">
-            <IAttribute>DISCID</IAttribute>
+        <IndexFile indexName="ORDERS_PRODUCT_ID" indexType="BTree" indexFileName="ORDERS_PRODUCT_ID_ORDERS_PRODUCT_ID_INDEX">
+            <IAttribute>PRODUCT_ID</IAttribute>
         </IndexFile>
         </IndexFiles>
         </Table>
-    <Table name="SPECIALIZATION">
+    <Table name="PRODUCTS">
         <Structure>
-            <Attribute attributeName="SPECID" type="VARCHAR"/>
-            <Attribute attributeName="SPECNAME" type="VARCHAR"/>
-            <Attribute attributeName="LANGUAGE" type="VARCHAR"/>
+            <Attribute attributeName="PRODUCT_ID" type="INT"/>
+            <Attribute attributeName="PRODUCT_NAME" type="VARCHAR"/>
+            <Attribute attributeName="CATEGORY_ID" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>SPECID</pkAttribute>
+            <pkAttribute>PRODUCT_ID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
@@ -123,78 +119,21 @@
             </uniqueKeys>
         <IndexFiles>
 
+        <IndexFile indexName="PRODUCTS_CATEGORY_ID" indexType="BTree" indexFileName="PRODUCTS_CATEGORY_ID_PRODUCTS_CATEGORY_ID_INDEX">
+            <IAttribute>CATEGORY_ID</IAttribute>
+        </IndexFile>
         </IndexFiles>
         </Table>
-    <Table name="GROUPS">
+    <Table name="CATEGORIES">
         <Structure>
-            <Attribute attributeName="GROUPID" type="INT"/>
-            <Attribute attributeName="SPECID" type="VARCHAR"/>
+            <Attribute attributeName="CATEGORY_ID" type="INT"/>
+            <Attribute attributeName="CATEGORY_NAME" type="VARCHAR"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>GROUPID</pkAttribute>
+            <pkAttribute>CATEGORY_ID</pkAttribute>
         </primaryKey>
         <foreignKeys>
-            <foreignKey>SPECID</foreignKey>
-
-            <references>
-                <refTable>SPECIALIZATION</refTable>
-                <refAttribute>SPECID</refAttribute>
-            </references>
-        </foreignKeys>
-        <uniqueKeys>
-            </uniqueKeys>
-        <IndexFiles>
-
-        </IndexFiles>
-        </Table>
-    <Table name="STUDENTS">
-        <Structure>
-            <Attribute attributeName="STUDID" type="INT"/>
-            <Attribute attributeName="GROUPID" type="INT"/>
-            <Attribute attributeName="STUDNAME" type="VARCHAR"/>
-            <Attribute attributeName="EMAIL" type="VARCHAR"/>
-        </Structure>
-        <primaryKey>
-            <pkAttribute>STUDID</pkAttribute>
-        </primaryKey>
-        <foreignKeys>
-            <foreignKey>GROUPID</foreignKey>
-
-            <references>
-                <refTable>GROUPS</refTable>
-                <refAttribute>GROUPID</refAttribute>
-            </references>
-        </foreignKeys>
-        <uniqueKeys>
-            </uniqueKeys>
-        <IndexFiles>
-
-        </IndexFiles>
-        </Table>
-    <Table name="MARKS">
-        <Structure>
-            <Attribute attributeName="STUDID" type="INT"/>
-            <Attribute attributeName="DISCID" type="VARCHAR"/>
-            <Attribute attributeName="MARK" type="INT"/>
-        </Structure>
-        <primaryKey>
-            <pkAttribute>STUDID</pkAttribute>
-            <pkAttribute>DISCID</pkAttribute>
-        </primaryKey>
-        <foreignKeys>
-            <foreignKey>STUDID</foreignKey>
-
-            <references>
-                <refTable>STUDENTS</refTable>
-                <refAttribute>STUDID</refAttribute>
-            </references>
-        <foreignKey>DISCID</foreignKey>
-
-            <references>
-                <refTable>DISCIPLINES</refTable>
-                <refAttribute>DISCID</refAttribute>
-            </references>
-        </foreignKeys>
+            </foreignKeys>
         <uniqueKeys>
             </uniqueKeys>
         <IndexFiles>
@@ -274,16 +213,17 @@
     </Tables>
 </Database>
 
-<Database name="ONLINE_SHOP">
+<Database name="UNIVERSITY">
     <Tables>
-        <Table name="ORDERS">
+        <Table name="STUDENTS">
         <Structure>
-            <Attribute attributeName="ORDER_ID" type="INT"/>
-            <Attribute attributeName="PRODUCT_ID" type="INT"/>
-            <Attribute attributeName="QUANTITY" type="INT"/>
+            <Attribute attributeName="STUDENTID" type="INT"/>
+            <Attribute attributeName="FIRSTNAME" type="VARCHAR"/>
+            <Attribute attributeName="LASTNAME" type="VARCHAR"/>
+            <Attribute attributeName="AGE" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>ORDER_ID</pkAttribute>
+            <pkAttribute>STUDENTID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
@@ -291,19 +231,16 @@
             </uniqueKeys>
         <IndexFiles>
 
-        <IndexFile indexName="ORDERS_PRODUCT_ID" indexType="BTree" indexFileName="ORDERS_PRODUCT_ID_ORDERS_PRODUCT_ID_INDEX">
-            <IAttribute>PRODUCT_ID</IAttribute>
-        </IndexFile>
         </IndexFiles>
         </Table>
-    <Table name="PRODUCTS">
+    <Table name="COURSES">
         <Structure>
-            <Attribute attributeName="PRODUCT_ID" type="INT"/>
-            <Attribute attributeName="PRODUCT_NAME" type="VARCHAR"/>
-            <Attribute attributeName="CATEGORY_ID" type="INT"/>
+            <Attribute attributeName="COURSEID" type="INT"/>
+            <Attribute attributeName="COURSENAME" type="VARCHAR"/>
+            <Attribute attributeName="CREDITHOURS" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>PRODUCT_ID</pkAttribute>
+            <pkAttribute>COURSEID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
@@ -311,18 +248,17 @@
             </uniqueKeys>
         <IndexFiles>
 
-        <IndexFile indexName="PRODUCTS_CATEGORY_ID" indexType="BTree" indexFileName="PRODUCTS_CATEGORY_ID_PRODUCTS_CATEGORY_ID_INDEX">
-            <IAttribute>CATEGORY_ID</IAttribute>
-        </IndexFile>
         </IndexFiles>
         </Table>
-    <Table name="CATEGORIES">
+    <Table name="ENROLLMENTS">
         <Structure>
-            <Attribute attributeName="CATEGORY_ID" type="INT"/>
-            <Attribute attributeName="CATEGORY_NAME" type="VARCHAR"/>
+            <Attribute attributeName="STUDENTID" type="INT"/>
+            <Attribute attributeName="COURSEID" type="INT"/>
+            <Attribute attributeName="GRADE" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>CATEGORY_ID</pkAttribute>
+            <pkAttribute>STUDENTID</pkAttribute>
+            <pkAttribute>COURSEID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
