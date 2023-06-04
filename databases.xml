@@ -274,48 +274,4 @@
     </Tables>
 </Database>
 
-<Database name="ONLINE_SHOP">
-    <Tables>
-        <Table name="GROCERY">
-        <Structure>
-            <Attribute attributeName="GROCERYNAME" type="VARCHAR"/>
-            <Attribute attributeName="QUANTITY" type="INT"/>
-        </Structure>
-        <primaryKey>
-            <pkAttribute>GROCERYNAME</pkAttribute>
-        </primaryKey>
-        <foreignKeys>
-            </foreignKeys>
-        <uniqueKeys>
-            </uniqueKeys>
-        <IndexFiles>
-
-        </IndexFiles>
-        </Table>
-    </Tables>
-</Database>
-
-<Database name="SUTI">
-    <Tables>
-        <Table name="DOBOS">
-        <Structure>
-            <Attribute attributeName="ID" type="INT"/>
-            <Attribute attributeName="DB" type="INT"/>
-            <Attribute attributeName="PRICE" type="INT"/>
-            <Attribute attributeName="NAME" type="VARCHAR"/>
-        </Structure>
-        <primaryKey>
-            <pkAttribute>ID</pkAttribute>
-        </primaryKey>
-        <foreignKeys>
-            </foreignKeys>
-        <uniqueKeys>
-            </uniqueKeys>
-        <IndexFiles>
-
-        </IndexFiles>
-        </Table>
-    </Tables>
-</Database>
-
 </Databases>
