@@ -4,8 +4,8 @@ DBMSName is a command-line database management system (DBMS) implemented in Pyth
 
 ## Authors
 
-- Gall Vincenzo-David
 - Csiki Szabolcs-Attila
+- Gall Vincenzo-David
 
 ## Requirements
 
