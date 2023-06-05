@@ -104,7 +104,13 @@ def client_parse_command(command):
                 response = recv_one_message(client_socket).decode()
                 table_to_print = eval(response)
 
-                configure_item = table_to_print[0]
+                configure_item = None
+                if len(table_to_print) >= 1: 
+                    configure_item = table_to_print[0]
+                else:
+                    print('Houston, we have a problem...')
+                    send_one_message(client_socket, 'kill yourself')
+                    return -1
 
                 table = Table(show_lines=True, header_style='yellow')
                 table.add_column('No.', style='yellow')
@@ -139,7 +145,7 @@ def client_parse_command(command):
         response = recv_one_message(client_socket).decode()
         prompt_info = eval(response)
         
-        db_in_use = prompt_info['db_in_use']
+        db_in_use = prompt_info['db_in_use'].upper()
         databases = prompt_info['databases']
         tables = prompt_info['tables']
 
@@ -186,7 +192,13 @@ def client_parse_command(command):
                 response = recv_one_message(client_socket).decode()
                 table_to_print = eval(response)
 
-                configure_item = table_to_print[0]
+                configure_item = None
+                if len(table_to_print) >= 1: 
+                    configure_item = table_to_print[0]
+                else:
+                    print('Houston, we have a problem...')
+                    send_one_message(client_socket, 'kill yourself')
+                    return -1
 
                 table = Table(show_lines=True, header_style='yellow')
                 table.add_column('No.', style='yellow')
