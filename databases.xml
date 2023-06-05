@@ -259,15 +259,17 @@
     </Tables>
 </Database>
 
-<Database name="ONLINE_SHOP">
+<Database name="SUTI">
     <Tables>
-        <Table name="GROCERY">
+        <Table name="DOBOS">
         <Structure>
-            <Attribute attributeName="GROCERYNAME" type="VARCHAR"/>
-            <Attribute attributeName="QUANTITY" type="INT"/>
+            <Attribute attributeName="ID" type="INT"/>
+            <Attribute attributeName="DB" type="INT"/>
+            <Attribute attributeName="PRICE" type="INT"/>
+            <Attribute attributeName="NAME" type="VARCHAR"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>GROCERYNAME</pkAttribute>
+            <pkAttribute>ID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
@@ -280,17 +282,55 @@
     </Tables>
 </Database>
 
-<Database name="SUTI">
+<Database name="ONLINE_SHOP">
     <Tables>
-        <Table name="DOBOS">
+        <Table name="ORDERS">
         <Structure>
-            <Attribute attributeName="ID" type="INT"/>
-            <Attribute attributeName="DB" type="INT"/>
-            <Attribute attributeName="PRICE" type="INT"/>
-            <Attribute attributeName="NAME" type="VARCHAR"/>
+            <Attribute attributeName="ORDER_ID" type="INT"/>
+            <Attribute attributeName="PRODUCT_ID" type="INT"/>
+            <Attribute attributeName="QUANTITY" type="INT"/>
         </Structure>
         <primaryKey>
-            <pkAttribute>ID</pkAttribute>
+            <pkAttribute>ORDER_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        <IndexFile indexName="ORDERS_PRODUCT_ID" indexType="BTree" indexFileName="ORDERS_PRODUCT_ID_ORDERS_PRODUCT_ID_INDEX">
+            <IAttribute>PRODUCT_ID</IAttribute>
+        </IndexFile>
+        </IndexFiles>
+        </Table>
+    <Table name="PRODUCTS">
+        <Structure>
+            <Attribute attributeName="PRODUCT_ID" type="INT"/>
+            <Attribute attributeName="PRODUCT_NAME" type="VARCHAR"/>
+            <Attribute attributeName="CATEGORY_ID" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>PRODUCT_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        <IndexFile indexName="PRODUCTS_CATEGORY_ID" indexType="BTree" indexFileName="PRODUCTS_CATEGORY_ID_PRODUCTS_CATEGORY_ID_INDEX">
+            <IAttribute>CATEGORY_ID</IAttribute>
+        </IndexFile>
+        </IndexFiles>
+        </Table>
+    <Table name="CATEGORIES">
+        <Structure>
+            <Attribute attributeName="CATEGORY_ID" type="INT"/>
+            <Attribute attributeName="CATEGORY_NAME" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>CATEGORY_ID</pkAttribute>
         </primaryKey>
         <foreignKeys>
             </foreignKeys>
