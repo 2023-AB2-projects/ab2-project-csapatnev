@@ -421,44 +421,44 @@ if __name__ == "__main__":
     # CREATE DATABASE ONLINE_SHOP;
     # USE ONLINE_SHOP;
 
-    CREATE TABLE Orders (
-        Order_ID INT PRIMARY KEY,
-        Product_ID INT,
-        Quantity INT
-    );
+    # CREATE TABLE Orders (
+    #     Order_ID INT PRIMARY KEY,
+    #     Product_ID INT,
+    #     Quantity INT
+    # );
 
-    CREATE TABLE Products (
-        Product_ID INT PRIMARY KEY,
-        Product_Name VarChar(255),
-        Category_ID INT
-    );
+    # CREATE TABLE Products (
+    #     Product_ID INT PRIMARY KEY,
+    #     Product_Name VarChar(255),
+    #     Category_ID INT
+    # );
 
-    CREATE TABLE Categories (
-        Category_ID INT PRIMARY KEY,
-        Category_Name VarChar(255)
-    );
+    # CREATE TABLE Categories (
+    #     Category_ID INT PRIMARY KEY,
+    #     Category_Name VarChar(255)
+    # );
 
-    CREATE INDEX orders_product_id ON Orders(Product_ID);
-    CREATE INDEX products_category_id ON Products(Category_ID);
+    # CREATE INDEX orders_product_id ON Orders(Product_ID);
+    # CREATE INDEX products_category_id ON Products(Category_ID);
     
-    INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (1, 101, 5);
-    INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (2, 102, 10);
-    INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (3, 103, 2);
+    # INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (1, 101, 5);
+    # INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (2, 102, 10);
+    # INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (3, 103, 2);
 
-    INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (101, 'iPhone', 201);
-    INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (102, 'MacBook', 202);
-    INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (103, 'iPad', 201);
+    # INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (101, 'iPhone', 201);
+    # INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (102, 'MacBook', 202);
+    # INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (103, 'iPad', 201);
 
 
-    INSERT INTO Categories (Category_ID, Category_Name) VALUES (201, 'Electronics');
-    INSERT INTO Categories (Category_ID, Category_Name) VALUES(202, 'Computers');
+    # INSERT INTO Categories (Category_ID, Category_Name) VALUES (201, 'Electronics');
+    # INSERT INTO Categories (Category_ID, Category_Name) VALUES(202, 'Computers');
 
-    SELECT *
-    FROM Orders
-    JOIN Products ON Orders.Product_ID = Products.Product_ID
-    JOIN Categories ON Products.Category_ID = Categories.Category_ID;
+    # SELECT *
+    # FROM Orders
+    # JOIN Products ON Orders.Product_ID = Products.Product_ID
+    # JOIN Categories ON Products.Category_ID = Categories.Category_ID;
 
-    """
+    # """
 
-    # syntax = prs.handle_my_sql_input(syntax)
-    # test_syntax(syntax, '', 'debug')
+    # # syntax = prs.handle_my_sql_input(syntax)
+    # # test_syntax(syntax, '', 'debug')
