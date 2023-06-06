@@ -14,4 +14,4 @@
     INSERT INTO Credits (CreditNr, CName) VALUES (3, 'Chemistry');
     INSERT INTO Credits (CreditNr, CName) VALUES (4, 'Biology');
 
-    SELECT CName AS CC, CreditNr FROM Credits WHERE CreditNr > 1;
+    SELECT CName, CreditNr FROM Credits WHERE CreditNr > 1;

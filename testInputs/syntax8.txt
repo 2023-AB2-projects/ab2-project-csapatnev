@@ -47,12 +47,12 @@ DROP DATABASE UNIVERSITY;
 
     SELECT avg(Age) AS AverageAge FROM Students;
 
-    SELECT count(StudentID) AS StudentCount, avg(Age) AS AverageAge FROM Students;
+    SELECT count(StudentID) AS StudentCount, avg(Age) FROM Students;
 
     SELECT CourseID, avg(Grade) AS AverageGrade 
     FROM Enrollments 
     GROUP BY CourseID;
         
-    SELECT CourseID, count(StudentID) AS StudentCount, min(Grade)
+    SELECT CourseID, count(StudentID) AS StudentCount, min(Grade) as asd
     FROM Enrollments 
     GROUP BY CourseID;

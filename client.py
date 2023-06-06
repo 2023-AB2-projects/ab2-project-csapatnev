@@ -116,7 +116,10 @@ def client_parse_command(command):
                 table.add_column('No.', style='yellow')
             
                 for columns in configure_item.keys():
-                    table.add_column(columns, no_wrap=True)
+                    if columns == None:
+                        table.add_column('', no_wrap=True)
+                    else:
+                        table.add_column(columns, no_wrap=True)
 
                 row_counter = 0
                 for row_item in table_to_print:
@@ -204,7 +207,10 @@ def client_parse_command(command):
                 table.add_column('No.', style='yellow')
             
                 for columns in configure_item.keys():
-                    table.add_column(columns, no_wrap=True)
+                    if columns == None:
+                        table.add_column('', no_wrap=True)
+                    else:
+                        table.add_column(columns, no_wrap=True)
 
                 row_counter = 0
                 for row_item in table_to_print:

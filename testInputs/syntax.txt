@@ -62,6 +62,6 @@ USE UNIVERSITY;
     INSERT INTO students (student_id, student_name, subject_id) VALUES (1, 'John Doe', 1);
 
     /* -- Attempt to delete the subject which is being referenced by the student */
-    /* DELETE FROM subjects WHERE subject_id = 1; */
+    DELETE FROM subjects WHERE subject_id = 1;
 
     SELECT DName AS DiscName, CreditNr FROM Disciplines WHERE CreditNr > 1 AND CreditNr < 4;
