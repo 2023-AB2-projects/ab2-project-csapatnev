@@ -1,0 +1,4 @@
+lxml
+pymongo
+rich
+prompt_toolkit

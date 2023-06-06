@@ -1,0 +1,45 @@
+1. valtoztatok a file(k)on
+2. ramegyek arra a csomopontos izere vskodban
+3. terminal >git add .			-> minden valtoztatott allomanyt hozzaad a git commithez
+4. terminal >git commit -m "changelog messages"		-> lokalisan tortenik meg a commit (nem toltodik fel a serverre)
+5. reload gomb vagy terminal >git push			-> feltolti a commit foldert a serverre 
+
+reload gomb: lefele nyil - hany file van a serveren, amit ha letoltok frissul az en allomanyom (regebbi allomanyom van nekem)
+		felfele nyil - hany file varakozik hogy felkeruljon a serverre (nalam van az ujabb allomany) -> git push
+
+
+HOW TO INSTALL ALL REQUIRED LIBRARIES:
+py -m pip install -r requirements.txt
+
+>git log					-> kiirja az osszes valtozast
+>git checkout <hexCode>			-> visszaugrik az adott cimu helyre
+
+>git checkout -b <branchName>		-> keszit egy uj branchet
+>git push origin <branchName> 	-> serverre felrakja az uj branchet
+
+>py -m pip install -r requirements.txt
+
+HOGYAN TOLTOD LE A MAIN BRANCHROL A TE BRANCHEDRE AMIT KELL?
+
+>git checkout main 				-> atmesz a main branchre 
+>git pull						-> kiszedsz minden valtoztatast
+>git checkout <your branch name>	-> atlepsz a te branchedre 
+>git merge main						-> felrakod a sajat branchedre ami a mainen van
+>git push
+
+HOGYAN TOLTOD FEL A TE BRANCHEDROL A MAIN BRANCHRE A VALTOZASOKAT?
+CSAK AKKOR HA MINDENT TESZTELTEL ES DEBUGGOLTAL!!!!!!!!!!!!
+
+> git checkout <a te branched neve>
+> git add .
+> git commit -m "message"
+> git push
+> git checkout main
+> git pull
+	> git checkout <a te branched neve>		|
+	> git merge main						|	ha git pull utan van valami changed
+
+	> git checkout <a te branched neve>		| 	ha a git pull utan "nothing to update"
+
+githubra felmesz es create pull request a branchedre
+> git merge origin main			- ha a pull request utan zolddel irja hogy "no conflicts found"

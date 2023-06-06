@@ -1,0 +1,172 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Databases>
+    <!-- All databases will be found here -->
+<Database name="ONLINE_SHOP">
+    <Tables>
+        <Table name="ORDERS">
+        <Structure>
+            <Attribute attributeName="ORDER_ID" type="INT"/>
+            <Attribute attributeName="PRODUCT_ID" type="INT"/>
+            <Attribute attributeName="QUANTITY" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>ORDER_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        <IndexFile indexName="ORDERS_PRODUCT_ID" indexType="BTree" indexFileName="ORDERS_PRODUCT_ID_ORDERS_PRODUCT_ID_INDEX">
+            <IAttribute>PRODUCT_ID</IAttribute>
+        </IndexFile>
+        </IndexFiles>
+        </Table>
+    <Table name="PRODUCTS">
+        <Structure>
+            <Attribute attributeName="PRODUCT_ID" type="INT"/>
+            <Attribute attributeName="PRODUCT_NAME" type="VARCHAR"/>
+            <Attribute attributeName="CATEGORY_ID" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>PRODUCT_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        <IndexFile indexName="PRODUCTS_CATEGORY_ID" indexType="BTree" indexFileName="PRODUCTS_CATEGORY_ID_PRODUCTS_CATEGORY_ID_INDEX">
+            <IAttribute>CATEGORY_ID</IAttribute>
+        </IndexFile>
+        </IndexFiles>
+        </Table>
+    <Table name="CATEGORIES">
+        <Structure>
+            <Attribute attributeName="CATEGORY_ID" type="INT"/>
+            <Attribute attributeName="CATEGORY_NAME" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>CATEGORY_ID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
+<Database name="UNIVERSITY">
+    <Tables>
+        <Table name="STUDENTS">
+        <Structure>
+            <Attribute attributeName="STUDENTID" type="INT"/>
+            <Attribute attributeName="FIRSTNAME" type="VARCHAR"/>
+            <Attribute attributeName="LASTNAME" type="VARCHAR"/>
+            <Attribute attributeName="AGE" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>STUDENTID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="COURSES">
+        <Structure>
+            <Attribute attributeName="COURSEID" type="INT"/>
+            <Attribute attributeName="COURSENAME" type="VARCHAR"/>
+            <Attribute attributeName="CREDITHOURS" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>COURSEID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="ENROLLMENTS">
+        <Structure>
+            <Attribute attributeName="STUDENTID" type="INT"/>
+            <Attribute attributeName="COURSEID" type="INT"/>
+            <Attribute attributeName="GRADE" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>STUDENTID</pkAttribute>
+            <pkAttribute>COURSEID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
+<Database name="BIGBOY">
+    <Tables>
+        <Table name="USERS">
+        <Structure>
+            <Attribute attributeName="USERID" type="INT"/>
+            <Attribute attributeName="USERNAME" type="VARCHAR"/>
+            <Attribute attributeName="PASSWORD" type="VARCHAR"/>
+            <Attribute attributeName="EMAIL" type="VARCHAR"/>
+            <Attribute attributeName="FIRSTNAME" type="VARCHAR"/>
+            <Attribute attributeName="LASTNAME" type="VARCHAR"/>
+            <Attribute attributeName="ADDRESS" type="VARCHAR"/>
+            <Attribute attributeName="CITY" type="VARCHAR"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>USERID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    <Table name="COMPANIES">
+        <Structure>
+            <Attribute attributeName="COMPANYID" type="VARCHAR"/>
+            <Attribute attributeName="USERID" type="INT"/>
+        </Structure>
+        <primaryKey>
+            <pkAttribute>COMPANYID</pkAttribute>
+        </primaryKey>
+        <foreignKeys>
+            <foreignKey>USERID</foreignKey>
+
+            <references>
+                <refTable>USERS</refTable>
+                <refAttribute>USERID</refAttribute>
+            </references>
+        </foreignKeys>
+        <uniqueKeys>
+            </uniqueKeys>
+        <IndexFiles>
+
+        </IndexFiles>
+        </Table>
+    </Tables>
+</Database>
+
+</Databases>

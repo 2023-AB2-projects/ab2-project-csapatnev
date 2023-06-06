@@ -1,0 +1,58 @@
+DROP DATABASE UNIVERSITY;
+    CREATE DATABASE UNIVERSITY;
+    USE UNIVERSITY;
+
+    CREATE TABLE Students (
+        StudentID INT PRIMARY KEY,
+        FirstName VARCHAR(100),
+        LastName VARCHAR(100),
+        Age INT
+    );
+
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (1, 'John', 'Doe', 20);
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (2, 'Jane', 'Smith', 22);
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (3, 'Bob', 'Johnson', 21);
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (4, 'Alice', 'Davis', 23);
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (5, 'Charlie', 'Brown', 20);
+
+    CREATE TABLE Courses (
+        CourseID INT PRIMARY KEY,
+        CourseName VARCHAR(100),
+        CreditHours INT
+    );
+
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (1, 'Math', 3);
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (2, 'English', 4);
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (3, 'Physics', 4);
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (4, 'Chemistry', 4);
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (5, 'History', 3);
+
+    CREATE TABLE Enrollments (
+        StudentID INT,
+        CourseID INT,
+        Grade INT,
+        PRIMARY KEY (StudentID, CourseID)
+    );
+
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (1, 1, 85);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (1, 2, 90);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (2, 1, 95);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (2, 3, 80);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (3, 2, 88);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (3, 3, 85);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (4, 2, 80);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (4, 3, 92);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (5, 1, 90);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (5, 2, 85);
+
+    SELECT avg(Age) AS AverageAge FROM Students;
+
+    SELECT count(StudentID) AS StudentCount, avg(Age) FROM Students;
+
+    SELECT CourseID, avg(Grade) AS AverageGrade 
+    FROM Enrollments 
+    GROUP BY CourseID;
+        
+    SELECT CourseID, count(StudentID) AS StudentCount, min(Grade) as asd
+    FROM Enrollments 
+    GROUP BY CourseID;
