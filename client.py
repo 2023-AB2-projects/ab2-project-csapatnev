@@ -1,7 +1,4 @@
 # Official client side of DBMSName
-# ToDo:
-#       Socket comm handling
-#       Server handshake check and error output if needed
 
 import socket as sck
 import re

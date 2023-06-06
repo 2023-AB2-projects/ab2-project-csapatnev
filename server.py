@@ -1,25 +1,10 @@
 # Official Server side for DBMSName
-# ToDo:
-#       Create Classes for individual syntax keywords
-#       Create a parsing function
-#       Establish connection to client side, check for errors / error messages
-#       CREATE
-#       DATABASE
-#       TABLE
-#       DROP
-#       CREATE INDEX
-#       xml file handling / reading / writing
-#       Required data types: int, float, bit, date, datetime, 
-#                            varchar(or string without specified length)
 
 import socket as sck
 import backend.commands as cmd
 import myparser.parsing_syntax as prs
 import backend.mongoHandler as mh
-import pdb
-
 import xml.etree.ElementTree as ET
-
 from protocol.simple_protocol import *
 
 HOST = '127.0.0.1'
