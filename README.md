@@ -1,6 +1,6 @@
 # DBMSName
 
-![Alt text] (./DBMSName.png)
+![Alt text] ./DBMSName.png
 DBMSName is a command-line database management system (DBMS) implemented in Python.
 
 ## Authors
