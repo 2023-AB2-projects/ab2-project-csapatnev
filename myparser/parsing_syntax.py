@@ -8,6 +8,7 @@
 #   7 - INSERT
 #   8 - DELETE
 #   9 - UPDATE
+#   10- SELECT
 
 import re
 
