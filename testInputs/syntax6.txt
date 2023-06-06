@@ -1,50 +1,58 @@
-drop database University;
-    create database University;
-    USE University;
+DROP DATABASE UNIVERSITY;
+    CREATE DATABASE UNIVERSITY;
+    USE UNIVERSITY;
 
-    CREATE TABLE disciplines (
-    DiscID varchar(5) PRIMARY KEY,
-    DName varchar(30),
-    CreditNr int
+    CREATE TABLE Students (
+        StudentID INT PRIMARY KEY,
+        FirstName VARCHAR(100),
+        LastName VARCHAR(100),
+        Age INT
     );
 
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (1, 'John', 'Doe', 20);
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (2, 'Jane', 'Smith', 22);
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (3, 'Bob', 'Johnson', 21);
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (4, 'Alice', 'Davis', 23);
+    INSERT INTO Students (StudentID, FirstName, LastName, Age) VALUES (5, 'Charlie', 'Brown', 20);
 
-    CREATE INDEX MixedIndex on disciplines (DiscID, CreditNr);
-
-
-    /*Data for the table disciplines */
-
-    insert into disciplines (DiscID,DName,CreditNr) values ('DB1','Databases 1', 7);
-    insert into disciplines (DiscID,DName,CreditNr) values ('DS','Data Structures',6);
-    insert into disciplines (DiscID,DName,CreditNr) values ('CP','C Programming',8);
-    insert into disciplines (DiscID,DName,CreditNr) values ('ST','Statistics',5);
-    insert into disciplines (DiscID,DName,CreditNr) values ('LT','Lattice Theory',8);
-    insert into disciplines (DiscID,DName,CreditNr) values ('OOP','Object Oriented Programming',6);
-    insert into disciplines (DiscID,DName,CreditNr) values ('AI','Artificial Intelligence',8);
-    insert into disciplines (DiscID,DName,CreditNr) values ('OS','Operating Systems',3);
-    insert into disciplines (DiscID,DName,CreditNr) values ('DB2','Databases 2',6);
-    insert into disciplines (DiscID,DName,CreditNr) values ('MA','Math Analysis',7);
-    insert into disciplines (DiscID,DName,CreditNr) values ('SI','Software Engineering',6);
-    insert into disciplines (DiscID,DName,CreditNr) values ('AL','Algebra',4);
-
-
-    /*Table structure for table specialization */
-
-
-    CREATE TABLE specialization (
-    SpecID varchar(5) PRIMARY KEY,
-    SpecName varchar(40),
-    Language varchar(20) 
+    CREATE TABLE Courses (
+        CourseID INT PRIMARY KEY,
+        CourseName VARCHAR(100),
+        CreditHours INT
     );
 
-    /*Data for the table specialization */
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (1, 'Math', 3);
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (2, 'English', 4);
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (3, 'Physics', 4);
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (4, 'Chemistry', 4);
+    INSERT INTO Courses (CourseID, CourseName, CreditHours) VALUES (5, 'History', 3);
 
-    insert into specialization (SpecID,SpecName,Language) values ('I','Informatics','English');
-    insert into specialization (SpecID,SpecName,Language) values ('MI','Mathematics Informatics','English');
-    insert into specialization (SpecID,SpecName,Language) values ('M','Mathematics','English');
-    insert into specialization (SpecID,SpecName,Language) values ('P','Physics','German');
-    insert into specialization (SpecID,SpecName,Language) values ('CM','Computational Mathematics','German');
-    insert into specialization (SpecID,SpecName,Language) values ('A','Automatization','French');
-    insert into specialization (SpecID,SpecName,Language) values ('ING','Engineering','French');
-    insert into specialization (SpecID,SpecName,Language) values ('C','Calculators','French');
-    insert into specialization (SpecID,SpecName,Language) values ('MP','Mathematics and Physics','German');
+    CREATE TABLE Enrollments (
+        StudentID INT,
+        CourseID INT,
+        Grade INT,
+        PRIMARY KEY (StudentID, CourseID)
+    );
+
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (1, 1, 85);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (1, 2, 90);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (2, 1, 95);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (2, 3, 80);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (3, 2, 88);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (3, 3, 85);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (4, 2, 80);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (4, 3, 92);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (5, 1, 90);
+    INSERT INTO Enrollments (StudentID, CourseID, Grade) VALUES (5, 2, 85);
+
+    SELECT avg(Age) AS AverageAge FROM Students;
+
+    SELECT count(StudentID) AS StudentCount, avg(Age) AS AverageAge FROM Students;
+
+    SELECT CourseID, avg(Grade) AS AverageGrade 
+    FROM Enrollments 
+    GROUP BY CourseID;
+        
+    SELECT CourseID, count(StudentID) AS StudentCount, min(Grade)
+    FROM Enrollments 
+    GROUP BY CourseID;

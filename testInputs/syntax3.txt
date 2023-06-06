@@ -1,23 +1,40 @@
-DROP DATABASE SCHOOL;
-    CREATE DATABASE SCHOOL;
+DROP DATABASE ONLINE_SHOP;
+    CREATE DATABASE ONLINE_SHOP;
+    USE ONLINE_SHOP;
 
-    CREATE TABLE subjects (
-        subject_id int PRIMARY KEY,
-        subject_name varchar(30)
-        );
-
-    /* Create a table for students with a foreign key referencing subjects */
-    
-    CREATE TABLE students (
-        student_id int PRIMARY KEY,
-        student_name varchar(30),
-        subject_id int REFERENCES subjects(subject_id)
+    CREATE TABLE Orders (
+        Order_ID INT PRIMARY KEY,
+        Product_ID INT,
+        Quantity INT
     );
 
-    /* -- Insert a subject */
-    INSERT INTO subjects (subject_id, subject_name) VALUES (1, 'Mathematics');
+    CREATE TABLE Products (
+        Product_ID INT PRIMARY KEY,
+        Product_Name VarChar(255),
+        Category_ID INT
+    );
 
-    INSERT INTO students (student_id, student_name, subject_id) VALUES (1, 'John Doe', 1);
+    CREATE TABLE Categories (
+        Category_ID INT PRIMARY KEY,
+        Category_Name VarChar(255)
+    );
 
-    /* -- Attempt to delete the subject which is being referenced by the student */
-    DELETE FROM subjects WHERE subject_id = 1;
+    CREATE INDEX orders_product_id ON Orders(Product_ID);
+    CREATE INDEX products_category_id ON Products(Category_ID);
+    
+    INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (1, 101, 5);
+    INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (2, 102, 10);
+    INSERT INTO Orders (Order_ID, Product_ID, Quantity) VALUES (3, 103, 2);
+
+    INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (101, 'iPhone', 201);
+    INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (102, 'MacBook', 202);
+    INSERT INTO Products (Product_ID, Product_Name, Category_ID) VALUES (103, 'iPad', 201);
+
+
+    INSERT INTO Categories (Category_ID, Category_Name) VALUES (201, 'Electronics');
+    INSERT INTO Categories (Category_ID, Category_Name) VALUES(202, 'Computers');
+
+    SELECT *
+    FROM Orders
+    JOIN Products ON Orders.Product_ID = Products.Product_ID
+    JOIN Categories ON Products.Category_ID = Categories.Category_ID;
